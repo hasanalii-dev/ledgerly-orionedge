@@ -5,6 +5,7 @@ import { EditableTable, CellInput } from "@/components/editable-table";
 import { useEffect, useState } from "react";
 import { formatMoney } from "@/lib/format";
 import { Progress } from "@/components/ui/progress";
+import { usePlannerCurrency } from "@/hooks/use-planner-currency";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/goals")({
   component: GoalsPage,
@@ -15,6 +16,7 @@ type Row = { id: string; name: string; target_amount: number; saved_amount: numb
 function GoalsPage() {
   const { plannerId } = Route.useParams();
   const [uid, setUid] = useState("");
+  const currency = usePlannerCurrency(plannerId);
   useEffect(() => { supabase.auth.getUser().then(({ data }) => setUid(data.user?.id ?? "")); }, []);
 
   const { data: rows = [] } = useQuery({
@@ -53,13 +55,13 @@ function GoalsPage() {
         planner_id={plannerId}
         user_id={uid}
         invalidateKeys={[["goals", plannerId]]}
-        onNewRow={() => ({ name: "New goal", target_amount: 1000, saved_amount: 0, currency: "USD" })}
+        onNewRow={() => ({ name: "New goal", target_amount: 1000, saved_amount: 0, currency })}
         columns={[
           { key: "emoji", label: "", width: "60px", render: (r, on) => <CellInput value={r.emoji ?? ""} onChange={(v) => on({ emoji: v })} className="text-center" /> },
           { key: "name", label: "Goal", render: (r, on) => <CellInput value={r.name ?? ""} onChange={(v) => on({ name: v })} /> },
           { key: "target_amount", label: "Target", width: "140px", render: (r, on) => <CellInput type="number" value={String(r.target_amount ?? 0)} onChange={(v) => on({ target_amount: parseFloat(v) || 0 })} className="text-right font-mono" /> },
           { key: "saved_amount", label: "Saved", width: "140px", render: (r, on) => <CellInput type="number" value={String(r.saved_amount ?? 0)} onChange={(v) => on({ saved_amount: parseFloat(v) || 0 })} className="text-right font-mono" /> },
-          { key: "currency", label: "CCY", width: "80px", render: (r, on) => <CellInput value={r.currency ?? "USD"} onChange={(v) => on({ currency: v.toUpperCase() })} className="uppercase" /> },
+          { key: "currency", label: "CCY", width: "80px", render: (r, on) => <CellInput value={r.currency ?? currency} onChange={(v) => on({ currency: v.toUpperCase() })} className="uppercase" /> },
           { key: "deadline", label: "Deadline", width: "140px", render: (r, on) => <CellInput type="date" value={r.deadline ?? ""} onChange={(v) => on({ deadline: v || null })} /> },
         ]}
       />
