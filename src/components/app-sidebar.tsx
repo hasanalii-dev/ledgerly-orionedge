@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   LayoutDashboard, TrendingUp, TrendingDown, Wallet, Users, FolderKanban,
   FileText, LineChart, Target, PieChart, Activity, StickyNote, Settings,
-  ChevronDown, Plus, Copy, Trash2, Pencil, Sparkles, LogOut, User, ArrowLeftRight, Files,
+  ChevronDown, Plus, Copy, Trash2, Pencil, Sparkles, LogOut, User, ArrowLeftRight, Files, CandlestickChart,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -118,6 +118,7 @@ export function AppSidebar() {
         { title: "Clients", to: `/app/p/${plannerId}/clients`, icon: Users },
         { title: "Projects", to: `/app/p/${plannerId}/projects`, icon: FolderKanban },
         { title: "Invoices", to: `/app/p/${plannerId}/invoices`, icon: FileText },
+        { title: "Investments", to: `/app/p/${plannerId}/investments`, icon: CandlestickChart },
       ]
     : [];
   const items2 = plannerId

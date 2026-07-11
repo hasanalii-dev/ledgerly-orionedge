@@ -596,6 +596,65 @@ export type Database = {
           },
         ]
       }
+      investments: {
+        Row: {
+          allocated_amount: number
+          created_at: string
+          currency: string
+          current_value: number
+          id: string
+          kind: string
+          name: string
+          notes: string | null
+          planner_id: string
+          purchase_date: string | null
+          return_amount: number
+          symbol: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allocated_amount?: number
+          created_at?: string
+          currency?: string
+          current_value?: number
+          id?: string
+          kind?: string
+          name?: string
+          notes?: string | null
+          planner_id: string
+          purchase_date?: string | null
+          return_amount?: number
+          symbol?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allocated_amount?: number
+          created_at?: string
+          currency?: string
+          current_value?: number
+          id?: string
+          kind?: string
+          name?: string
+          notes?: string | null
+          planner_id?: string
+          purchase_date?: string | null
+          return_amount?: number
+          symbol?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investments_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           amount: number
