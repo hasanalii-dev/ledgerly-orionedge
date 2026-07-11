@@ -7,6 +7,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_FOLDERS, CURRENCIES } from "@/lib/format";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { PageTransition } from "@/components/ui/loading-spinner";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId")({
   component: PlannerLayout,
@@ -91,7 +92,9 @@ function PlannerLayout() {
             )}
           </header>
           <main className="p-6">
-            <Outlet />
+            <PageTransition>
+              <Outlet />
+            </PageTransition>
           </main>
         </SidebarInset>
       </div>

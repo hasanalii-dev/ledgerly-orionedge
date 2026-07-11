@@ -16,14 +16,14 @@ export const Route = createFileRoute("/_authenticated/app/p/$plannerId/dashboard
   component: Dashboard,
 });
 
-function KpiCard({ icon: Icon, label, value, sub, accent }: { icon: React.ElementType; label: string; value: string; sub?: string; accent?: boolean }) {
+function KpiCard({ icon: Icon, label, value, compactValue, sub, accent }: { icon: React.ElementType; label: string; value: string; compactValue?: string; sub?: string; accent?: boolean }) {
   return (
     <div className={`rounded-2xl border p-5 ${accent ? "border-primary/30 bg-card glow-emerald" : "border-hairline bg-card"}`}>
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>{label}</span>
         <Icon className={`h-4 w-4 ${accent ? "text-primary" : ""}`} />
       </div>
-      <div className={`mt-3 text-3xl font-display tracking-tight ${accent ? "text-primary" : ""}`}>{value}</div>
+      <div className={`mt-3 text-3xl font-display tracking-tight truncate ${accent ? "text-primary" : ""}`} title={value}>{compactValue || value}</div>
       {sub && <div className="mt-1 text-xs text-muted-foreground">{sub}</div>}
     </div>
   );
@@ -121,16 +121,16 @@ function Dashboard() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard icon={TrendingUp} label="Total Income" value={formatMoney(totalIncome, currency)} accent />
-        <KpiCard icon={TrendingDown} label="Total Expenses" value={formatMoney(totalExpenses, currency)} />
-        <KpiCard icon={Sparkles} label="Net Cash Flow" value={formatMoney(net, currency)} sub={net >= 0 ? "In the green" : "In the red"} />
-        <KpiCard icon={Wallet} label="Current Balance" value={formatMoney(balance, currency)} />
+        <KpiCard icon={TrendingUp} label="Total Income" value={formatMoney(totalIncome, currency)} compactValue={formatMoney(totalIncome, currency, true)} accent />
+        <KpiCard icon={TrendingDown} label="Total Expenses" value={formatMoney(totalExpenses, currency)} compactValue={formatMoney(totalExpenses, currency, true)} />
+        <KpiCard icon={Sparkles} label="Net Cash Flow" value={formatMoney(net, currency)} compactValue={formatMoney(net, currency, true)} sub={net >= 0 ? "In the green" : "In the red"} />
+        <KpiCard icon={Wallet} label="Current Balance" value={formatMoney(balance, currency)} compactValue={formatMoney(balance, currency, true)} />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard icon={PiggyBank} label="This Month Profit" value={formatMoney(monthProfit, currency)} />
-        <KpiCard icon={Calendar} label="Avg Monthly Income" value={formatMoney(avgMonthlyIncome, currency)} />
-        <KpiCard icon={ShieldCheck} label="Tax Reserve (est. 25%)" value={formatMoney(yearIncome * 0.25, currency)} />
+        <KpiCard icon={PiggyBank} label="This Month Profit" value={formatMoney(monthProfit, currency)} compactValue={formatMoney(monthProfit, currency, true)} />
+        <KpiCard icon={Calendar} label="Avg Monthly Income" value={formatMoney(avgMonthlyIncome, currency)} compactValue={formatMoney(avgMonthlyIncome, currency, true)} />
+        <KpiCard icon={ShieldCheck} label="Tax Reserve (est. 25%)" value={formatMoney(yearIncome * 0.25, currency)} compactValue={formatMoney(yearIncome * 0.25, currency, true)} />
         <KpiCard icon={Flame} label="Pending Invoices" value={String(pendingInvoiceCount)} />
       </div>
 
@@ -148,7 +148,11 @@ function Dashboard() {
                 <CartesianGrid stroke="oklch(1 0 0 / 0.06)" vertical={false} />
                 <XAxis dataKey="month" stroke="oklch(0.66 0.02 155)" fontSize={12} />
                 <YAxis stroke="oklch(0.66 0.02 155)" fontSize={12} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                <Tooltip contentStyle={{ background: "oklch(0.22 0.008 155)", border: "1px solid oklch(1 0 0 / 0.08)", borderRadius: 12, color: "white" }} />
+                <Tooltip 
+                  formatter={(val: number) => formatMoney(val, currency)}
+                  contentStyle={{ background: "oklch(0.22 0.008 155)", border: "1px solid oklch(1 0 0 / 0.08)", borderRadius: 12, color: "white" }} 
+                  itemStyle={{ color: "white" }}
+                />
                 <Line type="monotone" dataKey="income" stroke="#3DDC97" strokeWidth={2.5} dot={{ r: 3 }} />
                 <Line type="monotone" dataKey="expense" stroke="#F56565" strokeWidth={2.5} dot={{ r: 3 }} />
                 <Line type="monotone" dataKey="net" stroke="#7CC4FF" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 2 }} />
@@ -169,7 +173,11 @@ function Dashboard() {
                   <Pie data={expensePie} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2}>
                     {expensePie.map((_, i) => <Cell key={i} fill={pieColors[i % pieColors.length]} />)}
                   </Pie>
-                  <Tooltip contentStyle={{ background: "oklch(0.22 0.008 155)", border: "1px solid oklch(1 0 0 / 0.08)", borderRadius: 12, color: "white" }} />
+                  <Tooltip 
+                    formatter={(val: number) => formatMoney(val, currency)}
+                    contentStyle={{ background: "oklch(0.22 0.008 155)", border: "1px solid oklch(1 0 0 / 0.08)", borderRadius: 12, color: "white" }} 
+                    itemStyle={{ color: "white" }}
+                  />
                 </RPieChart>
               </ResponsiveContainer>
             </div>

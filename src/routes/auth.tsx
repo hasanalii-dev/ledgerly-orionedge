@@ -53,7 +53,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Signed in");
-        navigate({ to: "/app" });
+        window.location.href = "/app";
       } else if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -67,7 +67,7 @@ function AuthPage() {
         
         if (data.session) {
           toast.success("Account created successfully!");
-          navigate({ to: "/app" });
+          window.location.href = "/app";
         } else {
           toast.success("Check your inbox to confirm your email");
         }

@@ -5,6 +5,7 @@ import { formatMoney } from "@/lib/format";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { usePlannerCurrency } from "@/hooks/use-planner-currency";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/budget")({
   component: BudgetPage,
@@ -14,6 +15,7 @@ type Budget = { id: string; category_id: string | null; amount: number };
 
 function BudgetPage() {
   const { plannerId } = Route.useParams();
+  const currency = usePlannerCurrency(plannerId);
   const month = new Date().toISOString().slice(0, 7) + "-01";
 
   const { data: categories = [], refetch } = useQuery({
@@ -71,7 +73,7 @@ function BudgetPage() {
             <div key={c.id} className="grid grid-cols-[1fr_140px_140px_1fr] px-4 py-3 items-center border-b border-hairline last:border-0">
               <div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full" style={{ background: c.color ?? "#666" }} />{c.name}</div>
               <Input type="number" defaultValue={budget || ""} onBlur={(e) => setBudget(c.id, parseFloat(e.target.value) || 0)} className="text-right font-mono h-9 bg-background border-hairline" />
-              <div className={`text-right font-mono ${over ? "text-destructive" : ""}`}>{formatMoney(spent)}</div>
+              <div className={`text-right font-mono ${over ? "text-destructive" : ""}`}>{formatMoney(spent, currency)}</div>
               <div className="pl-6 flex items-center gap-3">
                 <Progress value={pct} className="h-1.5 flex-1" />
                 <div className={`text-xs w-10 text-right ${over ? "text-destructive" : "text-muted-foreground"}`}>{pct}%</div>

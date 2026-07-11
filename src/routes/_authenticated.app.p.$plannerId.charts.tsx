@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
-
+import { formatMoney } from "@/lib/format";
+import { usePlannerCurrency } from "@/hooks/use-planner-currency";
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/charts")({
   component: ChartsPage,
 });
@@ -11,6 +12,7 @@ const COLORS = ["#3DDC97", "#7CC4FF", "#FFB86B", "#B794F4", "#F687B3", "#68D391"
 
 function ChartsPage() {
   const { plannerId } = Route.useParams();
+  const currency = usePlannerCurrency(plannerId);
   const { data: monthly = [] } = useQuery({
     queryKey: ["charts_monthly", plannerId],
     queryFn: async () => {
@@ -50,8 +52,12 @@ function ChartsPage() {
             <BarChart data={monthly}>
               <CartesianGrid stroke="oklch(1 0 0 / 8%)" vertical={false} />
               <XAxis dataKey="month" stroke="oklch(0.6 0 0)" fontSize={11} />
-              <YAxis stroke="oklch(0.6 0 0)" fontSize={11} />
-              <Tooltip contentStyle={{ background: "oklch(0.2 0 0)", border: "1px solid oklch(1 0 0 / 10%)", borderRadius: 10 }} />
+              <YAxis stroke="oklch(0.6 0 0)" fontSize={11} tickFormatter={(val) => formatMoney(val, currency)} />
+              <Tooltip 
+                formatter={(val: number) => formatMoney(val, currency)}
+                contentStyle={{ background: "oklch(0.2 0 0)", border: "1px solid oklch(1 0 0 / 10%)", borderRadius: 10, color: "white" }} 
+                itemStyle={{ color: "white" }}
+              />
               <Bar dataKey="income" fill="oklch(0.75 0.16 158)" radius={[6, 6, 0, 0]} />
               <Bar dataKey="expenses" fill="oklch(0.65 0.02 260)" radius={[6, 6, 0, 0]} />
             </BarChart>
@@ -64,7 +70,11 @@ function ChartsPage() {
               <Pie data={byCat} dataKey="value" nameKey="name" outerRadius={110} innerRadius={60} paddingAngle={2}>
                 {byCat.map((c, i) => <Cell key={c.name} fill={c.color || COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip contentStyle={{ background: "oklch(0.2 0 0)", border: "1px solid oklch(1 0 0 / 10%)", borderRadius: 10 }} />
+              <Tooltip 
+                formatter={(val: number) => formatMoney(val, currency)}
+                contentStyle={{ background: "oklch(0.2 0 0)", border: "1px solid oklch(1 0 0 / 10%)", borderRadius: 10, color: "white" }} 
+                itemStyle={{ color: "white" }}
+              />
               <Legend wrapperStyle={{ fontSize: 12 }} />
             </PieChart>
           </ResponsiveContainer>

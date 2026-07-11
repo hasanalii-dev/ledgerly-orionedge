@@ -1,11 +1,12 @@
-export function formatMoney(amount: number | string | null | undefined, currency = "USD") {
+export function formatMoney(amount: number | string | null | undefined, currency = "USD", compact = false) {
   const n = typeof amount === "string" ? parseFloat(amount) : (amount ?? 0);
   if (Number.isNaN(n)) return "—";
   try {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency,
-      maximumFractionDigits: 2,
+      notation: compact ? "compact" : "standard",
+      maximumFractionDigits: compact ? 1 : 2,
     }).format(n);
   } catch {
     return `${currency} ${n.toFixed(2)}`;

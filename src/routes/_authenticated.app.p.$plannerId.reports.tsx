@@ -56,11 +56,12 @@ function usePeriod(period: Period, customFrom: string, customTo: string): Period
 }
 
 function KpiCard({
-  icon: Icon, label, value, sub, tone,
+  icon: Icon, label, value, compactValue, sub, tone,
 }: {
   icon: React.ElementType;
   label: string;
   value: string;
+  compactValue?: string;
   sub?: string;
   tone?: "positive" | "negative" | "neutral";
 }) {
@@ -74,7 +75,7 @@ function KpiCard({
         <span>{label}</span>
         <Icon className="h-4 w-4 opacity-80" />
       </div>
-      <div className="mt-3 text-3xl font-display tracking-tight">{value}</div>
+      <div className="mt-3 text-3xl font-display tracking-tight truncate" title={value}>{compactValue || value}</div>
       {sub && <div className="mt-1 text-xs text-muted-foreground">{sub}</div>}
     </div>
   );
@@ -218,15 +219,15 @@ function ReportsPage() {
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard icon={TrendingUp} label="Total Earned" value={formatMoney(totalIncome, currency)} tone="positive" />
-        <KpiCard icon={TrendingDown} label="Total Spent" value={formatMoney(totalExpenses, currency)} tone="negative" />
-        <KpiCard icon={Wallet} label="Net" value={formatMoney(net, currency)} tone={net >= 0 ? "positive" : "negative"} />
+        <KpiCard icon={TrendingUp} label="Total Earned" value={formatMoney(totalIncome, currency)} compactValue={formatMoney(totalIncome, currency, true)} tone="positive" />
+        <KpiCard icon={TrendingDown} label="Total Spent" value={formatMoney(totalExpenses, currency)} compactValue={formatMoney(totalExpenses, currency, true)} tone="negative" />
+        <KpiCard icon={Wallet} label="Net" value={formatMoney(net, currency)} compactValue={formatMoney(net, currency, true)} tone={net >= 0 ? "positive" : "negative"} />
         <KpiCard icon={Clock} label="Transactions" value={String(filteredIncome.length + filteredExpenses.length)} />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard icon={Calendar} label="Avg monthly income" value={formatMoney(avgIncome, currency)} />
-        <KpiCard icon={Calendar} label="Avg monthly spend" value={formatMoney(avgExpense, currency)} />
+        <KpiCard icon={Calendar} label="Avg monthly income" value={formatMoney(avgIncome, currency)} compactValue={formatMoney(avgIncome, currency, true)} />
+        <KpiCard icon={Calendar} label="Avg monthly spend" value={formatMoney(avgExpense, currency)} compactValue={formatMoney(avgExpense, currency, true)} />
         <KpiCard icon={TrendingUp} label="Income transactions" value={String(filteredIncome.length)} />
         <KpiCard icon={TrendingDown} label="Expense transactions" value={String(filteredExpenses.length)} />
       </div>
@@ -243,7 +244,11 @@ function ReportsPage() {
                 <CartesianGrid stroke="oklch(1 0 0 / 6%)" vertical={false} />
                 <XAxis dataKey="label" stroke="oklch(0.66 0.02 155)" fontSize={12} />
                 <YAxis stroke="oklch(0.66 0.02 155)" fontSize={12} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                <Tooltip contentStyle={{ background: "oklch(0.22 0.008 155)", border: "1px solid oklch(1 0 0 / 0.08)", borderRadius: 12, color: "white" }} />
+                <Tooltip 
+                  formatter={(val: number) => formatMoney(val, currency)}
+                  contentStyle={{ background: "oklch(0.22 0.008 155)", border: "1px solid oklch(1 0 0 / 0.08)", borderRadius: 12, color: "white" }} 
+                  itemStyle={{ color: "white" }}
+                />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Bar dataKey="income" name="Earned" fill="#3DDC97" radius={[6, 6, 0, 0]} />
                 <Bar dataKey="expenses" name="Spent" fill="#F56565" radius={[6, 6, 0, 0]} />
