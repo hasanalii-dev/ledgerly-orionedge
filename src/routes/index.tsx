@@ -1,17 +1,35 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, LineChart, Wallet, Users, FileText, LayoutGrid, Receipt, Target } from "lucide-react";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   component: Landing,
 });
 
 function Landing() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 40);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Nav */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-hairline">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 h-16">
+      {/* Nav — transforms into a floating pill on scroll */}
+      <header className="sticky top-0 z-50 px-4 py-3 transition-all duration-500 ease-out">
+        <div
+          className={cn(
+            "mx-auto flex items-center justify-between transition-all duration-500 ease-out",
+            scrolled
+              ? "max-w-2xl bg-background/55 backdrop-blur-2xl border border-hairline rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.45)] px-5 py-2.5"
+              : "max-w-7xl bg-background/70 backdrop-blur-xl border-b border-hairline px-6 h-16"
+          )}
+        >
           <div className="flex items-center gap-2 font-display font-semibold text-lg">
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <img src="/favicon.png" alt="Ledgerly" className="h-4 w-4 object-contain" />
@@ -19,12 +37,12 @@ function Landing() {
             Ledgerly
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-            <a href="#features" className="hover:text-foreground">Features</a>
-            <a href="#modules" className="hover:text-foreground">Modules</a>
-            <a href="#pricing" className="hover:text-foreground">Pricing</a>
+            <a href="#features" className="hover:text-foreground transition-colors">Features</a>
+            <a href="#modules" className="hover:text-foreground transition-colors">Modules</a>
+            <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
           </nav>
           <div className="flex items-center gap-2">
-            <Link to="/auth"><Button variant="ghost" size="sm">Sign in</Button></Link>
+            <Link to="/auth"><Button variant="ghost" size="sm" className="hidden sm:inline-flex">Sign in</Button></Link>
             <Link to="/auth"><Button size="sm" className="glow-emerald">Get started<ArrowRight className="ml-1 h-4 w-4" /></Button></Link>
           </div>
         </div>
