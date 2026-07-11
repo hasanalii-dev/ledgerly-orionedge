@@ -5,7 +5,7 @@ export function usePlannerCurrency(plannerId: string): string {
   const { data } = useQuery({
     queryKey: ["planner", plannerId],
     queryFn: async () => {
-      const { data } = await supabase.from("planners").select("currency").eq("id", plannerId).maybeSingle();
+      const { data } = await supabase.from("planners").select("*").eq("id", plannerId).maybeSingle();
       return data;
     },
   });

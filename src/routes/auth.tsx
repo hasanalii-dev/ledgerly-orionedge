@@ -2,7 +2,6 @@ import { createFileRoute, Navigate, useNavigate, Link } from "@tanstack/react-ro
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,7 +55,7 @@ function AuthPage() {
         toast.success("Signed in");
         navigate({ to: "/app" });
       } else if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -65,7 +64,13 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Check your inbox to confirm your email");
+        
+        if (data.session) {
+          toast.success("Account created successfully!");
+          navigate({ to: "/app" });
+        } else {
+          toast.success("Check your inbox to confirm your email");
+        }
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/reset-password`,
@@ -85,11 +90,13 @@ function AuthPage() {
   async function handleGoogle() {
     setLoading(true);
     try {
-      const res = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/app`,
+        },
       });
-      if (res.error) throw res.error;
-      if (!res.redirected) navigate({ to: "/app" });
+      if (error) throw error;
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Google sign-in failed");
       setLoading(false);

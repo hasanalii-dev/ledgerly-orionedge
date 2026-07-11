@@ -184,6 +184,7 @@ export function CellInput({ value, onChange, type = "text", className = "" }: { 
       type={type}
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      step={type === "number" ? "any" : undefined}
       className={`w-full bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-elevated rounded-md focus:ring-1 focus:ring-primary/40 ${className}`}
     />
   );
