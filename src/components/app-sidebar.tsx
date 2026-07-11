@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   LayoutDashboard, TrendingUp, TrendingDown, Wallet, Users, FolderKanban,
   FileText, LineChart, Target, PieChart, Activity, StickyNote, Settings,
-  ChevronDown, Plus, Copy, Trash2, Pencil, Sparkles, LogOut, User, ArrowLeftRight, Files, CandlestickChart,
+  ChevronDown, Plus, Copy, Trash2, Pencil, LogOut, User, ArrowLeftRight, Files, CandlestickChart,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -137,7 +137,7 @@ export function AppSidebar() {
       <SidebarHeader className="px-3 py-3">
         <div className="flex items-center gap-2 px-1 mb-2">
           <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Sparkles className="h-4 w-4" />
+            <img src="/favicon.png" alt="Ledgerly" className="h-4 w-4 object-contain" />
           </span>
           {!collapsed && (
             <div className="flex flex-col leading-tight">
