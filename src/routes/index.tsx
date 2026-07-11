@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, LineChart, Wallet, Users, FileText, Sparkles, LayoutGrid, Receipt, Target } from "lucide-react";
+import { ArrowRight, LineChart, Wallet, Users, FileText, LayoutGrid, Receipt, Target } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -14,7 +14,7 @@ function Landing() {
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6 h-16">
           <div className="flex items-center gap-2 font-display font-semibold text-lg">
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Sparkles className="h-4 w-4" />
+              <img src="/favicon.png" alt="Ledgerly" className="h-4 w-4 object-contain" />
             </span>
             Ledgerly
           </div>
