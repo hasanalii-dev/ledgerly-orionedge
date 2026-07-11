@@ -19,7 +19,9 @@ import {
   LayoutDashboard, TrendingUp, TrendingDown, Wallet, Users, FolderKanban,
   FileText, LineChart, Target, PieChart, Activity, StickyNote, Settings,
   ChevronDown, Plus, Copy, Trash2, Pencil, LogOut, User, ArrowLeftRight, Files, CandlestickChart,
+  FileBarChart,
 } from "lucide-react";
+
 import { toast } from "sonner";
 
 type Planner = { id: string; name: string; emoji: string | null; is_default: boolean };
@@ -126,11 +128,13 @@ export function AppSidebar() {
         { title: "Vault", to: `/app/p/${plannerId}/vault`, icon: Files },
         { title: "Goals", to: `/app/p/${plannerId}/goals`, icon: Target },
         { title: "Budget", to: `/app/p/${plannerId}/budget`, icon: ArrowLeftRight },
+        { title: "Reports", to: `/app/p/${plannerId}/reports`, icon: FileBarChart },
         { title: "Charts", to: `/app/p/${plannerId}/charts`, icon: PieChart },
         { title: "Timeline", to: `/app/p/${plannerId}/timeline`, icon: Activity },
         { title: "Notes", to: `/app/p/${plannerId}/notes`, icon: StickyNote },
       ]
     : [];
+
 
   return (
     <Sidebar collapsible="icon" className="border-r border-hairline">
