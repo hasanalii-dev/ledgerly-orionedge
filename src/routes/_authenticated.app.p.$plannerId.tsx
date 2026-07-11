@@ -4,7 +4,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_FOLDERS } from "@/lib/format";
+import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_FOLDERS, CURRENCIES } from "@/lib/format";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId")({
   component: PlannerLayout,
@@ -66,9 +68,27 @@ function PlannerLayout() {
         <SidebarInset className="flex-1 overflow-hidden">
           <header className="sticky top-0 z-20 h-14 flex items-center gap-3 px-4 border-b border-hairline bg-background/80 backdrop-blur-xl">
             <SidebarTrigger />
-            <div className="text-sm text-muted-foreground truncate">
+            <div className="text-sm text-muted-foreground truncate flex-1">
               {planner?.name ?? ""}
             </div>
+            {planner && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">Currency</span>
+                <Select
+                  value={planner.currency ?? "USD"}
+                  onValueChange={async (v) => {
+                    const { error } = await supabase.from("planners").update({ currency: v }).eq("id", planner.id);
+                    if (error) return toast.error(error.message);
+                    qc.invalidateQueries({ queryKey: ["planner", planner.id] });
+                    qc.invalidateQueries({ queryKey: ["planners"] });
+                    toast.success(`Currency set to ${v}`);
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-[92px] bg-card border-hairline"><SelectValue /></SelectTrigger>
+                  <SelectContent>{CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            )}
           </header>
           <main className="p-6">
             <Outlet />
