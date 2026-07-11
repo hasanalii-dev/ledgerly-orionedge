@@ -14,8 +14,22 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated.app'
+import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated.app.settings'
 import { Route as AuthenticatedAppPPlannerIdRouteImport } from './routes/_authenticated.app.p.$plannerId'
+import { Route as AuthenticatedAppPPlannerIdVaultRouteImport } from './routes/_authenticated.app.p.$plannerId.vault'
+import { Route as AuthenticatedAppPPlannerIdTimelineRouteImport } from './routes/_authenticated.app.p.$plannerId.timeline'
+import { Route as AuthenticatedAppPPlannerIdProjectsRouteImport } from './routes/_authenticated.app.p.$plannerId.projects'
+import { Route as AuthenticatedAppPPlannerIdNotesRouteImport } from './routes/_authenticated.app.p.$plannerId.notes'
+import { Route as AuthenticatedAppPPlannerIdInvoicesRouteImport } from './routes/_authenticated.app.p.$plannerId.invoices'
+import { Route as AuthenticatedAppPPlannerIdIncomeRouteImport } from './routes/_authenticated.app.p.$plannerId.income'
+import { Route as AuthenticatedAppPPlannerIdGoalsRouteImport } from './routes/_authenticated.app.p.$plannerId.goals'
+import { Route as AuthenticatedAppPPlannerIdExpensesRouteImport } from './routes/_authenticated.app.p.$plannerId.expenses'
 import { Route as AuthenticatedAppPPlannerIdDashboardRouteImport } from './routes/_authenticated.app.p.$plannerId.dashboard'
+import { Route as AuthenticatedAppPPlannerIdClientsRouteImport } from './routes/_authenticated.app.p.$plannerId.clients'
+import { Route as AuthenticatedAppPPlannerIdChartsRouteImport } from './routes/_authenticated.app.p.$plannerId.charts'
+import { Route as AuthenticatedAppPPlannerIdCashflowRouteImport } from './routes/_authenticated.app.p.$plannerId.cashflow'
+import { Route as AuthenticatedAppPPlannerIdBudgetRouteImport } from './routes/_authenticated.app.p.$plannerId.budget'
+import { Route as AuthenticatedAppPPlannerIdAccountsRouteImport } from './routes/_authenticated.app.p.$plannerId.accounts'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -41,16 +55,100 @@ const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   path: '/app',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAppSettingsRoute =
+  AuthenticatedAppSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppPPlannerIdRoute =
   AuthenticatedAppPPlannerIdRouteImport.update({
     id: '/p/$plannerId',
     path: '/p/$plannerId',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppPPlannerIdVaultRoute =
+  AuthenticatedAppPPlannerIdVaultRouteImport.update({
+    id: '/vault',
+    path: '/vault',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdTimelineRoute =
+  AuthenticatedAppPPlannerIdTimelineRouteImport.update({
+    id: '/timeline',
+    path: '/timeline',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdProjectsRoute =
+  AuthenticatedAppPPlannerIdProjectsRouteImport.update({
+    id: '/projects',
+    path: '/projects',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdNotesRoute =
+  AuthenticatedAppPPlannerIdNotesRouteImport.update({
+    id: '/notes',
+    path: '/notes',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdInvoicesRoute =
+  AuthenticatedAppPPlannerIdInvoicesRouteImport.update({
+    id: '/invoices',
+    path: '/invoices',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdIncomeRoute =
+  AuthenticatedAppPPlannerIdIncomeRouteImport.update({
+    id: '/income',
+    path: '/income',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdGoalsRoute =
+  AuthenticatedAppPPlannerIdGoalsRouteImport.update({
+    id: '/goals',
+    path: '/goals',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdExpensesRoute =
+  AuthenticatedAppPPlannerIdExpensesRouteImport.update({
+    id: '/expenses',
+    path: '/expenses',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
 const AuthenticatedAppPPlannerIdDashboardRoute =
   AuthenticatedAppPPlannerIdDashboardRouteImport.update({
     id: '/dashboard',
     path: '/dashboard',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdClientsRoute =
+  AuthenticatedAppPPlannerIdClientsRouteImport.update({
+    id: '/clients',
+    path: '/clients',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdChartsRoute =
+  AuthenticatedAppPPlannerIdChartsRouteImport.update({
+    id: '/charts',
+    path: '/charts',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdCashflowRoute =
+  AuthenticatedAppPPlannerIdCashflowRouteImport.update({
+    id: '/cashflow',
+    path: '/cashflow',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdBudgetRoute =
+  AuthenticatedAppPPlannerIdBudgetRouteImport.update({
+    id: '/budget',
+    path: '/budget',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdAccountsRoute =
+  AuthenticatedAppPPlannerIdAccountsRouteImport.update({
+    id: '/accounts',
+    path: '/accounts',
     getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
   } as any)
 
@@ -59,16 +157,44 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/p/$plannerId': typeof AuthenticatedAppPPlannerIdRouteWithChildren
+  '/app/p/$plannerId/accounts': typeof AuthenticatedAppPPlannerIdAccountsRoute
+  '/app/p/$plannerId/budget': typeof AuthenticatedAppPPlannerIdBudgetRoute
+  '/app/p/$plannerId/cashflow': typeof AuthenticatedAppPPlannerIdCashflowRoute
+  '/app/p/$plannerId/charts': typeof AuthenticatedAppPPlannerIdChartsRoute
+  '/app/p/$plannerId/clients': typeof AuthenticatedAppPPlannerIdClientsRoute
   '/app/p/$plannerId/dashboard': typeof AuthenticatedAppPPlannerIdDashboardRoute
+  '/app/p/$plannerId/expenses': typeof AuthenticatedAppPPlannerIdExpensesRoute
+  '/app/p/$plannerId/goals': typeof AuthenticatedAppPPlannerIdGoalsRoute
+  '/app/p/$plannerId/income': typeof AuthenticatedAppPPlannerIdIncomeRoute
+  '/app/p/$plannerId/invoices': typeof AuthenticatedAppPPlannerIdInvoicesRoute
+  '/app/p/$plannerId/notes': typeof AuthenticatedAppPPlannerIdNotesRoute
+  '/app/p/$plannerId/projects': typeof AuthenticatedAppPPlannerIdProjectsRoute
+  '/app/p/$plannerId/timeline': typeof AuthenticatedAppPPlannerIdTimelineRoute
+  '/app/p/$plannerId/vault': typeof AuthenticatedAppPPlannerIdVaultRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/p/$plannerId': typeof AuthenticatedAppPPlannerIdRouteWithChildren
+  '/app/p/$plannerId/accounts': typeof AuthenticatedAppPPlannerIdAccountsRoute
+  '/app/p/$plannerId/budget': typeof AuthenticatedAppPPlannerIdBudgetRoute
+  '/app/p/$plannerId/cashflow': typeof AuthenticatedAppPPlannerIdCashflowRoute
+  '/app/p/$plannerId/charts': typeof AuthenticatedAppPPlannerIdChartsRoute
+  '/app/p/$plannerId/clients': typeof AuthenticatedAppPPlannerIdClientsRoute
   '/app/p/$plannerId/dashboard': typeof AuthenticatedAppPPlannerIdDashboardRoute
+  '/app/p/$plannerId/expenses': typeof AuthenticatedAppPPlannerIdExpensesRoute
+  '/app/p/$plannerId/goals': typeof AuthenticatedAppPPlannerIdGoalsRoute
+  '/app/p/$plannerId/income': typeof AuthenticatedAppPPlannerIdIncomeRoute
+  '/app/p/$plannerId/invoices': typeof AuthenticatedAppPPlannerIdInvoicesRoute
+  '/app/p/$plannerId/notes': typeof AuthenticatedAppPPlannerIdNotesRoute
+  '/app/p/$plannerId/projects': typeof AuthenticatedAppPPlannerIdProjectsRoute
+  '/app/p/$plannerId/timeline': typeof AuthenticatedAppPPlannerIdTimelineRoute
+  '/app/p/$plannerId/vault': typeof AuthenticatedAppPPlannerIdVaultRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,8 +203,22 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
   '/_authenticated/app/p/$plannerId': typeof AuthenticatedAppPPlannerIdRouteWithChildren
+  '/_authenticated/app/p/$plannerId/accounts': typeof AuthenticatedAppPPlannerIdAccountsRoute
+  '/_authenticated/app/p/$plannerId/budget': typeof AuthenticatedAppPPlannerIdBudgetRoute
+  '/_authenticated/app/p/$plannerId/cashflow': typeof AuthenticatedAppPPlannerIdCashflowRoute
+  '/_authenticated/app/p/$plannerId/charts': typeof AuthenticatedAppPPlannerIdChartsRoute
+  '/_authenticated/app/p/$plannerId/clients': typeof AuthenticatedAppPPlannerIdClientsRoute
   '/_authenticated/app/p/$plannerId/dashboard': typeof AuthenticatedAppPPlannerIdDashboardRoute
+  '/_authenticated/app/p/$plannerId/expenses': typeof AuthenticatedAppPPlannerIdExpensesRoute
+  '/_authenticated/app/p/$plannerId/goals': typeof AuthenticatedAppPPlannerIdGoalsRoute
+  '/_authenticated/app/p/$plannerId/income': typeof AuthenticatedAppPPlannerIdIncomeRoute
+  '/_authenticated/app/p/$plannerId/invoices': typeof AuthenticatedAppPPlannerIdInvoicesRoute
+  '/_authenticated/app/p/$plannerId/notes': typeof AuthenticatedAppPPlannerIdNotesRoute
+  '/_authenticated/app/p/$plannerId/projects': typeof AuthenticatedAppPPlannerIdProjectsRoute
+  '/_authenticated/app/p/$plannerId/timeline': typeof AuthenticatedAppPPlannerIdTimelineRoute
+  '/_authenticated/app/p/$plannerId/vault': typeof AuthenticatedAppPPlannerIdVaultRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -87,16 +227,44 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/app'
+    | '/app/settings'
     | '/app/p/$plannerId'
+    | '/app/p/$plannerId/accounts'
+    | '/app/p/$plannerId/budget'
+    | '/app/p/$plannerId/cashflow'
+    | '/app/p/$plannerId/charts'
+    | '/app/p/$plannerId/clients'
     | '/app/p/$plannerId/dashboard'
+    | '/app/p/$plannerId/expenses'
+    | '/app/p/$plannerId/goals'
+    | '/app/p/$plannerId/income'
+    | '/app/p/$plannerId/invoices'
+    | '/app/p/$plannerId/notes'
+    | '/app/p/$plannerId/projects'
+    | '/app/p/$plannerId/timeline'
+    | '/app/p/$plannerId/vault'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/reset-password'
     | '/app'
+    | '/app/settings'
     | '/app/p/$plannerId'
+    | '/app/p/$plannerId/accounts'
+    | '/app/p/$plannerId/budget'
+    | '/app/p/$plannerId/cashflow'
+    | '/app/p/$plannerId/charts'
+    | '/app/p/$plannerId/clients'
     | '/app/p/$plannerId/dashboard'
+    | '/app/p/$plannerId/expenses'
+    | '/app/p/$plannerId/goals'
+    | '/app/p/$plannerId/income'
+    | '/app/p/$plannerId/invoices'
+    | '/app/p/$plannerId/notes'
+    | '/app/p/$plannerId/projects'
+    | '/app/p/$plannerId/timeline'
+    | '/app/p/$plannerId/vault'
   id:
     | '__root__'
     | '/'
@@ -104,8 +272,22 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/app'
+    | '/_authenticated/app/settings'
     | '/_authenticated/app/p/$plannerId'
+    | '/_authenticated/app/p/$plannerId/accounts'
+    | '/_authenticated/app/p/$plannerId/budget'
+    | '/_authenticated/app/p/$plannerId/cashflow'
+    | '/_authenticated/app/p/$plannerId/charts'
+    | '/_authenticated/app/p/$plannerId/clients'
     | '/_authenticated/app/p/$plannerId/dashboard'
+    | '/_authenticated/app/p/$plannerId/expenses'
+    | '/_authenticated/app/p/$plannerId/goals'
+    | '/_authenticated/app/p/$plannerId/income'
+    | '/_authenticated/app/p/$plannerId/invoices'
+    | '/_authenticated/app/p/$plannerId/notes'
+    | '/_authenticated/app/p/$plannerId/projects'
+    | '/_authenticated/app/p/$plannerId/timeline'
+    | '/_authenticated/app/p/$plannerId/vault'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -152,12 +334,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/app/settings': {
+      id: '/_authenticated/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AuthenticatedAppSettingsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/p/$plannerId': {
       id: '/_authenticated/app/p/$plannerId'
       path: '/p/$plannerId'
       fullPath: '/app/p/$plannerId'
       preLoaderRoute: typeof AuthenticatedAppPPlannerIdRouteImport
       parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/p/$plannerId/vault': {
+      id: '/_authenticated/app/p/$plannerId/vault'
+      path: '/vault'
+      fullPath: '/app/p/$plannerId/vault'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdVaultRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
+    '/_authenticated/app/p/$plannerId/timeline': {
+      id: '/_authenticated/app/p/$plannerId/timeline'
+      path: '/timeline'
+      fullPath: '/app/p/$plannerId/timeline'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdTimelineRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
+    '/_authenticated/app/p/$plannerId/projects': {
+      id: '/_authenticated/app/p/$plannerId/projects'
+      path: '/projects'
+      fullPath: '/app/p/$plannerId/projects'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdProjectsRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
+    '/_authenticated/app/p/$plannerId/notes': {
+      id: '/_authenticated/app/p/$plannerId/notes'
+      path: '/notes'
+      fullPath: '/app/p/$plannerId/notes'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdNotesRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
+    '/_authenticated/app/p/$plannerId/invoices': {
+      id: '/_authenticated/app/p/$plannerId/invoices'
+      path: '/invoices'
+      fullPath: '/app/p/$plannerId/invoices'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdInvoicesRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
+    '/_authenticated/app/p/$plannerId/income': {
+      id: '/_authenticated/app/p/$plannerId/income'
+      path: '/income'
+      fullPath: '/app/p/$plannerId/income'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdIncomeRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
+    '/_authenticated/app/p/$plannerId/goals': {
+      id: '/_authenticated/app/p/$plannerId/goals'
+      path: '/goals'
+      fullPath: '/app/p/$plannerId/goals'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdGoalsRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
+    '/_authenticated/app/p/$plannerId/expenses': {
+      id: '/_authenticated/app/p/$plannerId/expenses'
+      path: '/expenses'
+      fullPath: '/app/p/$plannerId/expenses'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdExpensesRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
     }
     '/_authenticated/app/p/$plannerId/dashboard': {
       id: '/_authenticated/app/p/$plannerId/dashboard'
@@ -166,17 +411,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppPPlannerIdDashboardRouteImport
       parentRoute: typeof AuthenticatedAppPPlannerIdRoute
     }
+    '/_authenticated/app/p/$plannerId/clients': {
+      id: '/_authenticated/app/p/$plannerId/clients'
+      path: '/clients'
+      fullPath: '/app/p/$plannerId/clients'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdClientsRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
+    '/_authenticated/app/p/$plannerId/charts': {
+      id: '/_authenticated/app/p/$plannerId/charts'
+      path: '/charts'
+      fullPath: '/app/p/$plannerId/charts'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdChartsRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
+    '/_authenticated/app/p/$plannerId/cashflow': {
+      id: '/_authenticated/app/p/$plannerId/cashflow'
+      path: '/cashflow'
+      fullPath: '/app/p/$plannerId/cashflow'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdCashflowRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
+    '/_authenticated/app/p/$plannerId/budget': {
+      id: '/_authenticated/app/p/$plannerId/budget'
+      path: '/budget'
+      fullPath: '/app/p/$plannerId/budget'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdBudgetRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
+    '/_authenticated/app/p/$plannerId/accounts': {
+      id: '/_authenticated/app/p/$plannerId/accounts'
+      path: '/accounts'
+      fullPath: '/app/p/$plannerId/accounts'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdAccountsRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
   }
 }
 
 interface AuthenticatedAppPPlannerIdRouteChildren {
+  AuthenticatedAppPPlannerIdAccountsRoute: typeof AuthenticatedAppPPlannerIdAccountsRoute
+  AuthenticatedAppPPlannerIdBudgetRoute: typeof AuthenticatedAppPPlannerIdBudgetRoute
+  AuthenticatedAppPPlannerIdCashflowRoute: typeof AuthenticatedAppPPlannerIdCashflowRoute
+  AuthenticatedAppPPlannerIdChartsRoute: typeof AuthenticatedAppPPlannerIdChartsRoute
+  AuthenticatedAppPPlannerIdClientsRoute: typeof AuthenticatedAppPPlannerIdClientsRoute
   AuthenticatedAppPPlannerIdDashboardRoute: typeof AuthenticatedAppPPlannerIdDashboardRoute
+  AuthenticatedAppPPlannerIdExpensesRoute: typeof AuthenticatedAppPPlannerIdExpensesRoute
+  AuthenticatedAppPPlannerIdGoalsRoute: typeof AuthenticatedAppPPlannerIdGoalsRoute
+  AuthenticatedAppPPlannerIdIncomeRoute: typeof AuthenticatedAppPPlannerIdIncomeRoute
+  AuthenticatedAppPPlannerIdInvoicesRoute: typeof AuthenticatedAppPPlannerIdInvoicesRoute
+  AuthenticatedAppPPlannerIdNotesRoute: typeof AuthenticatedAppPPlannerIdNotesRoute
+  AuthenticatedAppPPlannerIdProjectsRoute: typeof AuthenticatedAppPPlannerIdProjectsRoute
+  AuthenticatedAppPPlannerIdTimelineRoute: typeof AuthenticatedAppPPlannerIdTimelineRoute
+  AuthenticatedAppPPlannerIdVaultRoute: typeof AuthenticatedAppPPlannerIdVaultRoute
 }
 
 const AuthenticatedAppPPlannerIdRouteChildren: AuthenticatedAppPPlannerIdRouteChildren =
   {
+    AuthenticatedAppPPlannerIdAccountsRoute:
+      AuthenticatedAppPPlannerIdAccountsRoute,
+    AuthenticatedAppPPlannerIdBudgetRoute:
+      AuthenticatedAppPPlannerIdBudgetRoute,
+    AuthenticatedAppPPlannerIdCashflowRoute:
+      AuthenticatedAppPPlannerIdCashflowRoute,
+    AuthenticatedAppPPlannerIdChartsRoute:
+      AuthenticatedAppPPlannerIdChartsRoute,
+    AuthenticatedAppPPlannerIdClientsRoute:
+      AuthenticatedAppPPlannerIdClientsRoute,
     AuthenticatedAppPPlannerIdDashboardRoute:
       AuthenticatedAppPPlannerIdDashboardRoute,
+    AuthenticatedAppPPlannerIdExpensesRoute:
+      AuthenticatedAppPPlannerIdExpensesRoute,
+    AuthenticatedAppPPlannerIdGoalsRoute: AuthenticatedAppPPlannerIdGoalsRoute,
+    AuthenticatedAppPPlannerIdIncomeRoute:
+      AuthenticatedAppPPlannerIdIncomeRoute,
+    AuthenticatedAppPPlannerIdInvoicesRoute:
+      AuthenticatedAppPPlannerIdInvoicesRoute,
+    AuthenticatedAppPPlannerIdNotesRoute: AuthenticatedAppPPlannerIdNotesRoute,
+    AuthenticatedAppPPlannerIdProjectsRoute:
+      AuthenticatedAppPPlannerIdProjectsRoute,
+    AuthenticatedAppPPlannerIdTimelineRoute:
+      AuthenticatedAppPPlannerIdTimelineRoute,
+    AuthenticatedAppPPlannerIdVaultRoute: AuthenticatedAppPPlannerIdVaultRoute,
   }
 
 const AuthenticatedAppPPlannerIdRouteWithChildren =
@@ -185,10 +501,12 @@ const AuthenticatedAppPPlannerIdRouteWithChildren =
   )
 
 interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
   AuthenticatedAppPPlannerIdRoute: typeof AuthenticatedAppPPlannerIdRouteWithChildren
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
   AuthenticatedAppPPlannerIdRoute: AuthenticatedAppPPlannerIdRouteWithChildren,
 }
 
