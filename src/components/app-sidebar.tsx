@@ -19,7 +19,9 @@ import {
   LayoutDashboard, TrendingUp, TrendingDown, Wallet, Users, FolderKanban,
   FileText, LineChart, Target, PieChart, Activity, StickyNote, Settings,
   ChevronDown, Plus, Copy, Trash2, Pencil, LogOut, User, ArrowLeftRight, Files, CandlestickChart,
+  FileBarChart,
 } from "lucide-react";
+
 import { toast } from "sonner";
 
 type Planner = { id: string; name: string; emoji: string | null; is_default: boolean };
