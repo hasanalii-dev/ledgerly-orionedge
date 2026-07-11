@@ -6,6 +6,7 @@ import { ACCOUNT_KINDS } from "@/lib/format";
 import { useEffect, useState } from "react";
 import { formatMoney } from "@/lib/format";
 import { Wallet } from "lucide-react";
+import { usePlannerCurrency } from "@/hooks/use-planner-currency";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/accounts")({
   component: AccountsPage,
@@ -16,6 +17,7 @@ type Row = { id: string; name: string; kind: string; currency: string; opening_b
 function AccountsPage() {
   const { plannerId } = Route.useParams();
   const [uid, setUid] = useState("");
+  const currency = usePlannerCurrency(plannerId);
   useEffect(() => { supabase.auth.getUser().then(({ data }) => setUid(data.user?.id ?? "")); }, []);
 
   const { data: rows = [] } = useQuery({
@@ -67,11 +69,11 @@ function AccountsPage() {
         planner_id={plannerId}
         user_id={uid}
         invalidateKeys={[["accounts", plannerId]]}
-        onNewRow={() => ({ name: "New account", kind: "bank", currency: "USD", opening_balance: 0 })}
+        onNewRow={() => ({ name: "New account", kind: "bank", currency, opening_balance: 0 })}
         columns={[
           { key: "name", label: "Name", render: (r, on) => <CellInput value={r.name ?? ""} onChange={(v) => on({ name: v })} /> },
           { key: "kind", label: "Type", width: "140px", render: (r, on) => <CellSelect value={r.kind ?? "bank"} onChange={(v) => on({ kind: v })} options={ACCOUNT_KINDS.map((k) => ({ value: k, label: k }))} /> },
-          { key: "currency", label: "CCY", width: "80px", render: (r, on) => <CellInput value={r.currency ?? "USD"} onChange={(v) => on({ currency: v.toUpperCase() })} className="uppercase" /> },
+          { key: "currency", label: "CCY", width: "80px", render: (r, on) => <CellInput value={r.currency ?? currency} onChange={(v) => on({ currency: v.toUpperCase() })} className="uppercase" /> },
           { key: "opening_balance", label: "Opening", width: "140px", render: (r, on) => <CellInput type="number" value={String(r.opening_balance ?? 0)} onChange={(v) => on({ opening_balance: parseFloat(v) || 0 })} className="text-right font-mono" /> },
         ]}
       />

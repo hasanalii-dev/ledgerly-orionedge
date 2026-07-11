@@ -166,8 +166,9 @@ function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-hairline py-8 text-center text-xs text-muted-foreground">
-        © Ledgerly · Built for freelancers, agencies, and entrepreneurs.
+      <footer className="border-t border-hairline py-8 text-center text-xs text-muted-foreground space-y-1">
+        <div>© Ledgerly · Built for freelancers, agencies, and entrepreneurs.</div>
+        <div>Ledgerly by <span className="text-foreground/80">Orion Edge Digital</span></div>
       </footer>
     </div>
   );

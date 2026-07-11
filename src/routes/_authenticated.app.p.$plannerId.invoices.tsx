@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { EditableTable, CellInput, CellSelect } from "@/components/editable-table";
 import { INVOICE_STATUSES } from "@/lib/format";
 import { useEffect, useState } from "react";
+import { usePlannerCurrency } from "@/hooks/use-planner-currency";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/invoices")({
   component: InvoicesPage,
@@ -14,6 +15,7 @@ type Row = { id: string; invoice_number: string; client_id: string | null; proje
 function InvoicesPage() {
   const { plannerId } = Route.useParams();
   const [uid, setUid] = useState("");
+  const currency = usePlannerCurrency(plannerId);
   useEffect(() => { supabase.auth.getUser().then(({ data }) => setUid(data.user?.id ?? "")); }, []);
 
   const { data: rows = [] } = useQuery({
@@ -35,7 +37,8 @@ function InvoicesPage() {
         planner_id={plannerId}
         user_id={uid}
         invalidateKeys={[["invoices", plannerId]]}
-        onNewRow={() => ({ issue_date: new Date().toISOString().slice(0, 10), amount: 0, currency: "USD", status: "pending", invoice_number: `INV-${Date.now().toString().slice(-6)}` })}
+        onNewRow={() => ({ issue_date: new Date().toISOString().slice(0, 10), amount: 0, currency, status: "pending", invoice_number: `INV-${Date.now().toString().slice(-6)}` })}
+        currency={currency}
         totals={{ amountKey: "amount", label: "Billed" }}
         columns={[
           { key: "invoice_number", label: "Number", width: "140px", render: (r, on) => <CellInput value={r.invoice_number ?? ""} onChange={(v) => on({ invoice_number: v })} /> },
@@ -44,7 +47,7 @@ function InvoicesPage() {
           { key: "issue_date", label: "Issued", width: "140px", render: (r, on) => <CellInput type="date" value={r.issue_date ?? ""} onChange={(v) => on({ issue_date: v })} /> },
           { key: "due_date", label: "Due", width: "140px", render: (r, on) => <CellInput type="date" value={r.due_date ?? ""} onChange={(v) => on({ due_date: v || null })} /> },
           { key: "amount", label: "Amount", width: "130px", render: (r, on) => <CellInput type="number" value={String(r.amount ?? 0)} onChange={(v) => on({ amount: parseFloat(v) || 0 })} className="text-right font-mono" /> },
-          { key: "currency", label: "CCY", width: "80px", render: (r, on) => <CellInput value={r.currency ?? "USD"} onChange={(v) => on({ currency: v.toUpperCase() })} className="uppercase" /> },
+          { key: "currency", label: "CCY", width: "80px", render: (r, on) => <CellInput value={r.currency ?? currency} onChange={(v) => on({ currency: v.toUpperCase() })} className="uppercase" /> },
           { key: "status", label: "Status", width: "140px", render: (r, on) => <CellSelect value={r.status ?? "pending"} onChange={(v) => on({ status: v })} options={INVOICE_STATUSES.map((s) => ({ value: s, label: s }))} /> },
         ]}
       />

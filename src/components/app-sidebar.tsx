@@ -138,7 +138,12 @@ export function AppSidebar() {
           <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Sparkles className="h-4 w-4" />
           </span>
-          {!collapsed && <span className="font-display font-semibold">Ledgerly</span>}
+          {!collapsed && (
+            <div className="flex flex-col leading-tight">
+              <span className="font-display font-semibold">Ledgerly</span>
+              <span className="text-[10px] text-muted-foreground">by Orion Edge Digital</span>
+            </div>
+          )}
         </div>
         {!collapsed && (
           <DropdownMenu>
