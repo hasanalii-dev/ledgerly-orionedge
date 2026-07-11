@@ -118,6 +118,7 @@ export function AppSidebar() {
         { title: "Clients", to: `/app/p/${plannerId}/clients`, icon: Users },
         { title: "Projects", to: `/app/p/${plannerId}/projects`, icon: FolderKanban },
         { title: "Invoices", to: `/app/p/${plannerId}/invoices`, icon: FileText },
+        { title: "Investments", to: `/app/p/${plannerId}/investments`, icon: CandlestickChart },
       ]
     : [];
   const items2 = plannerId
