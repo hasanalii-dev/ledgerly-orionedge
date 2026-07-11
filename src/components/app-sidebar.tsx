@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   LayoutDashboard, TrendingUp, TrendingDown, Wallet, Users, FolderKanban,
   FileText, LineChart, Target, PieChart, Activity, StickyNote, Settings,
-  ChevronDown, Plus, Copy, Trash2, Pencil, Sparkles, LogOut, User, ArrowLeftRight, Files,
+  ChevronDown, Plus, Copy, Trash2, Pencil, Sparkles, LogOut, User, ArrowLeftRight, Files, CandlestickChart,
 } from "lucide-react";
 import { toast } from "sonner";
 
