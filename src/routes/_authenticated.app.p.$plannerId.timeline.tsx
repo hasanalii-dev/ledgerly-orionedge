@@ -8,13 +8,13 @@ export const Route = createFileRoute("/_authenticated/app/p/$plannerId/timeline"
   component: TimelinePage,
 });
 
-type Event = { id: string; kind: string; summary: string; created_at: string };
+type Event = { id: string; kind: string; title: string; subtitle: string | null; created_at: string };
 
 function TimelinePage() {
   const { plannerId } = Route.useParams();
   const { data = [] } = useQuery({
     queryKey: ["timeline", plannerId],
-    queryFn: async () => (await supabase.from("activity_events").select("id, kind, summary, created_at").eq("planner_id", plannerId).order("created_at", { ascending: false }).limit(200)).data as Event[] ?? [],
+    queryFn: async () => ((await supabase.from("activity_events").select("id, kind, title, subtitle, created_at").eq("planner_id", plannerId).order("created_at", { ascending: false }).limit(200)).data ?? []) as unknown as Event[],
   });
 
   return (
@@ -34,7 +34,8 @@ function TimelinePage() {
             {data.map((e) => (
               <div key={e.id} className="relative pl-10 py-3 border-b border-hairline last:border-0">
                 <div className="absolute left-2 top-4 h-2 w-2 rounded-full bg-primary" />
-                <div className="text-sm">{e.summary}</div>
+                <div className="text-sm">{e.title}</div>
+                {e.subtitle && <div className="text-xs text-muted-foreground mt-0.5">{e.subtitle}</div>}
                 <div className="text-xs text-muted-foreground mt-0.5">{formatDate(e.created_at)} · {e.kind}</div>
               </div>
             ))}

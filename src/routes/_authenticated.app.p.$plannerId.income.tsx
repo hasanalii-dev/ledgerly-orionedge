@@ -12,11 +12,11 @@ export const Route = createFileRoute("/_authenticated/app/p/$plannerId/income")(
 type Row = {
   id: string;
   date: string;
-  source: string | null;
+  description: string | null;
   client_id: string | null;
   project_id: string | null;
   invoice_id: string | null;
-  amount: number | string;
+  amount: number;
   currency: string;
   status: string;
   account_id: string | null;
@@ -33,7 +33,7 @@ function IncomePage() {
     queryFn: async () => {
       const { data, error } = await supabase.from("income_entries").select("*").eq("planner_id", plannerId).order("date", { ascending: false });
       if (error) throw error;
-      return data as Row[];
+      return (data ?? []) as unknown as Row[];
     },
   });
   const { data: clients = [] } = useQuery({
@@ -65,7 +65,7 @@ function IncomePage() {
         totals={{ amountKey: "amount", label: "Total" }}
         columns={[
           { key: "date", label: "Date", width: "130px", render: (r, on) => <CellInput type="date" value={r.date ?? ""} onChange={(v) => on({ date: v })} /> },
-          { key: "source", label: "Source / Description", render: (r, on) => <CellInput value={r.source ?? ""} onChange={(v) => on({ source: v })} /> },
+          { key: "description", label: "Source / Description", render: (r, on) => <CellInput value={r.description ?? ""} onChange={(v) => on({ description: v })} /> },
           { key: "client_id", label: "Client", width: "160px", render: (r, on) => <CellSelect value={r.client_id ?? ""} onChange={(v) => on({ client_id: v || null })} options={clients.map((c) => ({ value: c.id, label: c.name }))} /> },
           { key: "project_id", label: "Project", width: "160px", render: (r, on) => <CellSelect value={r.project_id ?? ""} onChange={(v) => on({ project_id: v || null })} options={projects.map((p) => ({ value: p.id, label: p.name }))} /> },
           { key: "amount", label: "Amount", width: "130px", render: (r, on) => <CellInput type="number" value={String(r.amount ?? 0)} onChange={(v) => on({ amount: parseFloat(v) || 0 })} className="text-right font-mono" /> },

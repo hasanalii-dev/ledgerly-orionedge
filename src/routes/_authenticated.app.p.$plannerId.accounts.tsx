@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_authenticated/app/p/$plannerId/accounts"
   component: AccountsPage,
 });
 
-type Row = { id: string; name: string; kind: string; currency: string; opening_balance: number | string; notes: string | null };
+type Row = { id: string; name: string; kind: string; currency: string; opening_balance: number; color: string | null };
 
 function AccountsPage() {
   const { plannerId } = Route.useParams();
@@ -20,7 +20,7 @@ function AccountsPage() {
 
   const { data: rows = [] } = useQuery({
     queryKey: ["accounts", plannerId],
-    queryFn: async () => (await supabase.from("accounts").select("*").eq("planner_id", plannerId).order("name")).data as Row[] ?? [],
+    queryFn: async () => ((await supabase.from("accounts").select("*").eq("planner_id", plannerId).order("name")).data ?? []) as unknown as Row[],
   });
   const { data: bals = [] } = useQuery({
     queryKey: ["account_balances", plannerId],
@@ -30,8 +30,8 @@ function AccountsPage() {
         supabase.from("expense_entries").select("account_id, amount").eq("planner_id", plannerId),
       ]);
       const map = new Map<string, number>();
-      (inc ?? []).forEach((r: { account_id: string | null; amount: number }) => { if (r.account_id) map.set(r.account_id, (map.get(r.account_id) ?? 0) + Number(r.amount)); });
-      (exp ?? []).forEach((r: { account_id: string | null; amount: number }) => { if (r.account_id) map.set(r.account_id, (map.get(r.account_id) ?? 0) - Number(r.amount)); });
+      (inc ?? []).forEach((r) => { if (r.account_id) map.set(r.account_id, (map.get(r.account_id) ?? 0) + Number(r.amount)); });
+      (exp ?? []).forEach((r) => { if (r.account_id) map.set(r.account_id, (map.get(r.account_id) ?? 0) - Number(r.amount)); });
       return Array.from(map.entries());
     },
   });
@@ -73,7 +73,6 @@ function AccountsPage() {
           { key: "kind", label: "Type", width: "140px", render: (r, on) => <CellSelect value={r.kind ?? "bank"} onChange={(v) => on({ kind: v })} options={ACCOUNT_KINDS.map((k) => ({ value: k, label: k }))} /> },
           { key: "currency", label: "CCY", width: "80px", render: (r, on) => <CellInput value={r.currency ?? "USD"} onChange={(v) => on({ currency: v.toUpperCase() })} className="uppercase" /> },
           { key: "opening_balance", label: "Opening", width: "140px", render: (r, on) => <CellInput type="number" value={String(r.opening_balance ?? 0)} onChange={(v) => on({ opening_balance: parseFloat(v) || 0 })} className="text-right font-mono" /> },
-          { key: "notes", label: "Notes", render: (r, on) => <CellInput value={r.notes ?? ""} onChange={(v) => on({ notes: v })} /> },
         ]}
       />
     </div>

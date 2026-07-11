@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_authenticated/app/p/$plannerId/projects"
   component: ProjectsPage,
 });
 
-type Row = { id: string; name: string; client_id: string | null; status: string; budget: number | string | null; start_date: string | null; end_date: string | null; notes: string | null };
+type Row = { id: string; name: string; client_id: string | null; status: string; value: number | null; start_date: string | null; deadline: string | null; notes: string | null };
 
 function ProjectsPage() {
   const { plannerId } = Route.useParams();
@@ -18,7 +18,7 @@ function ProjectsPage() {
 
   const { data: rows = [] } = useQuery({
     queryKey: ["projects", plannerId],
-    queryFn: async () => (await supabase.from("projects").select("*").eq("planner_id", plannerId).order("created_at", { ascending: false })).data as Row[] ?? [],
+    queryFn: async () => ((await supabase.from("projects").select("*").eq("planner_id", plannerId).order("created_at", { ascending: false })).data ?? []) as unknown as Row[],
   });
   const { data: clients = [] } = useQuery({
     queryKey: ["clients", plannerId],
@@ -29,7 +29,7 @@ function ProjectsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-3xl">Projects</h1>
-        <p className="text-sm text-muted-foreground">Scope, budget and status per engagement.</p>
+        <p className="text-sm text-muted-foreground">Scope, value and status per engagement.</p>
       </div>
       <EditableTable<Row>
         table="projects"
@@ -42,9 +42,9 @@ function ProjectsPage() {
           { key: "name", label: "Name", render: (r, on) => <CellInput value={r.name ?? ""} onChange={(v) => on({ name: v })} /> },
           { key: "client_id", label: "Client", width: "170px", render: (r, on) => <CellSelect value={r.client_id ?? ""} onChange={(v) => on({ client_id: v || null })} options={clients.map((c) => ({ value: c.id, label: c.name }))} /> },
           { key: "status", label: "Status", width: "140px", render: (r, on) => <CellSelect value={r.status ?? "active"} onChange={(v) => on({ status: v })} options={PROJECT_STATUSES.map((s) => ({ value: s, label: s }))} /> },
-          { key: "budget", label: "Budget", width: "130px", render: (r, on) => <CellInput type="number" value={String(r.budget ?? 0)} onChange={(v) => on({ budget: parseFloat(v) || 0 })} className="text-right font-mono" /> },
+          { key: "value", label: "Value", width: "130px", render: (r, on) => <CellInput type="number" value={String(r.value ?? 0)} onChange={(v) => on({ value: parseFloat(v) || 0 })} className="text-right font-mono" /> },
           { key: "start_date", label: "Start", width: "140px", render: (r, on) => <CellInput type="date" value={r.start_date ?? ""} onChange={(v) => on({ start_date: v || null })} /> },
-          { key: "end_date", label: "End", width: "140px", render: (r, on) => <CellInput type="date" value={r.end_date ?? ""} onChange={(v) => on({ end_date: v || null })} /> },
+          { key: "deadline", label: "Deadline", width: "140px", render: (r, on) => <CellInput type="date" value={r.deadline ?? ""} onChange={(v) => on({ deadline: v || null })} /> },
           { key: "notes", label: "Notes", render: (r, on) => <CellInput value={r.notes ?? ""} onChange={(v) => on({ notes: v })} /> },
         ]}
       />

@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_authenticated/app/p/$plannerId/vault")({
 });
 
 type F = { id: string; name: string };
-type Doc = { id: string; folder_id: string | null; name: string; storage_path: string; size_bytes: number | null; mime_type: string | null; created_at: string };
+type Doc = { id: string; folder_id: string | null; file_name: string; file_path: string; size_bytes: number | null; mime_type: string | null; created_at: string };
 
 function VaultPage() {
   const { plannerId } = Route.useParams();
@@ -21,14 +21,14 @@ function VaultPage() {
 
   const { data: folders = [] } = useQuery({
     queryKey: ["folders", plannerId],
-    queryFn: async () => (await supabase.from("doc_folders").select("id, name").eq("planner_id", plannerId).order("name")).data as F[] ?? [],
+    queryFn: async () => ((await supabase.from("doc_folders").select("id, name").eq("planner_id", plannerId).order("name")).data ?? []) as F[],
   });
   const { data: docs = [] } = useQuery({
     queryKey: ["docs", plannerId, activeFolder],
     queryFn: async () => {
       let q = supabase.from("documents").select("*").eq("planner_id", plannerId).order("created_at", { ascending: false });
       if (activeFolder) q = q.eq("folder_id", activeFolder);
-      return (await q).data as Doc[] ?? [];
+      return ((await q).data ?? []) as unknown as Doc[];
     },
   });
 
@@ -42,7 +42,7 @@ function VaultPage() {
       if (upErr) { toast.error(upErr.message); continue; }
       const { error } = await supabase.from("documents").insert({
         planner_id: plannerId, user_id: user.id, folder_id: activeFolder,
-        name: file.name, storage_path: path, size_bytes: file.size, mime_type: file.type,
+        file_name: file.name, file_path: path, size_bytes: file.size, mime_type: file.type,
       });
       if (error) toast.error(error.message);
     }
@@ -51,13 +51,13 @@ function VaultPage() {
   }
 
   async function download(doc: Doc) {
-    const { data, error } = await supabase.storage.from("planner-files").createSignedUrl(doc.storage_path, 60);
+    const { data, error } = await supabase.storage.from("planner-files").createSignedUrl(doc.file_path, 60);
     if (error) return toast.error(error.message);
     window.open(data.signedUrl, "_blank");
   }
   async function remove(doc: Doc) {
-    if (!confirm(`Delete "${doc.name}"?`)) return;
-    await supabase.storage.from("planner-files").remove([doc.storage_path]);
+    if (!confirm(`Delete "${doc.file_name}"?`)) return;
+    await supabase.storage.from("planner-files").remove([doc.file_path]);
     await supabase.from("documents").delete().eq("id", doc.id);
     qc.invalidateQueries({ queryKey: ["docs", plannerId] });
   }
@@ -95,7 +95,7 @@ function VaultPage() {
                 <div key={d.id} className="flex items-center gap-3 px-4 py-3 border-b border-hairline last:border-0 hover:bg-elevated/40 group">
                   <FileText className="h-4 w-4 text-muted-foreground" />
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">{d.name}</div>
+                    <div className="text-sm font-medium truncate">{d.file_name}</div>
                     <div className="text-xs text-muted-foreground">{d.size_bytes ? `${(d.size_bytes / 1024).toFixed(1)} KB · ` : ""}{new Date(d.created_at).toLocaleDateString()}</div>
                   </div>
                   <button onClick={() => download(d)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground"><Download className="h-4 w-4" /></button>

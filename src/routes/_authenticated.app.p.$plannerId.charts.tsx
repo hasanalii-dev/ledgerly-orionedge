@@ -19,8 +19,8 @@ function ChartsPage() {
         supabase.from("expense_entries").select("date, amount").eq("planner_id", plannerId),
       ]);
       const m = new Map<string, { income: number; expenses: number }>();
-      (inc ?? []).forEach((r: { date: string; amount: number }) => { const k = r.date.slice(0, 7); const c = m.get(k) ?? { income: 0, expenses: 0 }; c.income += Number(r.amount); m.set(k, c); });
-      (exp ?? []).forEach((r: { date: string; amount: number }) => { const k = r.date.slice(0, 7); const c = m.get(k) ?? { income: 0, expenses: 0 }; c.expenses += Number(r.amount); m.set(k, c); });
+      (inc ?? []).forEach((r) => { const k = (r.date ?? "").slice(0, 7); const c = m.get(k) ?? { income: 0, expenses: 0 }; c.income += Number(r.amount); m.set(k, c); });
+      (exp ?? []).forEach((r) => { const k = (r.date ?? "").slice(0, 7); const c = m.get(k) ?? { income: 0, expenses: 0 }; c.expenses += Number(r.amount); m.set(k, c); });
       return Array.from(m.entries()).sort().map(([month, v]) => ({ month, ...v }));
     },
   });
@@ -32,8 +32,8 @@ function ChartsPage() {
         supabase.from("expense_categories").select("id, name, color").eq("planner_id", plannerId),
       ]);
       const map = new Map<string, number>();
-      (exp ?? []).forEach((r: { category_id: string | null; amount: number }) => { if (r.category_id) map.set(r.category_id, (map.get(r.category_id) ?? 0) + Number(r.amount)); });
-      return (cats ?? []).map((c: { id: string; name: string; color: string }) => ({ name: c.name, value: map.get(c.id) ?? 0, color: c.color })).filter((x) => x.value > 0);
+      (exp ?? []).forEach((r) => { if (r.category_id) map.set(r.category_id, (map.get(r.category_id) ?? 0) + Number(r.amount)); });
+      return (cats ?? []).map((c) => ({ name: c.name, value: map.get(c.id) ?? 0, color: c.color ?? "" })).filter((x) => x.value > 0);
     },
   });
 
@@ -62,7 +62,7 @@ function ChartsPage() {
           <ResponsiveContainer width="100%" height="90%">
             <PieChart>
               <Pie data={byCat} dataKey="value" nameKey="name" outerRadius={110} innerRadius={60} paddingAngle={2}>
-                {byCat.map((c, i) => <Cell key={c.name} fill={c.color ?? COLORS[i % COLORS.length]} />)}
+                {byCat.map((c, i) => <Cell key={c.name} fill={c.color || COLORS[i % COLORS.length]} />)}
               </Pie>
               <Tooltip contentStyle={{ background: "oklch(0.2 0 0)", border: "1px solid oklch(1 0 0 / 10%)", borderRadius: 10 }} />
               <Legend wrapperStyle={{ fontSize: 12 }} />

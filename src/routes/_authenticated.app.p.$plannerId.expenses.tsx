@@ -12,11 +12,11 @@ type Row = {
   id: string;
   date: string;
   vendor: string | null;
+  description: string | null;
   category_id: string | null;
-  amount: number | string;
+  amount: number;
   currency: string;
   account_id: string | null;
-  is_recurring: boolean;
   notes: string | null;
 };
 
@@ -30,7 +30,7 @@ function ExpensesPage() {
     queryFn: async () => {
       const { data, error } = await supabase.from("expense_entries").select("*").eq("planner_id", plannerId).order("date", { ascending: false });
       if (error) throw error;
-      return data as Row[];
+      return (data ?? []) as unknown as Row[];
     },
   });
   const { data: cats = [] } = useQuery({
@@ -54,11 +54,12 @@ function ExpensesPage() {
         planner_id={plannerId}
         user_id={uid}
         invalidateKeys={[["expenses", plannerId], ["dashboard", plannerId]]}
-        onNewRow={() => ({ date: new Date().toISOString().slice(0, 10), amount: 0, currency: "USD", is_recurring: false })}
+        onNewRow={() => ({ date: new Date().toISOString().slice(0, 10), amount: 0, currency: "USD" })}
         totals={{ amountKey: "amount", label: "Total" }}
         columns={[
           { key: "date", label: "Date", width: "130px", render: (r, on) => <CellInput type="date" value={r.date ?? ""} onChange={(v) => on({ date: v })} /> },
-          { key: "vendor", label: "Vendor / Description", render: (r, on) => <CellInput value={r.vendor ?? ""} onChange={(v) => on({ vendor: v })} /> },
+          { key: "vendor", label: "Vendor", width: "170px", render: (r, on) => <CellInput value={r.vendor ?? ""} onChange={(v) => on({ vendor: v })} /> },
+          { key: "description", label: "Description", render: (r, on) => <CellInput value={r.description ?? ""} onChange={(v) => on({ description: v })} /> },
           { key: "category_id", label: "Category", width: "160px", render: (r, on) => <CellSelect value={r.category_id ?? ""} onChange={(v) => on({ category_id: v || null })} options={cats.map((c) => ({ value: c.id, label: c.name }))} /> },
           { key: "amount", label: "Amount", width: "130px", render: (r, on) => <CellInput type="number" value={String(r.amount ?? 0)} onChange={(v) => on({ amount: parseFloat(v) || 0 })} className="text-right font-mono" /> },
           { key: "currency", label: "CCY", width: "80px", render: (r, on) => <CellInput value={r.currency ?? "USD"} onChange={(v) => on({ currency: v.toUpperCase() })} className="uppercase" /> },
