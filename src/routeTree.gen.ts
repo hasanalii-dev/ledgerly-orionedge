@@ -21,6 +21,7 @@ import { Route as AuthenticatedAppPPlannerIdTimelineRouteImport } from './routes
 import { Route as AuthenticatedAppPPlannerIdReportsRouteImport } from './routes/_authenticated.app.p.$plannerId.reports'
 import { Route as AuthenticatedAppPPlannerIdProjectsRouteImport } from './routes/_authenticated.app.p.$plannerId.projects'
 import { Route as AuthenticatedAppPPlannerIdNotesRouteImport } from './routes/_authenticated.app.p.$plannerId.notes'
+import { Route as AuthenticatedAppPPlannerIdMonthlyRouteImport } from './routes/_authenticated.app.p.$plannerId.monthly'
 import { Route as AuthenticatedAppPPlannerIdInvoicesRouteImport } from './routes/_authenticated.app.p.$plannerId.invoices'
 import { Route as AuthenticatedAppPPlannerIdInvestmentsRouteImport } from './routes/_authenticated.app.p.$plannerId.investments'
 import { Route as AuthenticatedAppPPlannerIdIncomeRouteImport } from './routes/_authenticated.app.p.$plannerId.income'
@@ -97,6 +98,12 @@ const AuthenticatedAppPPlannerIdNotesRoute =
   AuthenticatedAppPPlannerIdNotesRouteImport.update({
     id: '/notes',
     path: '/notes',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdMonthlyRoute =
+  AuthenticatedAppPPlannerIdMonthlyRouteImport.update({
+    id: '/monthly',
+    path: '/monthly',
     getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
   } as any)
 const AuthenticatedAppPPlannerIdInvoicesRoute =
@@ -184,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/app/p/$plannerId/income': typeof AuthenticatedAppPPlannerIdIncomeRoute
   '/app/p/$plannerId/investments': typeof AuthenticatedAppPPlannerIdInvestmentsRoute
   '/app/p/$plannerId/invoices': typeof AuthenticatedAppPPlannerIdInvoicesRoute
+  '/app/p/$plannerId/monthly': typeof AuthenticatedAppPPlannerIdMonthlyRoute
   '/app/p/$plannerId/notes': typeof AuthenticatedAppPPlannerIdNotesRoute
   '/app/p/$plannerId/projects': typeof AuthenticatedAppPPlannerIdProjectsRoute
   '/app/p/$plannerId/reports': typeof AuthenticatedAppPPlannerIdReportsRoute
@@ -208,6 +216,7 @@ export interface FileRoutesByTo {
   '/app/p/$plannerId/income': typeof AuthenticatedAppPPlannerIdIncomeRoute
   '/app/p/$plannerId/investments': typeof AuthenticatedAppPPlannerIdInvestmentsRoute
   '/app/p/$plannerId/invoices': typeof AuthenticatedAppPPlannerIdInvoicesRoute
+  '/app/p/$plannerId/monthly': typeof AuthenticatedAppPPlannerIdMonthlyRoute
   '/app/p/$plannerId/notes': typeof AuthenticatedAppPPlannerIdNotesRoute
   '/app/p/$plannerId/projects': typeof AuthenticatedAppPPlannerIdProjectsRoute
   '/app/p/$plannerId/reports': typeof AuthenticatedAppPPlannerIdReportsRoute
@@ -234,6 +243,7 @@ export interface FileRoutesById {
   '/_authenticated/app/p/$plannerId/income': typeof AuthenticatedAppPPlannerIdIncomeRoute
   '/_authenticated/app/p/$plannerId/investments': typeof AuthenticatedAppPPlannerIdInvestmentsRoute
   '/_authenticated/app/p/$plannerId/invoices': typeof AuthenticatedAppPPlannerIdInvoicesRoute
+  '/_authenticated/app/p/$plannerId/monthly': typeof AuthenticatedAppPPlannerIdMonthlyRoute
   '/_authenticated/app/p/$plannerId/notes': typeof AuthenticatedAppPPlannerIdNotesRoute
   '/_authenticated/app/p/$plannerId/projects': typeof AuthenticatedAppPPlannerIdProjectsRoute
   '/_authenticated/app/p/$plannerId/reports': typeof AuthenticatedAppPPlannerIdReportsRoute
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/app/p/$plannerId/income'
     | '/app/p/$plannerId/investments'
     | '/app/p/$plannerId/invoices'
+    | '/app/p/$plannerId/monthly'
     | '/app/p/$plannerId/notes'
     | '/app/p/$plannerId/projects'
     | '/app/p/$plannerId/reports'
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
     | '/app/p/$plannerId/income'
     | '/app/p/$plannerId/investments'
     | '/app/p/$plannerId/invoices'
+    | '/app/p/$plannerId/monthly'
     | '/app/p/$plannerId/notes'
     | '/app/p/$plannerId/projects'
     | '/app/p/$plannerId/reports'
@@ -309,6 +321,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/p/$plannerId/income'
     | '/_authenticated/app/p/$plannerId/investments'
     | '/_authenticated/app/p/$plannerId/invoices'
+    | '/_authenticated/app/p/$plannerId/monthly'
     | '/_authenticated/app/p/$plannerId/notes'
     | '/_authenticated/app/p/$plannerId/projects'
     | '/_authenticated/app/p/$plannerId/reports'
@@ -409,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppPPlannerIdNotesRouteImport
       parentRoute: typeof AuthenticatedAppPPlannerIdRoute
     }
+    '/_authenticated/app/p/$plannerId/monthly': {
+      id: '/_authenticated/app/p/$plannerId/monthly'
+      path: '/monthly'
+      fullPath: '/app/p/$plannerId/monthly'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdMonthlyRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
     '/_authenticated/app/p/$plannerId/invoices': {
       id: '/_authenticated/app/p/$plannerId/invoices'
       path: '/invoices'
@@ -501,6 +521,7 @@ interface AuthenticatedAppPPlannerIdRouteChildren {
   AuthenticatedAppPPlannerIdIncomeRoute: typeof AuthenticatedAppPPlannerIdIncomeRoute
   AuthenticatedAppPPlannerIdInvestmentsRoute: typeof AuthenticatedAppPPlannerIdInvestmentsRoute
   AuthenticatedAppPPlannerIdInvoicesRoute: typeof AuthenticatedAppPPlannerIdInvoicesRoute
+  AuthenticatedAppPPlannerIdMonthlyRoute: typeof AuthenticatedAppPPlannerIdMonthlyRoute
   AuthenticatedAppPPlannerIdNotesRoute: typeof AuthenticatedAppPPlannerIdNotesRoute
   AuthenticatedAppPPlannerIdProjectsRoute: typeof AuthenticatedAppPPlannerIdProjectsRoute
   AuthenticatedAppPPlannerIdReportsRoute: typeof AuthenticatedAppPPlannerIdReportsRoute
@@ -531,6 +552,8 @@ const AuthenticatedAppPPlannerIdRouteChildren: AuthenticatedAppPPlannerIdRouteCh
       AuthenticatedAppPPlannerIdInvestmentsRoute,
     AuthenticatedAppPPlannerIdInvoicesRoute:
       AuthenticatedAppPPlannerIdInvoicesRoute,
+    AuthenticatedAppPPlannerIdMonthlyRoute:
+      AuthenticatedAppPPlannerIdMonthlyRoute,
     AuthenticatedAppPPlannerIdNotesRoute: AuthenticatedAppPPlannerIdNotesRoute,
     AuthenticatedAppPPlannerIdProjectsRoute:
       AuthenticatedAppPPlannerIdProjectsRoute,

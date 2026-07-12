@@ -19,7 +19,7 @@ import {
   LayoutDashboard, TrendingUp, TrendingDown, Wallet, Users, FolderKanban,
   FileText, LineChart, Target, PieChart, Activity, StickyNote, Settings,
   ChevronDown, Plus, Copy, Trash2, Pencil, LogOut, User, ArrowLeftRight, Files, CandlestickChart,
-  FileBarChart,
+  FileBarChart, Calendar
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -130,6 +130,7 @@ export function AppSidebar() {
         { title: "Budget", to: `/app/p/${plannerId}/budget`, icon: ArrowLeftRight },
         { title: "Reports", to: `/app/p/${plannerId}/reports`, icon: FileBarChart },
         { title: "Charts", to: `/app/p/${plannerId}/charts`, icon: PieChart },
+        { title: "Monthly Tracking", to: `/app/p/${plannerId}/monthly`, icon: Calendar },
         { title: "Timeline", to: `/app/p/${plannerId}/timeline`, icon: Activity },
         { title: "Notes", to: `/app/p/${plannerId}/notes`, icon: StickyNote },
       ]
@@ -137,7 +138,7 @@ export function AppSidebar() {
 
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-hairline">
+    <Sidebar collapsible="icon" className="border-r border-white/5 bg-[#030808]">
       <SidebarHeader className="px-3 py-3">
         <div className="flex items-center gap-2 px-1 mb-2">
           <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -153,7 +154,7 @@ export function AppSidebar() {
         {!collapsed && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full justify-between h-11 bg-card border-hairline hover:bg-accent">
+              <Button variant="outline" className="w-full justify-between h-11 bg-white/[0.02] border-white/5 hover:bg-white/5 transition-colors">
                 <span className="flex items-center gap-2 truncate">
                   <span>{active?.emoji ?? "📘"}</span>
                   <span className="font-medium truncate">{active?.name ?? "Planner"}</span>
@@ -188,8 +189,8 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.to} tooltip={item.title}>
-                    <Link to={item.to} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
+                    <Link to={item.to} className={`flex items-center gap-3 py-1.5 transition-all ${pathname === item.to ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"}`}>
+                      <item.icon className={`h-4 w-4 ${pathname === item.to ? "drop-shadow-[0_0_8px_rgba(61,220,151,0.5)]" : ""}`} />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -205,8 +206,8 @@ export function AppSidebar() {
               {items2.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.to} tooltip={item.title}>
-                    <Link to={item.to} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
+                    <Link to={item.to} className={`flex items-center gap-3 py-1.5 transition-all ${pathname === item.to ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"}`}>
+                      <item.icon className={`h-4 w-4 ${pathname === item.to ? "drop-shadow-[0_0_8px_rgba(61,220,151,0.5)]" : ""}`} />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -220,7 +221,7 @@ export function AppSidebar() {
       <SidebarFooter className="p-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="w-full justify-start h-11 px-2 hover:bg-accent">
+            <Button variant="ghost" className="w-full justify-start h-11 px-2 bg-transparent hover:bg-white/5 transition-colors">
               <Avatar className="h-7 w-7"><AvatarFallback className="bg-primary text-primary-foreground text-xs">{(profile?.display_name ?? profile?.email ?? "U").toString().charAt(0).toUpperCase()}</AvatarFallback></Avatar>
               {!collapsed && (
                 <div className="ml-2 text-left overflow-hidden">

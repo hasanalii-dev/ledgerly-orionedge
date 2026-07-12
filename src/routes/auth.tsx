@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Loader2, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -33,14 +34,26 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(!!data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(!!s));
-    return () => sub.subscription.unsubscribe();
-  }, []);
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        setRedirecting(true);
+        navigate({ to: "/app", replace: true });
+      } else {
+        setSession(false);
+      }
+    });
+  }, [navigate]);
 
-  if (session) return <Navigate to="/app" replace />;
+  if (session === null || redirecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
@@ -53,7 +66,8 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Signed in");
-        window.location.href = "/app";
+        setRedirecting(true);
+        navigate({ to: "/app", replace: true });
       } else if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -67,7 +81,8 @@ function AuthPage() {
         
         if (data.session) {
           toast.success("Account created successfully!");
-          window.location.href = "/app";
+          setRedirecting(true);
+          navigate({ to: "/app", replace: true });
         } else {
           toast.success("Check your inbox to confirm your email");
         }
@@ -107,41 +122,62 @@ function AuthPage() {
     <div className="min-h-screen w-full grid lg:grid-cols-2 bg-background">
       {/* Left brand panel */}
       <div className="hidden lg:flex relative flex-col justify-between p-12 overflow-hidden border-r border-hairline">
-        <div
-          className="absolute inset-0 opacity-40"
-          style={{
-            background:
-              "radial-gradient(circle at 20% 20%, oklch(0.82 0.17 160 / 0.25), transparent 50%), radial-gradient(circle at 80% 80%, oklch(0.72 0.14 200 / 0.15), transparent 55%)",
-          }}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="absolute inset-0 pointer-events-none select-none"
+        >
+          <img src="/bg-gradient.png" alt="" className="w-full h-full object-cover opacity-60" />
+        </motion.div>
+        {/* Subtle noise */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")", backgroundRepeat: "repeat", backgroundSize: "256px 256px" }} />
+        {/* Floating orb */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="absolute top-1/3 right-1/4 w-64 h-64 bg-primary/10 rounded-full blur-[100px] animate-pulse" 
         />
-        <div className="relative flex items-center gap-2 text-xl font-display font-semibold">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Sparkles className="h-4 w-4" />
-          </span>
-          Ledgerly
-        </div>
-        <div className="relative space-y-6">
-          <h1 className="text-5xl font-display leading-[1.05] tracking-tight">
-            Your financial <span className="text-primary">operating&nbsp;system</span>.
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-md">
-            Track income, expenses, invoices, clients, and cash flow across unlimited planners.
-            Built for entrepreneurs and agencies.
-          </p>
-          <div className="grid grid-cols-2 gap-3 max-w-md pt-4">
+        
+        <motion.div 
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.2 } }
+          }}
+          initial="hidden"
+          animate="visible"
+          className="relative h-full flex flex-col justify-between z-10"
+        >
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } } }} className="flex items-center gap-2 text-xl font-display font-semibold">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <img src="/favicon.png" alt="Ledgerly" className="h-4 w-4 object-contain" />
+            </span>
+            Ledgerly
+          </motion.div>
+          <div className="space-y-6">
+            <motion.h1 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } } }} className="text-5xl font-display leading-[1.05] tracking-tight">
+              Your financial <span className="text-primary">operating&nbsp;system</span>.
+            </motion.h1>
+            <motion.p variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } } }} className="text-lg text-muted-foreground max-w-md leading-relaxed">
+              Track income, expenses, invoices, clients, and cash flow across unlimited planners.
+              Built for entrepreneurs and agencies.
+            </motion.p>
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } } }} className="grid grid-cols-2 gap-3 max-w-md pt-4">
             {[
               "Multi-planner workspace",
               "Editable spreadsheet ledgers",
               "Client & project tracking",
               "Invoice & receipt vault",
             ].map((f) => (
-              <div key={f} className="rounded-xl border border-hairline bg-card/40 px-4 py-3 text-sm text-muted-foreground">
+              <div key={f} className="rounded-xl border border-hairline bg-card/40 backdrop-blur-sm px-4 py-3 text-sm text-muted-foreground hover:border-primary/20 hover:bg-card/60 transition-all duration-300">
                 {f}
               </div>
             ))}
+          </motion.div>
           </div>
-        </div>
-        <p className="relative text-xs text-muted-foreground">© Ledgerly. A calm space for your money.</p>
+          <motion.p variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.8, delay: 0.6 } } }} className="relative text-xs text-muted-foreground mt-8">© Ledgerly. A calm space for your money.</motion.p>
+        </motion.div>
       </div>
 
       {/* Right auth card */}
@@ -149,7 +185,7 @@ function AuthPage() {
         <div className="w-full max-w-md space-y-8">
           <div className="lg:hidden flex items-center gap-2 text-lg font-display font-semibold">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Sparkles className="h-4 w-4" />
+              <img src="/favicon.png" alt="Ledgerly" className="h-4 w-4 object-contain" />
             </span>
             Ledgerly
           </div>
@@ -171,7 +207,7 @@ function AuthPage() {
               <Button
                 type="button"
                 variant="outline"
-                className="w-full h-11 border-hairline bg-card hover:bg-accent"
+                className="w-full h-12 border-hairline bg-card hover:bg-accent hover:border-primary/20 transition-all"
                 onClick={handleGoogle}
                 disabled={loading}
               >
@@ -201,12 +237,12 @@ function AuthPage() {
                 {mode === "signup" && (
                   <div className="space-y-2">
                     <Label htmlFor="name">Full name</Label>
-                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Alex Rivera" className="h-11 bg-card" />
+                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Alex Rivera" className="h-11 bg-card border-hairline focus:border-primary/30" />
                   </div>
                 )}
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" className="h-11 bg-card" />
+                  <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" className="h-11 bg-card border-hairline focus:border-primary/30" />
                 </div>
                 {mode !== "forgot" && (
                   <div className="space-y-2">
@@ -218,7 +254,7 @@ function AuthPage() {
                         </button>
                       )}
                     </div>
-                    <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="h-11 bg-card" />
+                    <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="h-11 bg-card border-hairline focus:border-primary/30" />
                   </div>
                 )}
                 {mode === "signin" && (
@@ -227,12 +263,12 @@ function AuthPage() {
                     <Label htmlFor="remember" className="text-sm text-muted-foreground font-normal">Remember me on this device</Label>
                   </div>
                 )}
-                <Button type="submit" className="w-full h-11 glow-emerald" disabled={loading}>
+                <Button type="submit" className="w-full h-12 glow-emerald text-base font-medium" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link"}
                 </Button>
                 {mode === "forgot" && (
-                  <button type="button" onClick={() => setMode("signin")} className="w-full text-center text-sm text-muted-foreground hover:text-foreground">
+                  <button type="button" onClick={() => setMode("signin")} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                     ← Back to sign in
                   </button>
                 )}
@@ -242,7 +278,7 @@ function AuthPage() {
 
           <p className="text-center text-xs text-muted-foreground">
             By continuing you agree to our terms & privacy.{" "}
-            <Link to="/" className="underline hover:text-foreground">Back home</Link>
+            <Link to="/" className="underline hover:text-foreground transition-colors">Back home</Link>
           </p>
         </div>
       </div>

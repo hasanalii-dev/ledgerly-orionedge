@@ -53,8 +53,8 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --font-sans: "Satoshi", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "General Sans", "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Samsung Sharp Sans", "Satoshi", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Samsung Sharp Sans", "General Sans", "Satoshi", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
