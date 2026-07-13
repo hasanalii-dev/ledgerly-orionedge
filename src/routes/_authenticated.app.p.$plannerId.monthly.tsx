@@ -131,71 +131,124 @@ function AllocationTable({
         </div>
       </div>
       <div className="flex-1 p-0 overflow-x-auto">
-        <table className="w-full text-sm text-left whitespace-nowrap min-w-[600px]">
-          <thead className="text-xs text-muted-foreground bg-black/20">
-            <tr>
-              <th className="px-5 py-3 font-medium w-1/3">Category / Type</th>
-              <th className="px-5 py-3 font-medium w-1/3">Description</th>
-              <th className="px-5 py-3 font-medium text-right w-1/4">Amount</th>
-              <th className="px-5 py-3 font-medium w-12 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {items.length === 0 && !isAdding ? (
-              <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground">No entries yet. Click + below to add one.</td></tr>
-            ) : (
-              items.map(item => (
-                <tr key={item.id} className="hover:bg-white/5 transition-colors group">
-                  {editingId === item.id ? (
-                    <>
-                      <td className="px-2 py-2"><Input className="h-8 text-sm" value={editCat} onChange={(e) => setEditCat(e.target.value)} /></td>
-                      <td className="px-2 py-2"><Input className="h-8 text-sm" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} /></td>
-                      <td className="px-2 py-2"><Input className="h-8 text-sm text-right" type="number" step="0.01" value={editAmt} onChange={(e) => setEditAmt(e.target.value)} /></td>
-                      <td className="px-2 py-2 text-center flex justify-center gap-1">
-                        <button onClick={() => updateMutation.mutate()} className="p-1.5 text-primary hover:bg-primary/20 rounded-md transition-colors"><Check className="h-4 w-4" /></button>
-                        <button onClick={() => setEditingId(null)} className="p-1.5 text-muted-foreground hover:bg-white/10 rounded-md transition-colors"><X className="h-4 w-4" /></button>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="px-5 py-3 font-medium">{item.category}</td>
-                      <td className="px-5 py-3 text-muted-foreground truncate max-w-[200px]">{item.description ?? "—"}</td>
-                      <td className="px-5 py-3 text-right">{formatMoney(item.amount, currency)}</td>
-                      <td className="px-2 py-3 text-center flex justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-1">
-                        {onAssign && item.amount > 0 && (
-                          <button onClick={() => onAssign(item.amount, item.category, type)} className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/20 rounded-md transition-colors" title="Assign to Account"><Wallet className="h-4 w-4" /></button>
-                        )}
-                        <button onClick={() => startEdit(item)} className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/20 rounded-md transition-colors" title="Edit"><Pencil className="h-4 w-4" /></button>
-                        <button onClick={() => deleteMutation.mutate(item.id)} className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/20 rounded-md transition-colors" title="Delete"><Trash2 className="h-4 w-4" /></button>
-                      </td>
-                    </>
-                  )}
+          <table className="w-full text-left text-sm hidden md:table">
+            <thead className="text-xs uppercase tracking-wider text-muted-foreground bg-white/5 sticky top-0 z-10">
+              <tr>
+                <th className="px-5 py-3 font-medium">Category</th>
+                <th className="px-5 py-3 font-medium">Description</th>
+                <th className="px-5 py-3 font-medium text-right">Amount</th>
+                <th className="px-2 py-3 w-[100px] text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {items.length === 0 && !isAdding ? (
+                <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground text-sm">No items yet</td></tr>
+              ) : (
+                items.map((item: any) => (
+                  <tr key={item.id} className="group hover:bg-white/5 transition-colors">
+                    {editingId === item.id ? (
+                      <>
+                        <td className="px-2 py-2"><Input className="h-8 text-sm" value={editCat} onChange={(e) => setEditCat(e.target.value)} /></td>
+                        <td className="px-2 py-2"><Input className="h-8 text-sm" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} /></td>
+                        <td className="px-2 py-2"><Input className="h-8 text-sm text-right" type="number" step="0.01" value={editAmt} onChange={(e) => setEditAmt(e.target.value)} /></td>
+                        <td className="px-2 py-2 text-center flex justify-center gap-1">
+                          <button onClick={() => updateMutation.mutate()} className="p-1.5 text-primary hover:bg-primary/20 rounded-md transition-colors"><Check className="h-4 w-4" /></button>
+                          <button onClick={() => setEditingId(null)} className="p-1.5 text-muted-foreground hover:bg-white/10 rounded-md transition-colors"><X className="h-4 w-4" /></button>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="px-5 py-3 font-medium">{item.category}</td>
+                        <td className="px-5 py-3 text-muted-foreground truncate max-w-[200px]">{item.description ?? "—"}</td>
+                        <td className="px-5 py-3 text-right">{formatMoney(item.amount, currency)}</td>
+                        <td className="px-2 py-3 text-center flex justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-1">
+                          {onAssign && item.amount > 0 && (
+                            <button onClick={() => onAssign(item.amount, item.category, type)} className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/20 rounded-md transition-colors" title="Assign to Account"><Wallet className="h-4 w-4" /></button>
+                          )}
+                          <button onClick={() => startEdit(item)} className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/20 rounded-md transition-colors" title="Edit"><Pencil className="h-4 w-4" /></button>
+                          <button onClick={() => deleteMutation.mutate(item.id)} className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/20 rounded-md transition-colors" title="Delete"><Trash2 className="h-4 w-4" /></button>
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                ))
+              )}
+              
+              {/* Inline Add Row Desktop */}
+              {isAdding && (
+                <tr className="bg-white/5">
+                  <td className="px-2 py-2"><Input placeholder="Category" autoFocus className="h-8 text-sm" value={addCat} onChange={(e) => setAddCat(e.target.value)} /></td>
+                  <td className="px-2 py-2"><Input placeholder="Description (optional)" className="h-8 text-sm" value={addDesc} onChange={(e) => setAddDesc(e.target.value)} /></td>
+                  <td className="px-2 py-2"><Input placeholder="0.00" className="h-8 text-sm text-right" type="number" step="0.01" value={addAmt} onChange={(e) => setAddAmt(e.target.value)} /></td>
+                  <td className="px-2 py-2 text-center flex justify-center gap-1">
+                    <button onClick={() => addMutation.mutate()} className="p-1.5 text-primary hover:bg-primary/20 rounded-md transition-colors"><Check className="h-4 w-4" /></button>
+                    <button onClick={() => { setIsAdding(false); setAddCat(""); setAddDesc(""); setAddAmt(""); }} className="p-1.5 text-muted-foreground hover:bg-white/10 rounded-md transition-colors"><X className="h-4 w-4" /></button>
+                  </td>
                 </tr>
-              ))
+              )}
+            </tbody>
+          </table>
+
+          {/* Mobile Card List */}
+          <div className="md:hidden flex flex-col divide-y divide-white/5">
+            {items.length === 0 && !isAdding && (
+              <div className="px-4 py-8 text-center text-muted-foreground text-sm">No items yet</div>
             )}
             
-            {/* Inline Add Row */}
+            {items.map((item: any) => (
+              <div key={item.id} className="p-4 flex flex-col gap-3">
+                {editingId === item.id ? (
+                  <div className="flex flex-col gap-2">
+                    <Input placeholder="Category" className="h-9 text-sm" value={editCat} onChange={(e) => setEditCat(e.target.value)} />
+                    <Input placeholder="Description" className="h-9 text-sm" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
+                    <Input placeholder="Amount" className="h-9 text-sm" type="number" step="0.01" value={editAmt} onChange={(e) => setEditAmt(e.target.value)} />
+                    <div className="flex items-center gap-2 mt-2">
+                      <Button onClick={() => updateMutation.mutate()} size="sm" className="flex-1"><Check className="h-4 w-4 mr-2" /> Save</Button>
+                      <Button onClick={() => setEditingId(null)} size="sm" variant="ghost" className="flex-1">Cancel</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-sm text-foreground">{item.category}</div>
+                        {item.description && <div className="text-xs text-muted-foreground mt-0.5">{item.description}</div>}
+                      </div>
+                      <div className="text-sm font-medium whitespace-nowrap">{formatMoney(item.amount, currency)}</div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      {onAssign && item.amount > 0 && (
+                        <Button onClick={() => onAssign(item.amount, item.category, type)} variant="secondary" size="sm" className="h-7 text-xs px-2 flex-1"><Wallet className="h-3 w-3 mr-1.5" /> Assign</Button>
+                      )}
+                      <Button onClick={() => startEdit(item)} variant="secondary" size="sm" className="h-7 text-xs px-2 flex-1 bg-white/5"><Pencil className="h-3 w-3 mr-1.5" /> Edit</Button>
+                      <Button onClick={() => deleteMutation.mutate(item.id)} variant="secondary" size="sm" className="h-7 text-xs px-2 flex-1 bg-destructive/10 text-destructive hover:bg-destructive/20 hover:text-destructive"><Trash2 className="h-3 w-3 mr-1.5" /> Delete</Button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+
+            {/* Inline Add Mobile */}
             {isAdding && (
-              <tr className="bg-white/5">
-                <td className="px-2 py-2"><Input placeholder="Category" autoFocus className="h-8 text-sm" value={addCat} onChange={(e) => setAddCat(e.target.value)} /></td>
-                <td className="px-2 py-2"><Input placeholder="Description (optional)" className="h-8 text-sm" value={addDesc} onChange={(e) => setAddDesc(e.target.value)} /></td>
-                <td className="px-2 py-2"><Input placeholder="0.00" className="h-8 text-sm text-right" type="number" step="0.01" value={addAmt} onChange={(e) => setAddAmt(e.target.value)} /></td>
-                <td className="px-2 py-2 text-center flex justify-center gap-1">
-                  <button onClick={() => addMutation.mutate()} className="p-1.5 text-primary hover:bg-primary/20 rounded-md transition-colors"><Check className="h-4 w-4" /></button>
-                  <button onClick={() => { setIsAdding(false); setAddCat(""); setAddDesc(""); setAddAmt(""); }} className="p-1.5 text-muted-foreground hover:bg-white/10 rounded-md transition-colors"><X className="h-4 w-4" /></button>
-                </td>
-              </tr>
+              <div className="p-4 flex flex-col gap-2 bg-white/5">
+                <Input placeholder="Category" autoFocus className="h-9 text-sm" value={addCat} onChange={(e) => setAddCat(e.target.value)} />
+                <Input placeholder="Description (optional)" className="h-9 text-sm" value={addDesc} onChange={(e) => setAddDesc(e.target.value)} />
+                <Input placeholder="Amount" className="h-9 text-sm" type="number" step="0.01" value={addAmt} onChange={(e) => setAddAmt(e.target.value)} />
+                <div className="flex items-center gap-2 mt-2">
+                  <Button onClick={() => addMutation.mutate()} size="sm" className="flex-1"><Check className="h-4 w-4 mr-2" /> Save</Button>
+                  <Button onClick={() => { setIsAdding(false); setAddCat(""); setAddDesc(""); setAddAmt(""); }} size="sm" variant="ghost" className="flex-1">Cancel</Button>
+                </div>
+              </div>
             )}
-          </tbody>
-        </table>
+          </div>
       </div>
-      {!isAdding && (
-        <div className="border-t border-white/5 p-2 bg-black/20">
-          <Button variant="ghost" size="sm" onClick={() => setIsAdding(true)} className="w-full text-muted-foreground hover:text-foreground text-xs h-8">
-            <Plus className="h-3 w-3 mr-2" /> Add row
-          </Button>
-        </div>
-      )}
+        {!isAdding && (
+          <div className="border-t border-white/5 p-2 bg-black/20">
+            <Button variant="ghost" size="sm" onClick={() => setIsAdding(true)} className="w-full text-muted-foreground hover:text-foreground text-xs h-9">
+              <Plus className="h-4 w-4 mr-2" /> Add entry
+            </Button>
+          </div>
+        )}
     </div>
   );
 }

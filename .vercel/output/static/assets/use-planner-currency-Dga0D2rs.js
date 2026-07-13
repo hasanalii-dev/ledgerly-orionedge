@@ -1,1 +1,0 @@
-import{t as e}from"./useQuery-DKsM-FL5.js";import{ot as t}from"./index-DaU9zRVa.js";function n(n){let{data:r}=e({queryKey:[`planner`,n],queryFn:async()=>{let{data:e}=await t.from(`planners`).select(`*`).eq(`id`,n).maybeSingle();return e}});return r?.currency??`USD`}export{n as t};

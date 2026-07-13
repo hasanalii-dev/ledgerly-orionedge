@@ -1,5 +1,5 @@
 import { t as supabase } from "./client-CwRrl1Mu.mjs";
-import { t as useQuery } from "../_libs/tanstack__react-query.mjs";
+import { n as useQuery } from "../_libs/tanstack__react-query.mjs";
 //#region node_modules/.nitro/vite/services/ssr/assets/use-planner-currency-CyRruqkt.js
 function usePlannerCurrency(plannerId) {
 	const { data } = useQuery({

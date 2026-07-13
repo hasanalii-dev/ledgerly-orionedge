@@ -10,11 +10,16 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as DocsRouteImport } from './routes/docs'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated.app'
-import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated.app.settings'
+import { Route as AuthenticatedAppProfileRouteImport } from './routes/_authenticated.app.profile'
+import { Route as AuthenticatedAppPreferencesRouteImport } from './routes/_authenticated.app.preferences'
 import { Route as AuthenticatedAppPPlannerIdRouteImport } from './routes/_authenticated.app.p.$plannerId'
 import { Route as AuthenticatedAppPPlannerIdVaultRouteImport } from './routes/_authenticated.app.p.$plannerId.vault'
 import { Route as AuthenticatedAppPPlannerIdTimelineRouteImport } from './routes/_authenticated.app.p.$plannerId.timeline'
@@ -39,9 +44,29 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComingSoonRoute = ComingSoonRouteImport.update({
+  id: '/coming-soon',
+  path: '/coming-soon',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -58,10 +83,15 @@ const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   path: '/app',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedAppSettingsRoute =
-  AuthenticatedAppSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
+const AuthenticatedAppProfileRoute = AuthenticatedAppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppPreferencesRoute =
+  AuthenticatedAppPreferencesRouteImport.update({
+    id: '/preferences',
+    path: '/preferences',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 const AuthenticatedAppPPlannerIdRoute =
@@ -175,10 +205,15 @@ const AuthenticatedAppPPlannerIdAccountsRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/coming-soon': typeof ComingSoonRoute
+  '/contact': typeof ContactRoute
+  '/docs': typeof DocsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
-  '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/app/preferences': typeof AuthenticatedAppPreferencesRoute
+  '/app/profile': typeof AuthenticatedAppProfileRoute
   '/app/p/$plannerId': typeof AuthenticatedAppPPlannerIdRouteWithChildren
   '/app/p/$plannerId/accounts': typeof AuthenticatedAppPPlannerIdAccountsRoute
   '/app/p/$plannerId/budget': typeof AuthenticatedAppPPlannerIdBudgetRoute
@@ -200,10 +235,15 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/coming-soon': typeof ComingSoonRoute
+  '/contact': typeof ContactRoute
+  '/docs': typeof DocsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
-  '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/app/preferences': typeof AuthenticatedAppPreferencesRoute
+  '/app/profile': typeof AuthenticatedAppProfileRoute
   '/app/p/$plannerId': typeof AuthenticatedAppPPlannerIdRouteWithChildren
   '/app/p/$plannerId/accounts': typeof AuthenticatedAppPPlannerIdAccountsRoute
   '/app/p/$plannerId/budget': typeof AuthenticatedAppPPlannerIdBudgetRoute
@@ -227,10 +267,15 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/coming-soon': typeof ComingSoonRoute
+  '/contact': typeof ContactRoute
+  '/docs': typeof DocsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
-  '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/_authenticated/app/preferences': typeof AuthenticatedAppPreferencesRoute
+  '/_authenticated/app/profile': typeof AuthenticatedAppProfileRoute
   '/_authenticated/app/p/$plannerId': typeof AuthenticatedAppPPlannerIdRouteWithChildren
   '/_authenticated/app/p/$plannerId/accounts': typeof AuthenticatedAppPPlannerIdAccountsRoute
   '/_authenticated/app/p/$plannerId/budget': typeof AuthenticatedAppPPlannerIdBudgetRoute
@@ -254,10 +299,15 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/auth'
+    | '/coming-soon'
+    | '/contact'
+    | '/docs'
     | '/reset-password'
     | '/app'
-    | '/app/settings'
+    | '/app/preferences'
+    | '/app/profile'
     | '/app/p/$plannerId'
     | '/app/p/$plannerId/accounts'
     | '/app/p/$plannerId/budget'
@@ -279,10 +329,15 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/auth'
+    | '/coming-soon'
+    | '/contact'
+    | '/docs'
     | '/reset-password'
     | '/app'
-    | '/app/settings'
+    | '/app/preferences'
+    | '/app/profile'
     | '/app/p/$plannerId'
     | '/app/p/$plannerId/accounts'
     | '/app/p/$plannerId/budget'
@@ -305,10 +360,15 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/about'
     | '/auth'
+    | '/coming-soon'
+    | '/contact'
+    | '/docs'
     | '/reset-password'
     | '/_authenticated/app'
-    | '/_authenticated/app/settings'
+    | '/_authenticated/app/preferences'
+    | '/_authenticated/app/profile'
     | '/_authenticated/app/p/$plannerId'
     | '/_authenticated/app/p/$plannerId/accounts'
     | '/_authenticated/app/p/$plannerId/budget'
@@ -332,7 +392,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
+  ComingSoonRoute: typeof ComingSoonRoute
+  ContactRoute: typeof ContactRoute
+  DocsRoute: typeof DocsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
@@ -345,11 +409,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coming-soon': {
+      id: '/coming-soon'
+      path: '/coming-soon'
+      fullPath: '/coming-soon'
+      preLoaderRoute: typeof ComingSoonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -373,11 +465,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/app/settings': {
-      id: '/_authenticated/app/settings'
-      path: '/settings'
-      fullPath: '/app/settings'
-      preLoaderRoute: typeof AuthenticatedAppSettingsRouteImport
+    '/_authenticated/app/profile': {
+      id: '/_authenticated/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AuthenticatedAppProfileRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/preferences': {
+      id: '/_authenticated/app/preferences'
+      path: '/preferences'
+      fullPath: '/app/preferences'
+      preLoaderRoute: typeof AuthenticatedAppPreferencesRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/p/$plannerId': {
@@ -570,12 +669,14 @@ const AuthenticatedAppPPlannerIdRouteWithChildren =
   )
 
 interface AuthenticatedAppRouteChildren {
-  AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
+  AuthenticatedAppPreferencesRoute: typeof AuthenticatedAppPreferencesRoute
+  AuthenticatedAppProfileRoute: typeof AuthenticatedAppProfileRoute
   AuthenticatedAppPPlannerIdRoute: typeof AuthenticatedAppPPlannerIdRouteWithChildren
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
-  AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
+  AuthenticatedAppPreferencesRoute: AuthenticatedAppPreferencesRoute,
+  AuthenticatedAppProfileRoute: AuthenticatedAppProfileRoute,
   AuthenticatedAppPPlannerIdRoute: AuthenticatedAppPPlannerIdRouteWithChildren,
 }
 
@@ -597,7 +698,11 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
+  ComingSoonRoute: ComingSoonRoute,
+  ContactRoute: ContactRoute,
+  DocsRoute: DocsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,11 +1,8 @@
 import { o as __toESM } from "../_runtime.mjs";
 import { u as require_react } from "./@floating-ui/react-dom+[...].mjs";
-import { c as require_jsx_runtime, n as Primitive, o as createSlottable, s as useComposedRefs } from "./@radix-ui/react-arrow+[...].mjs";
+import { D as Primitive, M as createSlottable, N as useComposedRefs, P as require_jsx_runtime, T as DismissableLayer, b as Portal$1, k as createContextScope, v as useControllableState, x as useId, y as Presence } from "./@radix-ui/react-alert-dialog+[...].mjs";
 import { t as composeEventHandlers } from "./radix-ui__primitive.mjs";
-import { o as createContextScope } from "./@radix-ui/react-avatar+[...].mjs";
-import { d as useId, m as DismissableLayer, u as Portal$1 } from "./@radix-ui/react-dialog+[...].mjs";
-import { a as Presence, i as useControllableState } from "./@radix-ui/react-checkbox+[...].mjs";
-import { _ as Arrow, b as createPopperScope, g as Anchor, v as Content, y as Root2 } from "./@radix-ui/react-dropdown-menu+[...].mjs";
+import { _ as createPopperScope, g as Root2, h as Content, m as Arrow, p as Anchor } from "./@radix-ui/react-dropdown-menu+[...].mjs";
 import { h as Root } from "./@radix-ui/react-select+[...].mjs";
 //#region node_modules/@radix-ui/react-tooltip/dist/index.mjs
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);

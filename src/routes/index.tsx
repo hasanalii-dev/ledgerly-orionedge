@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, LineChart, Wallet, Users, FileText, LayoutGrid, Receipt, Target } from "lucide-react";
+import { ArrowRight, LineChart, Wallet, Users, FileText, LayoutGrid, Receipt, Target, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import SideRays from "@/components/magic/SideRays";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,34 +27,70 @@ function Landing() {
       {/* Nav — full width at top, transforms into a floating pill on scroll smoothly */}
       <header
         className={cn(
-          "fixed top-0 inset-x-0 z-50 flex justify-center transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-          isScrolled ? "pt-4 px-4" : "pt-0 px-0"
+          "fixed top-0 inset-x-0 z-[100] flex justify-center transition-all duration-300 ease-out",
+          isScrolled ? "pt-4 px-4" : "pt-6 px-6"
         )}
       >
         <div
           className={cn(
-            "flex items-center justify-between transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden",
+            "flex items-center justify-between w-full max-w-[54rem] transition-all duration-300 ease-out",
             isScrolled
-              ? "bg-background/70 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] px-5 py-2.5 w-full max-w-[42rem]"
-              : "bg-background/80 backdrop-blur-xl border border-transparent border-b-white/5 rounded-none px-6 py-4 w-full max-w-full"
+              ? "bg-[#050a0a]/90 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl px-6 py-3"
+              : "bg-transparent border border-transparent rounded-full px-2 py-2"
           )}
         >
           <div className="flex items-center gap-2 font-display font-semibold text-lg">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <img src="/favicon.png" alt="Ledgerly" className="h-4 w-4 object-contain" />
-            </span>
-            Ledgerly
+            <img src="/favicon.png" alt="Lumen" className="h-6 w-6 object-contain" />
+            Lumen
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
+            <Link to="/about" className="hover:text-foreground transition-colors">About</Link>
             <a href="#features" className="hover:text-foreground transition-colors">Features</a>
             <a href="#modules" className="hover:text-foreground transition-colors">Modules</a>
             <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
+            <Link to="/docs" className="hover:text-foreground transition-colors">Docs</Link>
           </nav>
           <div className="flex items-center gap-2">
-            <Link to="/auth"><Button variant="ghost" size="sm" className="hidden sm:inline-flex">Sign in</Button></Link>
-            <Link to="/auth"><Button size="sm" className="hidden sm:inline-flex rounded-full glow-emerald">Get started</Button></Link>
+            <Link to="/auth"><Button variant="ghost" size="sm" className="hidden md:inline-flex">Sign in</Button></Link>
+            <Link to="/auth"><Button size="sm" className="hidden md:inline-flex rounded-full glow-emerald">Join Beta</Button></Link>
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMobileMenuOpen(true)}>
+              <Menu className="h-5 w-5" />
+            </Button>
           </div>
         </div>
+
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="absolute top-4 inset-x-4 p-6 bg-[#050a0a]/95 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-2xl md:hidden"
+            >
+              <div className="flex justify-between items-center mb-8">
+                <div className="flex items-center gap-2 font-display font-semibold text-lg">
+                  <img src="/favicon.png" alt="Lumen" className="h-6 w-6 object-contain" />
+                  Lumen
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+              <div className="flex flex-col gap-6 text-lg font-medium text-foreground/80 mb-8">
+                <Link to="/about" onClick={() => setIsMobileMenuOpen(false)}>About</Link>
+                <a href="#features" onClick={() => setIsMobileMenuOpen(false)}>Features</a>
+                <a href="#modules" onClick={() => setIsMobileMenuOpen(false)}>Modules</a>
+                <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)}>Pricing</a>
+                <Link to="/docs" onClick={() => setIsMobileMenuOpen(false)}>Docs</Link>
+              </div>
+              <div className="flex flex-col gap-3">
+                <Link to="/auth"><Button variant="outline" className="w-full border-white/10 bg-transparent">Sign in</Button></Link>
+                <Link to="/auth"><Button className="w-full rounded-full glow-emerald">Join Beta</Button></Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Hero */}
@@ -167,7 +205,7 @@ function Landing() {
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
               <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-white/10 to-transparent" />
               
-              <div className="grid grid-cols-4 gap-3 mb-4 relative z-10">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 relative z-10">
                 {[
                   { label: "Total Income", value: "$48,240", tone: "text-primary" },
                   { label: "Total Expenses", value: "$12,910", tone: "text-foreground" },
@@ -247,9 +285,6 @@ function Landing() {
 
         {/* Modules */}
         <section id="modules" className="py-28 overflow-hidden relative bg-[#040d0d]">
-          {/* Gradient fade mask on upper border */}
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_left,_var(--tw-gradient-stops))] from-primary/[0.03] via-transparent to-transparent" />
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <motion.div
@@ -277,7 +312,7 @@ function Landing() {
                 <div className="mt-8">
                   <Link to="/auth">
                     <Button size="lg" className="glow-emerald hover:scale-105 transition-transform duration-300">
-                      Try it free<ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                      Join Beta
                     </Button>
                   </Link>
                 </div>
@@ -314,8 +349,44 @@ function Landing() {
           </div>
         </section>
 
+        {/* About Section */}
+        <section id="about" className="py-24 relative overflow-hidden bg-[#040d0d]">
+          <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <h2 className="text-3xl md:text-5xl font-display tracking-tight">
+                Designed for <span className="text-primary">clarity</span>.
+              </h2>
+              <p className="mt-6 text-muted-foreground text-lg leading-relaxed">
+                Lumen was born out of frustration with clunky financial tools that made managing money feel like a chore. We are a dedicated team at Orion Edge Digital building a completely different experience—one where your finances are beautifully organized and calm.
+              </p>
+              <div className="mt-8">
+                <Link to="/about">
+                  <Button variant="outline" className="border-white/10 hover:bg-white/5 rounded-full">
+                    Read our story
+                  </Button>
+                </Link>
+              </div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+              className="relative aspect-square md:aspect-[4/3] rounded-3xl overflow-hidden border border-white/5 bg-card/20 backdrop-blur-sm shadow-2xl flex items-center justify-center group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
+              <img src="/favicon.png" alt="Lumen Logo" className="w-32 h-32 object-contain opacity-80 group-hover:scale-110 transition-transform duration-700" loading="lazy" />
+            </motion.div>
+          </div>
+        </section>
+
         {/* CTA */}
-        <section id="pricing" className="pt-32 pb-24 relative overflow-hidden">
+        <section id="pricing" className="pt-32 pb-24 relative overflow-hidden bg-background z-0">
           {/* Flipped Background gradient image — full width at the top of CTA */}
           <div className="absolute inset-x-0 top-0 z-0 w-full pointer-events-none select-none flex items-start opacity-70">
             <img
@@ -323,10 +394,11 @@ function Landing() {
               alt=""
               className="w-full h-auto object-cover opacity-90 rotate-180"
               draggable={false}
+              loading="lazy"
             />
           </div>
-          {/* Blending overlay to merge the top edge of the image with the #030b0c background smoothly */}
-          <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-[#030b0c] to-transparent z-0 pointer-events-none" />
+          {/* Blending overlay to merge the top edge of the image with the background smoothly */}
+          <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-background to-transparent z-0 pointer-events-none" />
           
           <div className="absolute inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary/10 rounded-full blur-[120px]" />
@@ -352,8 +424,8 @@ function Landing() {
               className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4"
             >
               <Link to="/auth">
-                <Button size="lg" className="h-14 px-8 text-base glow-emerald hover:scale-105 hover:bg-primary/90 transition-all duration-300">
-                  Create your workspace<ArrowRight className="ml-2 h-4 w-4" />
+                <Button size="lg" className="h-12 px-6 glow-emerald hover:scale-105 hover:bg-primary/90 transition-all duration-300">
+                  Join Beta <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <div className="flex -space-x-2">
@@ -370,15 +442,44 @@ function Landing() {
           </motion.div>
         </section>
 
+
         {/* Footer */}
         <footer className="pt-16 pb-8 text-sm text-muted-foreground relative z-10 overflow-hidden bg-black border-t border-white/5 shadow-2xl">
+          <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen opacity-100">
+            <div className="absolute inset-0">
+               <SideRays 
+                  speed={1.5}
+                  rayColor1="#10B981" 
+                  rayColor2="#34D399" 
+                  intensity={2.5}
+                  spread={2.5}
+                  origin="bottom-left"
+                  tilt={15}
+                  saturation={1.5}
+                  blend={0.5}
+                  opacity={1.0}
+               />
+            </div>
+            <div className="absolute inset-0">
+               <SideRays 
+                  speed={1.5}
+                  rayColor1="#10B981" 
+                  rayColor2="#34D399" 
+                  intensity={2.5}
+                  spread={2.5}
+                  origin="bottom-right"
+                  tilt={-15}
+                  saturation={1.5}
+                  blend={0.5}
+                  opacity={1.0}
+               />
+            </div>
+          </div>
           <div className="max-w-7xl mx-auto px-10 grid md:grid-cols-2 gap-16 relative z-10 mb-20">
             <div className="space-y-6">
               <div className="flex items-center gap-2 text-2xl font-display font-semibold text-foreground">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                  <img src="/favicon.png" alt="Ledgerly" className="h-5 w-5 object-contain" />
-                </span>
-                Ledgerly
+                <img src="/favicon.png" alt="Lumen" className="h-8 w-8 object-contain" />
+                Lumen
               </div>
               <p className="max-w-md text-base leading-relaxed text-muted-foreground/80">
                 The financial operating system built for freelancers, agencies, and entrepreneurs. A calm space for your money.
@@ -395,42 +496,45 @@ function Landing() {
               <div>
                 <h4 className="font-display font-medium text-foreground mb-4 text-base">Product</h4>
                 <ul className="space-y-3">
-                  {['Features', 'Pricing', 'Modules', 'Changelog'].map((item) => (
-                    <li key={item}><a href={`#${item.toLowerCase()}`} className="hover:text-primary transition-colors">{item}</a></li>
-                  ))}
+                  <li><a href="/#features" className="hover:text-primary transition-colors">Features</a></li>
+                  <li><a href="/#pricing" className="hover:text-primary transition-colors">Pricing</a></li>
+                  <li><a href="/#modules" className="hover:text-primary transition-colors">Modules</a></li>
+                  <li><Link to="/coming-soon" className="hover:text-primary transition-colors">Changelog</Link></li>
                 </ul>
               </div>
               <div>
                 <h4 className="font-display font-medium text-foreground mb-4 text-base">Resources</h4>
                 <ul className="space-y-3">
-                  {['Documentation', 'Tutorials', 'Blog', 'Support'].map((item) => (
-                    <li key={item}><a href="#" className="hover:text-primary transition-colors">{item}</a></li>
-                  ))}
+                  <li><Link to="/docs" className="hover:text-primary transition-colors">Documentation</Link></li>
+                  <li><Link to="/coming-soon" className="hover:text-primary transition-colors">Tutorials</Link></li>
+                  <li><Link to="/coming-soon" className="hover:text-primary transition-colors">Blog</Link></li>
+                  <li><Link to="/contact" className="hover:text-primary transition-colors">Support</Link></li>
                 </ul>
               </div>
               <div>
                 <h4 className="font-display font-medium text-foreground mb-4 text-base">Company</h4>
                 <ul className="space-y-3">
-                  {['About', 'Careers', 'Terms', 'Privacy'].map((item) => (
-                    <li key={item}><a href="#" className="hover:text-primary transition-colors">{item}</a></li>
-                  ))}
+                  <li><Link to="/about" className="hover:text-primary transition-colors">About</Link></li>
+                  <li><Link to="/coming-soon" className="hover:text-primary transition-colors">Careers</Link></li>
+                  <li><Link to="/coming-soon" className="hover:text-primary transition-colors">Terms</Link></li>
+                  <li><Link to="/coming-soon" className="hover:text-primary transition-colors">Privacy</Link></li>
                 </ul>
               </div>
             </div>
             </div>
             
-            <div className="w-full overflow-hidden flex justify-center items-center opacity-40 select-none pointer-events-none mt-16 mb-12">
-               <h1 className="text-[16vw] font-display font-bold text-transparent bg-clip-text bg-gradient-to-b from-muted-foreground/30 to-transparent leading-none tracking-tighter mix-blend-plus-lighter">
-                 Ledgerly
+            <div className="w-full overflow-hidden flex justify-center items-center opacity-100 select-none pointer-events-none mt-16 mb-12 relative z-10 px-4">
+               <h1 className="text-[clamp(6rem,15vw,22rem)] font-display font-bold text-transparent bg-clip-text bg-gradient-to-t from-emerald-400/30 via-emerald-500/5 to-transparent leading-none tracking-tighter mix-blend-plus-lighter">
+                 Lumen
                </h1>
             </div>
 
             <div className="max-w-7xl mx-auto px-10 border-t border-hairline flex flex-col md:flex-row items-center justify-between gap-4 text-xs pt-8">
-              <div>© {new Date().getFullYear()} Ledgerly. All rights reserved.</div>
+              <div>© {new Date().getFullYear()} Lumen. All rights reserved.</div>
               <div className="flex gap-6">
-                <a href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</a>
-                <a href="/terms" className="hover:text-primary transition-colors">Terms of Service</a>
-                <a href="/cookies" className="hover:text-primary transition-colors">Cookies Settings</a>
+                <Link to="/coming-soon" className="hover:text-primary transition-colors">Privacy Policy</Link>
+                <Link to="/coming-soon" className="hover:text-primary transition-colors">Terms of Service</Link>
+                <Link to="/coming-soon" className="hover:text-primary transition-colors">Cookies Settings</Link>
               </div>
             </div>
           </footer>

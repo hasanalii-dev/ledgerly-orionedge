@@ -66,14 +66,14 @@ export const Route = createRootRouteWithContext<{
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Ledgerly — Personal & Business Finance Planner" },
+      { title: "Lumen — Personal & Business Finance Planner" },
       { name: "description", content: "A premium financial operating system for entrepreneurs, freelancers, and agencies. Track income, expenses, invoices, clients, and cash flow in beautiful spreadsheet-style planners." },
       { name: "theme-color", content: "#0B0F0D" },
-      { property: "og:title", content: "Ledgerly — Personal & Business Finance Planner" },
+      { property: "og:title", content: "Lumen — Personal & Business Finance Planner" },
       { property: "og:description", content: "A premium financial operating system for entrepreneurs, freelancers, and agencies. Track income, expenses, invoices, clients, and cash flow in beautiful spreadsheet-style planners." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Ledgerly — Personal & Business Finance Planner" },
+      { name: "twitter:title", content: "Lumen — Personal & Business Finance Planner" },
       { name: "twitter:description", content: "A premium financial operating system for entrepreneurs, freelancers, and agencies. Track income, expenses, invoices, clients, and cash flow in beautiful spreadsheet-style planners." },
     ],
     links: [
@@ -124,6 +124,70 @@ function PageLoader() {
   );
 }
 
+function InitialSplash() {
+  const [show, setShow] = useState(true);
+
+  useEffect(() => {
+    // Show splash screen for 1.8 seconds to allow the loading bar to finish before fading out
+    const timer = setTimeout(() => setShow(false), 1800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ opacity: 1, y: 0 }}
+          exit={{ y: "-100vh", opacity: 0.8 }}
+          transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
+          className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-[#020505] shadow-2xl"
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="relative flex flex-col items-center justify-center gap-8 w-full max-w-xs"
+          >
+            <div className="relative">
+              <img src="/favicon.png" alt="Lumen" className="h-24 w-24 object-contain" />
+            </div>
+            
+            <div className="flex flex-col items-center w-full gap-3">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="text-white/80 font-display tracking-[0.2em] uppercase text-xs"
+              >
+                Lumen
+              </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.4 }}
+                className="w-48 h-[2px] bg-white/5 rounded-full overflow-hidden"
+              >
+                <motion.div
+                  initial={{ width: "0%" }}
+                  animate={{ width: ["0%", "30%", "70%", "100%"] }}
+                  transition={{ 
+                    duration: 1.5, 
+                    times: [0, 0.4, 0.8, 1],
+                    ease: "easeInOut" 
+                  }}
+                  className="h-full bg-emerald-400 rounded-full shadow-[0_0_10px_rgba(52,211,153,0.8)]"
+                />
+              </motion.div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="dark">
@@ -147,14 +211,14 @@ function RootComponent() {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
         queryClient.clear();
-        router.navigate({ to: "/auth", replace: true });
+        setTimeout(() => router.navigate({ to: "/auth", replace: true }), 0);
       } else if (event === "SIGNED_IN") {
         queryClient.invalidateQueries();
         if (location.pathname === "/auth" || location.pathname === "/") {
-           router.navigate({ to: "/app", replace: true });
+           setTimeout(() => router.navigate({ to: "/app", replace: true }), 0);
         }
       } else if (event === "USER_UPDATED") {
-        router.invalidate();
+        setTimeout(() => router.invalidate(), 0);
       }
     });
     return () => sub.subscription.unsubscribe();
@@ -164,6 +228,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <InitialSplash />
       <PageLoader />
       {isDashboard ? (
         <Outlet />

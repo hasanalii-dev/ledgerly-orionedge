@@ -7,7 +7,8 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_FOLDERS, CURRENCIES } from "@/lib/format";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { PageTransition } from "@/components/ui/loading-spinner";
+import { PageTransition, LoadingSpinner } from "@/components/ui/loading-spinner";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId")({
   component: PlannerLayout,
@@ -62,12 +63,19 @@ function PlannerLayout() {
     if (!isLoading && (isError || !planner)) navigate({ to: "/app" });
   }, [isLoading, isError, planner, navigate]);
 
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <SidebarProvider defaultOpen>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        <SidebarInset className="flex-1 overflow-hidden">
-          <header className="sticky top-0 z-20 h-14 flex items-center gap-3 px-4 border-b border-hairline bg-background/80 backdrop-blur-xl">
+      <div className="min-h-screen flex w-full bg-background pb-[80px] md:pb-0 relative">
+
+        <div className="hidden md:flex relative z-10">
+          <AppSidebar />
+        </div>
+        <SidebarInset className="flex-1 overflow-hidden relative z-10">
+          <header className="hidden md:flex sticky top-0 z-20 h-14 items-center gap-3 px-4 border-b border-hairline bg-background/80 backdrop-blur-xl">
             <SidebarTrigger />
             <div className="text-sm text-muted-foreground truncate flex-1">
               {planner?.name ?? ""}
@@ -91,12 +99,21 @@ function PlannerLayout() {
               </div>
             )}
           </header>
-          <main className="p-6">
+
+          {/* Mobile Top Bar */}
+          <header className="md:hidden sticky top-0 z-20 h-14 flex items-center justify-center px-4 border-b border-white/5 bg-background/90 backdrop-blur-xl">
+            <div className="font-display font-medium text-base truncate">
+              {planner?.name ?? "Planner"}
+            </div>
+          </header>
+
+          <main className="p-4 md:p-6 overflow-y-auto">
             <PageTransition>
               <Outlet />
             </PageTransition>
           </main>
         </SidebarInset>
+        <MobileBottomNav />
       </div>
     </SidebarProvider>
   );
