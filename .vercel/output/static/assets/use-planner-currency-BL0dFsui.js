@@ -1,0 +1,1 @@
+import{t as e}from"./useQuery-BaLBnoZ8.js";import{H as t}from"./index-CXcsfo74.js";function n(n){let{data:r}=e({queryKey:[`planner`,n],queryFn:async()=>{let{data:e}=await t.from(`planners`).select(`*`).eq(`id`,n).maybeSingle();return e}});return r?.currency??`USD`}export{n as t};

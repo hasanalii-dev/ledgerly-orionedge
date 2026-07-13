@@ -284,7 +284,7 @@ function Landing() {
         </section>
 
         {/* Modules */}
-        <section id="modules" className="py-28 overflow-hidden relative bg-[#040d0d]">
+        <section id="modules" className="py-28 overflow-hidden relative bg-[#030b0c]">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <motion.div
@@ -350,7 +350,7 @@ function Landing() {
         </section>
 
         {/* About Section */}
-        <section id="about" className="py-24 relative overflow-hidden bg-[#040d0d]">
+        <section id="about" className="py-24 relative overflow-hidden bg-[#030b0c]">
           <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
