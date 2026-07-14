@@ -95,6 +95,23 @@ function Landing() {
 
       {/* Hero */}
       <section className="relative overflow-hidden pt-24 min-h-[90vh] flex flex-col justify-center bg-background z-0">
+        
+        {/* Top-Right Light Rays */}
+        <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen opacity-100">
+           <SideRays 
+              speed={1.5}
+              rayColor1="#10B981" 
+              rayColor2="#34D399" 
+              intensity={2.0}
+              spread={2.5}
+              origin="top-right"
+              tilt={-20}
+              saturation={1.5}
+              blend={0.5}
+              opacity={1.0}
+           />
+        </div>
+
         {/* Background gradient image — full width at the bottom of hero */}
         <div className="absolute inset-x-0 bottom-0 z-0 w-full pointer-events-none select-none flex items-end opacity-80">
           <img
@@ -130,7 +147,7 @@ function Landing() {
             animate="visible"
             className="text-5xl md:text-7xl font-display tracking-tight leading-[1.02] max-w-4xl mx-auto flex flex-wrap justify-center gap-x-4"
           >
-            {["The", "financial"].map((word, i) => (
+            {["Illuminating", "your"].map((word, i) => (
               <motion.span
                 key={i}
                 variants={{
@@ -148,10 +165,10 @@ function Landing() {
                   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } }
               }}
             >
-              operating system
+              financial universe
             </motion.span>
             <motion.div className="w-full h-0 hidden md:block" />
-            {["built", "for", "entrepreneurs."].map((word, i) => (
+            {["with", "absolute", "clarity."].map((word, i) => (
               <motion.span
                 key={i}
                 variants={{
