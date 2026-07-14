@@ -410,7 +410,7 @@ function Landing() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="relative z-10 max-w-2xl mx-auto px-6 text-center"
+              className="relative z-10 max-w-3xl mx-auto px-6 text-center"
             >
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-display tracking-tight leading-tight drop-shadow-md">
                 Start with your <span className="text-primary font-medium">first planner</span>.
@@ -423,13 +423,23 @@ function Landing() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="mt-6 flex justify-center items-center"
+                className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4"
               >
                 <Link to="/auth">
-                  <Button variant="outline" className="h-10 px-5 text-sm rounded-xl bg-card border-white/10 text-foreground hover:bg-card/80 transition-all font-medium">
-                    <Bug className="mr-2 h-4 w-4" /> Report bugs & request changes
+                  <Button variant="outline" className="h-12 px-8 text-base rounded-full bg-card border-white/10 text-foreground hover:bg-white/5 transition-all font-medium">
+                    Join Beta <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
+                <div className="flex -space-x-3 ml-2">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="w-10 h-10 rounded-full border-2 border-background bg-background flex items-center justify-center relative overflow-hidden shadow-md transition-transform hover:scale-110 hover:z-10">
+                      <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=user${i + 42}`} alt="" className="w-8 h-8 object-contain" />
+                    </div>
+                  ))}
+                  <div className="w-10 h-10 rounded-full border-2 border-background bg-elevated flex items-center justify-center text-[10px] font-medium text-muted-foreground shadow-md z-10">
+                    +1k
+                  </div>
+                </div>
               </motion.div>
             </motion.div>
           </div>
