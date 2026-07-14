@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Folder, Upload, FileText, Download, Trash2 } from "lucide-react";
+import { Folder, Upload, FileText, Download, Trash2, Link, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/vault")({
   component: VaultPage,
@@ -18,6 +18,15 @@ function VaultPage() {
   const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUserEmail(data.user?.email ?? null);
+      setUserId(data.user?.id ?? null);
+    });
+  }, []);
 
   const { data: folders = [] } = useQuery({
     queryKey: ["folders", plannerId],
@@ -50,14 +59,38 @@ function VaultPage() {
     qc.invalidateQueries({ queryKey: ["docs", plannerId] });
   }
 
+  async function addLink() {
+    if (!userId) return;
+    const name = prompt("Enter a name for this link:");
+    if (!name) return;
+    const url = prompt("Enter the URL (Google Drive, etc.):");
+    if (!url) return;
+    
+    const { error } = await supabase.from("documents").insert({
+      planner_id: plannerId, user_id: userId, folder_id: activeFolder,
+      file_name: name, file_path: url, size_bytes: null, mime_type: "link",
+    });
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Link added");
+      qc.invalidateQueries({ queryKey: ["docs", plannerId] });
+    }
+  }
+
   async function download(doc: Doc) {
+    if (doc.mime_type === "link") {
+      window.open(doc.file_path, "_blank");
+      return;
+    }
     const { data, error } = await supabase.storage.from("planner-files").createSignedUrl(doc.file_path, 60);
     if (error) return toast.error(error.message);
     window.open(data.signedUrl, "_blank");
   }
   async function remove(doc: Doc) {
     if (!confirm(`Delete "${doc.file_name}"?`)) return;
-    await supabase.storage.from("planner-files").remove([doc.file_path]);
+    if (doc.mime_type !== "link") {
+      await supabase.storage.from("planner-files").remove([doc.file_path]);
+    }
     await supabase.from("documents").delete().eq("id", doc.id);
     qc.invalidateQueries({ queryKey: ["docs", plannerId] });
   }
@@ -70,7 +103,11 @@ function VaultPage() {
           <p className="text-sm text-muted-foreground">Invoices, receipts, contracts — private and encrypted at rest.</p>
         </div>
         <input ref={fileRef} type="file" multiple hidden onChange={(e) => upload(e.target.files)} />
-        <Button onClick={() => fileRef.current?.click()} className="glow-emerald"><Upload className="h-4 w-4 mr-1" />Upload</Button>
+        {userEmail === "hasanalijaffe@gmail.com" ? (
+          <Button onClick={() => fileRef.current?.click()} className="glow-emerald"><Upload className="h-4 w-4 mr-1" />Upload</Button>
+        ) : (
+          <Button onClick={addLink} className="glow-emerald"><Plus className="h-4 w-4 mr-1" />Add Link</Button>
+        )}
       </div>
       <div className="flex flex-col md:grid md:grid-cols-[240px_1fr] gap-6">
         <div className="rounded-2xl border border-hairline bg-card p-2 h-fit">
@@ -93,10 +130,10 @@ function VaultPage() {
             <div>
               {docs.map((d) => (
                 <div key={d.id} className="flex items-center gap-3 px-4 py-3 border-b border-hairline last:border-0 hover:bg-elevated/40 group">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  {d.mime_type === "link" ? <Link className="h-4 w-4 text-muted-foreground" /> : <FileText className="h-4 w-4 text-muted-foreground" />}
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{d.file_name}</div>
-                    <div className="text-xs text-muted-foreground">{d.size_bytes ? `${(d.size_bytes / 1024).toFixed(1)} KB · ` : ""}{new Date(d.created_at).toLocaleDateString()}</div>
+                    <div className="text-xs text-muted-foreground">{d.mime_type === "link" ? "External Link" : (d.size_bytes ? `${(d.size_bytes / 1024).toFixed(1)} KB` : "File")} · {new Date(d.created_at).toLocaleDateString()}</div>
                   </div>
                   <button onClick={() => download(d)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground"><Download className="h-4 w-4" /></button>
                   <button onClick={() => remove(d)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
