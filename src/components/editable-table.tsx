@@ -113,8 +113,8 @@ export function EditableTable<T extends BaseRow>({
         )}
         <Button size="sm" onClick={addRow} className="glow-emerald"><Plus className="h-4 w-4 mr-1" />New</Button>
       </div>
-      <div className="overflow-auto max-h-[calc(100vh-260px)]">
-        <table className="w-full text-sm">
+      <div className="overflow-auto max-h-[calc(100vh-260px)] w-full">
+        <table className="w-full text-sm min-w-max">
           <thead>
             <tr className="text-xs text-muted-foreground bg-card sticky-th">
               <th className="w-8 p-2 border-b border-hairline">
@@ -179,13 +179,17 @@ export function EditableTable<T extends BaseRow>({
 }
 
 export function CellInput({ value, onChange, type = "text", className = "" }: { value: string; onChange: (v: string) => void; type?: string; className?: string }) {
+  const [local, setLocal] = useState(value);
+  useEffect(() => { setLocal(value); }, [value]);
   return (
     <input
       type={type}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
+      value={local}
+      onChange={(e) => setLocal(e.target.value)}
+      onBlur={() => { if (local !== value) onChange(local); }}
+      onKeyDown={(e) => { if (e.key === "Enter") { e.currentTarget.blur(); } }}
       step={type === "number" ? "any" : undefined}
-      className={`w-full bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-elevated rounded-md focus:ring-1 focus:ring-primary/40 ${className}`}
+      className={`w-full min-w-[80px] bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-elevated rounded-md focus:ring-1 focus:ring-primary/40 ${className}`}
     />
   );
 }

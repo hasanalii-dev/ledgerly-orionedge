@@ -441,7 +441,7 @@ function MonthlyTracking() {
                 <span className="text-sm text-muted-foreground">Allocated</span>
                 <span className="font-medium text-lg text-muted-foreground">{formatMoney(tEarnings - netCashflow, currency)}</span>
               </div>
-              <div className="flex justify-between items-end pt-2">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 justify-between items-end pt-2">
                 <span className="text-sm font-medium">Net Cash Flow</span>
                 <span className={`font-display text-2xl ${netCashflow >= 0 ? "text-primary" : "text-destructive"}`}>
                   {formatMoney(netCashflow, currency)}
@@ -457,8 +457,9 @@ function MonthlyTracking() {
                       {pieData.map((e, i) => <Cell key={i} fill={e.color} />)}
                     </Pie>
                     <Tooltip 
-                      formatter={(val: number, name: string, props: any) => {
-                        const percent = props?.payload?.percent ? `(${(props.payload.percent * 100).toFixed(1)}%)` : '';
+                      formatter={(val: number, name: string) => {
+                        const total = pieData.reduce((acc, curr) => acc + curr.value, 0);
+                        const percent = total > 0 ? `(${(val / total * 100).toFixed(1)}%)` : '';
                         return [`${formatMoney(val, currency)} ${percent}`, name];
                       }}
                       contentStyle={{ background: "oklch(0.22 0.008 155)", border: "1px solid oklch(1 0 0 / 0.08)", borderRadius: 12, color: "white" }} 
