@@ -386,20 +386,20 @@ function Landing() {
         </section>
 
         {/* CTA */}
-        <section id="pricing" className="relative z-20 px-4 md:px-8 -mb-12 max-w-7xl mx-auto w-full pt-12">
+        <section id="pricing" className="relative z-20 px-4 md:px-8 -mb-32 max-w-7xl mx-auto w-full pt-12">
           <div className="rounded-[40px] md:rounded-[60px] border border-white/5 bg-[#030a0a] shadow-[0_0_80px_-20px_rgba(16,185,129,0.15)] relative overflow-hidden pt-28 pb-28">
-            {/* Background gradient image — flipped vertically */}
-            <div className="absolute inset-x-0 bottom-0 z-0 w-full pointer-events-none select-none flex items-end opacity-70">
+            {/* Background gradient image — normal */}
+            <div className="absolute inset-x-0 top-0 z-0 w-full pointer-events-none select-none flex items-start opacity-70">
               <img
                 src="/bg-gradient.png"
                 alt=""
-                className="w-full h-auto object-cover opacity-90 scale-y-[-1]"
+                className="w-full h-auto object-cover opacity-90"
                 draggable={false}
                 loading="lazy"
               />
             </div>
             {/* Blending overlay */}
-            <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#030a0a] to-transparent z-0 pointer-events-none" />
+            <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-[#030a0a] to-transparent z-0 pointer-events-none" />
             
             <div className="absolute inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/10 rounded-full blur-[120px]" />
@@ -446,7 +446,7 @@ function Landing() {
         </section>
 
         {/* Footer */}
-        <footer className="pt-24 pb-8 text-sm text-muted-foreground relative z-10 overflow-hidden bg-black border-t border-white/5 shadow-2xl">
+        <footer className="pt-48 pb-8 text-sm text-muted-foreground relative z-10 overflow-hidden bg-black border-t border-white/5 shadow-2xl">
           <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen opacity-100">
             <div className="absolute inset-0">
                <SideRays 
