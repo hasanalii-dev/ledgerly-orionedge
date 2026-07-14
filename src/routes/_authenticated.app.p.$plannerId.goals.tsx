@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_authenticated/app/p/$plannerId/goals")({
   component: GoalsPage,
 });
 
-type Row = { id: string; name: string; target_amount: number; saved_amount: number; deadline: string | null; currency: string; emoji: string | null };
+type Row = { id: string; name: string; target_amount: number; saved_amount: number; currency: string; emoji: string | null };
 
 function GoalsPage() {
   const { plannerId } = Route.useParams();
@@ -37,7 +37,6 @@ function GoalsPage() {
             return (
               <div key={g.id} className="rounded-2xl border border-hairline bg-card p-4">
                 <div className="text-sm font-medium">{g.emoji ?? "🎯"} {g.name}</div>
-                <div className="mt-1 text-xs text-muted-foreground">Due {g.deadline ?? "—"}</div>
                 <div className="mt-3 flex items-baseline justify-between">
                   <div className="font-display text-2xl text-primary">{formatMoney(g.saved_amount, g.currency)}</div>
                   <div className="text-xs text-muted-foreground">of {formatMoney(g.target_amount, g.currency)}</div>
@@ -62,7 +61,6 @@ function GoalsPage() {
           { key: "target_amount", label: "Target", width: "140px", render: (r, on) => <CellInput type="number" value={String(r.target_amount ?? 0)} onChange={(v) => on({ target_amount: parseFloat(v) || 0 })} className="text-right font-mono" /> },
           { key: "saved_amount", label: "Saved", width: "140px", render: (r, on) => <CellInput type="number" value={String(r.saved_amount ?? 0)} onChange={(v) => on({ saved_amount: parseFloat(v) || 0 })} className="text-right font-mono" /> },
           { key: "currency", label: "CCY", width: "80px", render: (r, on) => <CellInput value={r.currency ?? currency} onChange={(v) => on({ currency: v.toUpperCase() })} className="uppercase" /> },
-          { key: "deadline", label: "Deadline", width: "140px", render: (r, on) => <CellInput type="date" value={r.deadline ?? ""} onChange={(v) => on({ deadline: v || null })} /> },
         ]}
       />
     </div>
