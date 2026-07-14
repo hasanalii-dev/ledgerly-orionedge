@@ -166,18 +166,23 @@ function DashboardPage() {
             <p className="text-sm text-muted-foreground mt-1">Snapshot of {planner?.name ?? "your planner"}</p>
           </div>
           
-          <div className="order-1 md:order-2 self-center md:self-auto flex items-center gap-4">
-            <Avatar className="h-14 w-14 md:h-12 md:w-12 border-2 border-white/10 ring-2 ring-primary/20 shadow-lg">
+          <div className="order-1 md:order-2 self-center md:self-auto flex items-center md:gap-4 relative">
+            <Avatar className="h-20 w-20 md:h-12 md:w-12 border-2 border-white/10 ring-2 ring-primary/20 shadow-xl md:shadow-lg">
               <AvatarImage src={profile?.avatar_url} />
-              <AvatarFallback className="bg-primary/20 text-primary text-lg font-medium">
+              <AvatarFallback className="bg-primary/20 text-primary text-2xl md:text-lg font-medium">
                 {(profile?.display_name || "U").charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <Button variant="outline" size="icon" asChild className="rounded-full h-10 w-10 relative">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              asChild 
+              className="absolute md:static -top-1 -right-1 rounded-full h-9 w-9 md:h-10 md:w-10 z-10 bg-background/95 md:bg-transparent backdrop-blur-md shadow-lg md:shadow-none border-white/20 md:border-input"
+            >
               <Link to="/app/p/$plannerId/notifications" params={{ plannerId }}>
-                <Bell className="h-5 w-5 text-muted-foreground" />
+                <Bell className="h-4 w-4 md:h-5 md:w-5 text-foreground md:text-muted-foreground" />
                 {pendingInvites.length > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-destructive text-white text-[10px] font-bold rounded-full border-2 border-background flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 h-4 w-4 md:h-5 md:w-5 bg-destructive text-white text-[9px] md:text-[10px] font-bold rounded-full border-2 border-background flex items-center justify-center">
                     {pendingInvites.length}
                   </span>
                 )}
