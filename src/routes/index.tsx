@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, LineChart, Wallet, Users, FileText, LayoutGrid, Receipt, Target, Menu, X } from "lucide-react";
+import { ArrowRight, LineChart, Wallet, Users, FileText, LayoutGrid, Receipt, Target, Menu, X, Bug } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
