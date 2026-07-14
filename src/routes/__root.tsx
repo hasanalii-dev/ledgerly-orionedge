@@ -291,7 +291,21 @@ function RootComponent() {
           </AnimatePresence>
         )}
       </ReactLenis>
-      <Toaster theme="dark" position="bottom-right" />
+      <Toaster 
+        theme="dark" 
+        position="bottom-right"
+        toastOptions={{
+          classNames: {
+            toast: "bg-card/80 backdrop-blur-2xl border border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.5)] rounded-2xl",
+            title: "text-foreground font-medium font-display text-sm",
+            description: "text-muted-foreground text-xs",
+            actionButton: "bg-primary text-primary-foreground font-medium hover:bg-primary/90",
+            cancelButton: "bg-white/5 text-foreground hover:bg-white/10",
+            success: "text-emerald-400",
+            error: "text-rose-400",
+          }
+        }}
+      />
     </QueryClientProvider>
   );
 }

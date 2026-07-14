@@ -167,6 +167,12 @@ function DashboardPage() {
           </div>
           
           <div className="order-1 md:order-2 self-center md:self-auto flex items-center gap-4">
+            <Avatar className="h-14 w-14 md:h-12 md:w-12 border-2 border-white/10 ring-2 ring-primary/20 shadow-lg">
+              <AvatarImage src={profile?.avatar_url} />
+              <AvatarFallback className="bg-primary/20 text-primary text-lg font-medium">
+                {(profile?.display_name || "U").charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
             <Button variant="outline" size="icon" asChild className="rounded-full h-10 w-10 relative">
               <Link to="/app/p/$plannerId/notifications" params={{ plannerId }}>
                 <Bell className="h-5 w-5 text-muted-foreground" />
@@ -177,12 +183,6 @@ function DashboardPage() {
                 )}
               </Link>
             </Button>
-            <Avatar className="h-12 w-12 border-2 border-white/10 ring-2 ring-primary/20 shadow-lg">
-              <AvatarImage src={profile?.avatar_url} />
-              <AvatarFallback className="bg-primary/20 text-primary text-lg font-medium">
-                {(profile?.display_name || "U").charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
           </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
