@@ -140,9 +140,9 @@ export function AuthLegacy() {
         >
           <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } } }} className="flex items-center gap-2 text-xl font-display font-semibold">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <img src="/favicon.png" alt="Lumen" className="h-4 w-4 object-contain" />
+              <img src="/favicon.png" alt="Capient" className="h-4 w-4 object-contain" />
             </span>
-            Lumen
+            Capient
           </motion.div>
           <div className="space-y-6">
             <motion.h1 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } } }} className="text-5xl font-display leading-[1.05] tracking-tight">
@@ -165,7 +165,7 @@ export function AuthLegacy() {
             ))}
           </motion.div>
           </div>
-          <motion.p variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.8, delay: 0.6 } } }} className="relative text-xs text-muted-foreground mt-8">© Lumen. A calm space for your money.</motion.p>
+          <motion.p variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.8, delay: 0.6 } } }} className="relative text-xs text-muted-foreground mt-8">© Capient. A calm space for your money.</motion.p>
         </motion.div>
       </div>
 
@@ -174,9 +174,9 @@ export function AuthLegacy() {
         <div className="w-full max-w-md space-y-8">
           <div className="lg:hidden flex items-center gap-2 text-lg font-display font-semibold">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <img src="/favicon.png" alt="Lumen" className="h-4 w-4 object-contain" />
+              <img src="/favicon.png" alt="Capient" className="h-4 w-4 object-contain" />
             </span>
-            Lumen
+            Capient
           </div>
           <div>
             <h2 className="text-3xl font-display tracking-tight">

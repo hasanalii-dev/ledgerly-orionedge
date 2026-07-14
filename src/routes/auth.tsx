@@ -12,8 +12,8 @@ import SideRays from "@/components/magic/SideRays";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Join Beta — Lumen" },
-      { name: "description", content: "Join the Lumen Beta program." },
+      { title: "Join Beta — Capient" },
+      { name: "description", content: "Join the Capient Beta program." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -262,9 +262,9 @@ function AuthBetaPage() {
               {/* Plain Logo without glow */}
               <Link to="/" className="inline-flex items-center gap-2 mb-6 group cursor-pointer">
                  <div className="h-9 w-9 bg-[#0b1414] rounded-[10px] flex items-center justify-center border border-white/5">
-                   <img src="/favicon.png" alt="Lumen" className="h-4 w-4 object-contain" />
+                   <img src="/favicon.png" alt="Capient" className="h-4 w-4 object-contain" />
                  </div>
-                 <span className="font-display font-semibold text-xl text-white tracking-tight">Lumen</span>
+                 <span className="font-display font-semibold text-xl text-white tracking-tight">Capient</span>
               </Link>
               <h1 className="text-3xl font-display font-medium text-white tracking-tight">
                 {mode === "login" ? "Welcome back" : "Join the Beta"}

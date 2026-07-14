@@ -1,97 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, LineChart, Wallet, Users, FileText, LayoutGrid, Receipt, Target, Menu, X, Bug } from "lucide-react";
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, LineChart, Wallet, Users, FileText, LayoutGrid, Receipt, Target, User, Briefcase, Building2 } from "lucide-react";
+import { lazy, Suspense } from "react";
+const LazyLightRays = lazy(() => import("@/components/magic/LightRays"));
+const LazySideRays = lazy(() => import("@/components/magic/SideRays"));
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import SideRays from "@/components/magic/SideRays";
+
+
+import { MarketingNavbar } from "@/components/MarketingNavbar";
 
 export const Route = createFileRoute("/")({
   component: Landing,
 });
 
 function Landing() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Nav — full width at top, transforms into a floating pill on scroll smoothly */}
-      <header
-        className={cn(
-          "fixed top-0 inset-x-0 z-[100] flex justify-center transition-all duration-300 ease-out",
-          isScrolled ? "pt-4 px-4" : "pt-6 px-6"
-        )}
-      >
-        <div
-          className={cn(
-            "flex items-center justify-between w-full max-w-[54rem] transition-all duration-300 ease-out",
-            isScrolled
-              ? "bg-[#050a0a]/90 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl px-6 py-3"
-              : "bg-transparent border border-transparent rounded-full px-2 py-2"
-          )}
-        >
-          <div className="flex items-center gap-2 font-display font-semibold text-lg">
-            <img src="/favicon.png" alt="Lumen" className="h-6 w-6 object-contain" />
-            Lumen
-          </div>
-          <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-            <Link to="/about" className="hover:text-foreground transition-colors">About</Link>
-            <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-            <a href="#modules" className="hover:text-foreground transition-colors">Modules</a>
-            <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
-            <Link to="/docs" className="hover:text-foreground transition-colors">Docs</Link>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Link to="/auth"><Button variant="ghost" size="sm" className="hidden md:inline-flex">Sign in</Button></Link>
-            <Link to="/auth"><Button size="sm" className="hidden md:inline-flex rounded-full glow-emerald">Join Beta</Button></Link>
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMobileMenuOpen(true)}>
-              <Menu className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-              className="absolute top-4 inset-x-4 p-6 bg-[#050a0a]/95 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-2xl md:hidden"
-            >
-              <div className="flex justify-between items-center mb-8">
-                <div className="flex items-center gap-2 font-display font-semibold text-lg">
-                  <img src="/favicon.png" alt="Lumen" className="h-6 w-6 object-contain" />
-                  Lumen
-                </div>
-                <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-              <div className="flex flex-col gap-6 text-lg font-medium text-foreground/80 mb-8">
-                <Link to="/about" onClick={() => setIsMobileMenuOpen(false)}>About</Link>
-                <a href="#features" onClick={() => setIsMobileMenuOpen(false)}>Features</a>
-                <a href="#modules" onClick={() => setIsMobileMenuOpen(false)}>Modules</a>
-                <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)}>Pricing</a>
-                <Link to="/docs" onClick={() => setIsMobileMenuOpen(false)}>Docs</Link>
-              </div>
-              <div className="flex flex-col gap-3">
-                <Link to="/auth"><Button variant="outline" className="w-full border-white/10 bg-transparent">Sign in</Button></Link>
-                <Link to="/auth"><Button className="w-full rounded-full glow-emerald">Join Beta</Button></Link>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
+      <MarketingNavbar />
 
       {/* Hero */}
       <section className="relative overflow-hidden pt-24 min-h-[90vh] flex flex-col justify-center bg-background z-0">
@@ -106,20 +32,21 @@ function Landing() {
           />
         </div>
 
-        {/* Top-Right Light Rays (Positioned above bg image but below text) */}
-        <div className="absolute inset-0 z-[5] pointer-events-none mix-blend-screen opacity-100">
-           <SideRays 
-              speed={1.5}
-              rayColor1="#10B981" 
-              rayColor2="#34D399" 
-              intensity={2.0}
-              spread={2.5}
-              origin="top-right"
-              tilt={-20}
-              saturation={1.5}
-              blend={0.5}
-              opacity={1.0}
-           />
+        {/* Top Light Rays */}
+        <div className="absolute inset-0 z-[5] pointer-events-none mix-blend-screen">
+          <Suspense fallback={null}>
+            <LazyLightRays 
+              raysOrigin="top-center"
+              raysColor="#10B981"
+              raysSpeed={1.5}
+              lightSpread={0.8}
+              rayLength={1.2}
+              followMouse={true}
+              mouseInfluence={0.1}
+              noiseAmount={0.1}
+              distortion={0.05}
+            />
+          </Suspense>
         </div>
         
         {/* Subtle grain/noise overlay */}
@@ -147,11 +74,12 @@ function Landing() {
             }}
             initial="hidden"
             animate="visible"
-            className="text-5xl md:text-7xl font-display tracking-tight leading-[1.02] max-w-4xl mx-auto flex flex-wrap justify-center gap-x-4 pb-2 bg-gradient-to-bl from-emerald-400 via-white to-white/80 bg-clip-text text-transparent"
+            className="text-5xl md:text-7xl font-display tracking-tight leading-[1.02] max-w-4xl mx-auto flex flex-wrap justify-center gap-x-4 gap-y-2 pb-4"
           >
-            {["The", "financial", "operating", "system"].map((word, i) => (
+            {["The", "Financial"].map((word, i) => (
               <motion.span
-                key={i}
+                key={`a-${i}`}
+                className="bg-gradient-to-bl from-emerald-200 via-white/90 to-white/40 bg-clip-text text-transparent inline-block pb-2"
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
@@ -160,10 +88,20 @@ function Landing() {
                 {word}
               </motion.span>
             ))}
+            <motion.span
+              className="bg-gradient-to-bl from-emerald-300 via-emerald-400 to-emerald-600 bg-clip-text text-transparent inline-block pb-2"
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+              }}
+            >
+              Workspace
+            </motion.span>
             <motion.div className="w-full h-0 hidden md:block" />
-            {["built", "for", "entrepreneurs."].map((word, i) => (
+            {["for", "Modern", "Professionals."].map((word, i) => (
               <motion.span
                 key={`b-${i}`}
+                className="bg-gradient-to-bl from-emerald-200 via-white/90 to-white/40 bg-clip-text text-transparent inline-block pb-2"
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
@@ -179,7 +117,7 @@ function Landing() {
             transition={{ duration: 0.6, delay: 1.1, ease: "easeOut" }}
             className="mt-8 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed"
           >
-            Manage income, expenses, invoices, clients, and cash flow across unlimited planners. Feels like Notion. Powered like a spreadsheet.
+            Replace disconnected spreadsheets, outdated budgeting tools, and scattered financial apps with one intelligent workspace designed to help you manage, plan, and grow with confidence.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -188,13 +126,13 @@ function Landing() {
             className="mt-10 flex flex-wrap gap-3 justify-center"
           >
             <Link to="/auth">
-              <Button size="lg" className="h-12 px-6 glow-emerald hover:scale-105 hover:bg-primary/90 transition-all duration-300">
-                Open your workspace<ArrowRight className="ml-2 h-4 w-4" />
+              <Button size="lg" className="h-12 px-8 glow-emerald hover:scale-105 hover:bg-primary/90 transition-all duration-300">
+                Enroll Beta<ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
             <a href="#features">
-              <Button size="lg" variant="outline" className="h-12 px-6 border-white/10 bg-white/5 backdrop-blur-sm hover:border-primary/30 hover:bg-primary/10 hover:text-primary hover:scale-105 transition-all duration-300">
-                Explore features
+              <Button size="lg" variant="outline" className="h-12 px-8 border-white/10 bg-white/5 backdrop-blur-sm hover:border-primary/30 hover:bg-primary/10 hover:text-primary hover:scale-105 transition-all duration-300">
+                Learn More
               </Button>
             </a>
           </motion.div>
@@ -222,13 +160,13 @@ function Landing() {
                   { label: "Net Cash Flow", value: "$35,330", tone: "text-primary" },
                   { label: "Balance", value: "$81,450", tone: "text-foreground" },
                 ].map((k) => (
-                  <div key={k.label} className="rounded-xl bg-card/40 border border-white/5 p-4 text-left hover:bg-card/60 transition-colors backdrop-blur-md">
+                  <div key={k.label} className="rounded-xl bg-card/40 border border-white/5 p-4 text-left hover:bg-card/60 transition-colors">
                     <div className="text-xs text-muted-foreground uppercase tracking-wider">{k.label}</div>
                     <div className={`mt-2 text-2xl font-display font-medium ${k.tone}`}>{k.value}</div>
                   </div>
                 ))}
               </div>
-              <div className="rounded-xl bg-card/30 border border-white/5 h-64 flex items-end justify-between px-6 pb-6 gap-2 relative overflow-hidden backdrop-blur-md z-10">
+              <div className="rounded-xl bg-card/30 border border-white/5 h-64 flex items-end justify-between px-6 pb-6 gap-2 relative overflow-hidden z-10">
                 {/* Subtle grid lines */}
                 <div className="absolute inset-0 flex flex-col justify-between py-6 px-6 pointer-events-none">
                   {[0,1,2,3].map(i => <div key={i} className="border-b border-white/5" />)}
@@ -262,8 +200,8 @@ function Landing() {
               transition={{ duration: 0.6, ease: "easeOut" }}
               className="text-center max-w-2xl mx-auto mb-16"
             >
-              <h2 className="text-4xl font-display tracking-tight">Everything you track. In one calm place.</h2>
-              <p className="mt-4 text-muted-foreground leading-relaxed">Spreadsheet flexibility, dashboard clarity, and vault-level file organization — without the mess.</p>
+              <h2 className="text-4xl font-display tracking-tight">Everything. <span className="text-primary">One Workspace.</span></h2>
+              <p className="mt-4 text-muted-foreground leading-relaxed">Manage every aspect of your financial life from one unified platform. Whether you're budgeting your personal finances, running a freelance business, managing client projects, or operating an entire company, Capient keeps everything connected, organized, and always within reach.</p>
             </motion.div>
             <div className="grid md:grid-cols-3 gap-4">
               {[
@@ -303,22 +241,9 @@ function Landing() {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.7, ease: "easeOut" }}
               >
-                <h2 className="text-4xl font-display tracking-tight">Built for how you actually work.</h2>
-                <p className="mt-4 text-muted-foreground leading-relaxed">Every module speaks to the next. Add income → invoice → payment proof → account balance updates → cash flow reflects it → dashboard refreshes.</p>
-                <ul className="mt-6 space-y-3 text-sm">
-                  {["Editable spreadsheet-style tables", "Inline autosave", "Sticky headers, keyboard navigation", "Custom columns & categories", "Drag-and-drop file uploads"].map((x, i) => (
-                    <motion.li
-                      key={x}
-                      initial={{ opacity: 0, x: -10 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }}
-                      className="flex items-center gap-3 text-muted-foreground"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" /> {x}
-                    </motion.li>
-                  ))}
-                </ul>
+                <h2 className="text-4xl font-display tracking-tight">Designed Around How You <span className="text-primary">Actually Work</span></h2>
+                <p className="mt-4 text-muted-foreground leading-relaxed">Most financial tools solve one problem. <span className="text-foreground/90 font-medium">Capient brings them together.</span></p>
+                <p className="mt-4 text-muted-foreground leading-relaxed text-sm">Track income and expenses, forecast future cash flow, manage clients, generate invoices, monitor project profitability, organize financial documents, collaborate with your team, and gain a complete picture of your finances—all from one beautifully designed workspace.</p>
                 <div className="mt-8">
                   <Link to="/auth">
                     <Button size="lg" className="glow-emerald hover:scale-105 transition-transform duration-300">
@@ -359,39 +284,46 @@ function Landing() {
           </div>
         </section>
 
-        {/* About Section */}
-        <section id="about" className="py-24 relative overflow-hidden bg-[#030b0c]">
-          <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+
+        {/* Built for Every Stage */}
+        <section className="py-28 relative bg-[#050c0d]">
+          <div className="max-w-7xl mx-auto px-6">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.6, ease: "easeOut" }}
+              className="text-center max-w-2xl mx-auto mb-16"
             >
-              <h2 className="text-3xl md:text-5xl font-display tracking-tight">
-                Designed for <span className="text-primary">clarity</span>.
-              </h2>
-              <p className="mt-6 text-muted-foreground text-lg leading-relaxed">
-                Lumen was born out of frustration with clunky financial tools that made managing money feel like a chore. We are a dedicated team at Orion Edge Digital building a completely different experience—one where your finances are beautifully organized and calm.
-              </p>
-              <div className="mt-8">
-                <Link to="/about">
-                  <Button variant="outline" className="border-white/10 hover:bg-white/5 rounded-full">
-                    Read our story
-                  </Button>
-                </Link>
-              </div>
+              <h2 className="text-4xl font-display tracking-tight">Built for <span className="text-primary">Every Stage</span></h2>
             </motion.div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-              className="relative aspect-square md:aspect-[4/3] rounded-3xl overflow-hidden border border-white/5 bg-card/20 backdrop-blur-sm shadow-2xl flex items-center justify-center group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
-              <img src="/favicon.png" alt="Lumen Logo" className="w-32 h-32 object-contain opacity-80 group-hover:scale-110 transition-transform duration-700" loading="lazy" />
-            </motion.div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                { icon: User, title: "Personal Finance", desc: "Stay on top of your spending, savings, goals, and everyday finances.", accent: "from-emerald-500/20 to-transparent" },
+                { icon: Briefcase, title: "Freelancers", desc: "Manage clients, invoices, expenses, and project profitability in one place.", accent: "from-emerald-400/25 to-transparent" },
+                { icon: Building2, title: "Businesses", desc: "Collaborate with your team, monitor financial performance, and make informed decisions with confidence.", accent: "from-emerald-300/20 to-transparent" },
+              ].map((card, i) => (
+                <motion.div
+                  key={card.title}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.6, delay: i * 0.15, ease: "easeOut" }}
+                  className="relative group rounded-2xl border border-hairline bg-card/10 p-8 hover:bg-card/30 hover:border-primary/15 hover:-translate-y-1 transition-all duration-500 overflow-hidden"
+                >
+                  {/* Subtle gradient glow at top */}
+                  <div className={`absolute inset-x-0 top-0 h-32 bg-gradient-to-b ${card.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`} />
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative z-10">
+                    <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
+                      <card.icon className="h-6 w-6" />
+                    </div>
+                    <h3 className="font-display text-xl font-medium text-foreground/90 group-hover:text-foreground transition-colors mb-3">{card.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{card.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -457,9 +389,10 @@ function Landing() {
 
         {/* Footer */}
         <footer className="pt-32 pb-4 text-sm text-muted-foreground relative z-10 overflow-hidden bg-black border-t border-white/5 shadow-2xl mt-8">
-          <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen opacity-100">
+          <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen">
             <div className="absolute inset-0">
-               <SideRays 
+              <Suspense fallback={null}>
+                <LazySideRays 
                   speed={1.5}
                   rayColor1="#10B981" 
                   rayColor2="#34D399" 
@@ -470,10 +403,12 @@ function Landing() {
                   saturation={1.5}
                   blend={0.5}
                   opacity={1.0}
-               />
+                />
+              </Suspense>
             </div>
             <div className="absolute inset-0">
-               <SideRays 
+              <Suspense fallback={null}>
+                <LazySideRays 
                   speed={1.5}
                   rayColor1="#10B981" 
                   rayColor2="#34D399" 
@@ -484,14 +419,15 @@ function Landing() {
                   saturation={1.5}
                   blend={0.5}
                   opacity={1.0}
-               />
+                />
+              </Suspense>
             </div>
           </div>
           <div className="max-w-7xl mx-auto px-10 grid md:grid-cols-2 gap-16 relative z-10 mb-20">
             <div className="space-y-6">
               <div className="flex items-center gap-2 text-2xl font-display font-semibold text-foreground">
-                <img src="/favicon.png" alt="Lumen" className="h-8 w-8 object-contain" />
-                Lumen
+                <img src="/favicon.png" alt="Capient" className="h-8 w-8 object-contain" />
+                Capient
               </div>
               <p className="max-w-md text-base leading-relaxed text-muted-foreground/80">
                 The financial operating system built for freelancers, agencies, and entrepreneurs. A calm space for your money.
@@ -537,12 +473,12 @@ function Landing() {
             
             <div className="w-full overflow-hidden flex justify-center items-center opacity-100 select-none pointer-events-none mt-16 mb-2 relative z-10 px-4">
                <h1 className="text-[clamp(6rem,15vw,22rem)] font-display font-bold text-transparent bg-clip-text bg-gradient-to-t from-emerald-400/30 via-emerald-500/5 to-transparent leading-none tracking-tighter mix-blend-plus-lighter">
-                 Lumen
+                 Capient
                </h1>
             </div>
 
             <div className="max-w-7xl mx-auto px-10 border-t border-hairline flex flex-col md:flex-row items-center justify-between gap-4 text-xs pt-4">
-              <div>© {new Date().getFullYear()} Lumen. All rights reserved.</div>
+              <div>© {new Date().getFullYear()} Capient. All rights reserved.</div>
               <div className="flex gap-6">
                 <Link to="/coming-soon" className="hover:text-primary transition-colors">Privacy Policy</Link>
                 <Link to="/coming-soon" className="hover:text-primary transition-colors">Terms of Service</Link>

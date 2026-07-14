@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({ meta: [{ title: "Reset password — Lumen" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Reset password — Capient" }, { name: "robots", content: "noindex" }] }),
   component: ResetPasswordPage,
 });
 

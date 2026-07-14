@@ -196,10 +196,10 @@ function OnboardingWizard() {
 
           <div className="mb-8 text-center mt-4">
              <div className="inline-flex h-12 w-12 bg-[#0b1414] rounded-xl items-center justify-center border border-white/5 mb-6">
-               <img src="/favicon.png" alt="Lumen" className="h-6 w-6 object-contain" />
+               <img src="/favicon.png" alt="Capient" className="h-6 w-6 object-contain" />
              </div>
              <h1 className="text-2xl font-display font-medium text-white tracking-tight">
-               Welcome to Lumen
+               Welcome to Capient
              </h1>
              <p className="text-muted-foreground text-sm mt-2">
                Let's set up your workspace
@@ -262,7 +262,7 @@ function OnboardingWizard() {
                   </div>
                   
                   <div className="space-y-3">
-                    <label className="text-sm font-medium text-white/80 pl-1">How will you use Lumen?</label>
+                    <label className="text-sm font-medium text-white/80 pl-1">How will you use Capient?</label>
                     <div className="grid grid-cols-2 gap-3">
                       <button 
                         onClick={() => setPurpose("personal")}

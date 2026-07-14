@@ -143,10 +143,10 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-white/5 bg-[#030808]">
       <SidebarHeader className="px-3 py-3">
         <div className="flex items-center gap-2 px-1 mb-2">
-          <img src="/favicon.png" alt="Lumen" className="h-6 w-6 object-contain" />
+          <img src="/favicon.png" alt="Capient" className="h-6 w-6 object-contain" />
           {!collapsed && (
             <div className="flex flex-col leading-tight">
-              <span className="font-display font-semibold">Lumen</span>
+              <span className="font-display font-semibold">Capient</span>
               <span className="text-[10px] text-muted-foreground">by Orion Edge Digital</span>
             </div>
           )}

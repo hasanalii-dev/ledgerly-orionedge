@@ -14,6 +14,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import appCss from "../styles.css?url";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { ReactLenis } from 'lenis/react';
 
 // Global log buffer for bug reporting
 declare global {
@@ -81,14 +82,14 @@ export const Route = createRootRouteWithContext<{
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lumen — Personal & Business Finance Planner" },
+      { title: "Capient — Personal & Business Finance Planner" },
       { name: "description", content: "A premium financial operating system for entrepreneurs, freelancers, and agencies. Track income, expenses, invoices, clients, and cash flow in beautiful spreadsheet-style planners." },
       { name: "theme-color", content: "#0B0F0D" },
-      { property: "og:title", content: "Lumen — Personal & Business Finance Planner" },
+      { property: "og:title", content: "Capient — Personal & Business Finance Planner" },
       { property: "og:description", content: "A premium financial operating system for entrepreneurs, freelancers, and agencies. Track income, expenses, invoices, clients, and cash flow in beautiful spreadsheet-style planners." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Lumen — Personal & Business Finance Planner" },
+      { name: "twitter:title", content: "Capient — Personal & Business Finance Planner" },
       { name: "twitter:description", content: "A premium financial operating system for entrepreneurs, freelancers, and agencies. Track income, expenses, invoices, clients, and cash flow in beautiful spreadsheet-style planners." },
     ],
     links: [
@@ -162,37 +163,33 @@ function InitialSplash() {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative flex flex-col items-center justify-center gap-8 w-full max-w-xs"
+            className="relative flex flex-col items-center justify-center gap-10 w-full max-w-xs will-change-transform"
           >
-            <div className="relative">
-              <img src="/favicon.png" alt="Lumen" className="h-24 w-24 object-contain" />
+            <div className="relative will-change-transform">
+              <motion.div
+                 animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }}
+                 transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                 className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full"
+              />
+              <img src="/favicon.png" alt="Capient" className="relative h-20 w-20 object-contain" />
             </div>
             
-            <div className="flex flex-col items-center w-full gap-3">
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-                className="text-white/80 font-display tracking-[0.2em] uppercase text-xs"
-              >
-                Lumen
-              </motion.div>
-              
+            <div className="flex flex-col items-center w-full">
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.4 }}
-                className="w-48 h-[2px] bg-white/5 rounded-full overflow-hidden"
+                transition={{ delay: 0.3, duration: 0.4 }}
+                className="w-48 h-[1px] bg-white/5 rounded-full overflow-hidden relative"
               >
                 <motion.div
-                  initial={{ width: "0%" }}
-                  animate={{ width: ["0%", "30%", "70%", "100%"] }}
+                  initial={{ left: "-100%" }}
+                  animate={{ left: "100%" }}
                   transition={{ 
+                    repeat: Infinity,
                     duration: 1.5, 
-                    times: [0, 0.4, 0.8, 1],
                     ease: "easeInOut" 
                   }}
-                  className="h-full bg-emerald-400 rounded-full shadow-[0_0_10px_rgba(52,211,153,0.8)]"
+                  className="absolute top-0 bottom-0 w-1/2 bg-gradient-to-r from-transparent via-emerald-400 to-transparent"
                 />
               </motion.div>
             </div>
@@ -255,43 +252,45 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <InitialSplash />
       <PageLoader />
-      {isDashboard ? (
-        <Outlet />
-      ) : (
-        <AnimatePresence mode="wait">
-          <motion.div key={location.pathname} className="flex min-h-screen flex-col w-full relative">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98, filter: "blur(4px)" }}
-              animate={{ opacity: 1, scale: 1, filter: "blur(0px)", transitionEnd: { filter: "none", transform: "none" } }}
-              exit={{ opacity: 0, scale: 1.02, filter: "blur(4px)" }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="flex min-h-screen flex-col w-full"
-            >
-              <Outlet />
+      <ReactLenis root options={{ lerp: 0.08, syncTouch: true }}>
+        {isDashboard ? (
+          <Outlet />
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.div key={location.pathname} className="flex min-h-screen flex-col w-full relative">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98, filter: "blur(4px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)", transitionEnd: { filter: "none", transform: "none" } }}
+                exit={{ opacity: 0, scale: 1.02, filter: "blur(4px)" }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="flex min-h-screen flex-col w-full"
+              >
+                <Outlet />
+              </motion.div>
+              
+              {/* The Wipe Overlays */}
+              <motion.div
+                className="fixed inset-0 z-[999] bg-[#020505] origin-bottom border-t border-emerald-500/20"
+                initial={{ scaleY: 0 }}
+                animate={{ scaleY: 0 }}
+                exit={{ scaleY: 1 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              >
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <div className="w-12 h-12 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
+                 </div>
+              </motion.div>
+              <motion.div
+                className="fixed inset-0 z-[999] bg-[#020505] origin-top border-b border-emerald-500/20"
+                initial={{ scaleY: 1 }}
+                animate={{ scaleY: 0 }}
+                exit={{ scaleY: 0 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              />
             </motion.div>
-            
-            {/* The Wipe Overlays */}
-            <motion.div
-              className="fixed inset-0 z-[999] bg-[#020505] origin-bottom border-t border-emerald-500/20"
-              initial={{ scaleY: 0 }}
-              animate={{ scaleY: 0 }}
-              exit={{ scaleY: 1 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            >
-               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-12 h-12 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
-               </div>
-            </motion.div>
-            <motion.div
-              className="fixed inset-0 z-[999] bg-[#020505] origin-top border-b border-emerald-500/20"
-              initial={{ scaleY: 1 }}
-              animate={{ scaleY: 0 }}
-              exit={{ scaleY: 0 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            />
-          </motion.div>
-        </AnimatePresence>
-      )}
+          </AnimatePresence>
+        )}
+      </ReactLenis>
       <Toaster theme="dark" position="bottom-right" />
     </QueryClientProvider>
   );

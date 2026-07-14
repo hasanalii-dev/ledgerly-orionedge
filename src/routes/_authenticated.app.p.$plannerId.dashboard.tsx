@@ -8,7 +8,7 @@ import {
 } from "recharts";
 import { Clock, TrendingUp, TrendingDown, Wallet, Activity, Target, PieChart, PiggyBank, Flame, Calendar, Crown, ShieldCheck, Sparkles } from "lucide-react";
 import { format, subMonths, startOfMonth, endOfMonth, startOfYear } from "date-fns";
-import { PageTransition } from "@/components/page-transition";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
