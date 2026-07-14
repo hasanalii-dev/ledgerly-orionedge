@@ -130,7 +130,7 @@ function Landing() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-            className="inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/5 backdrop-blur-md px-4 py-1.5 text-xs text-muted-foreground mb-8 hover:border-primary/30 transition-colors cursor-default"
+            className="inline-flex items-center gap-2 rounded-full border border-white/5 border-t-emerald-500/30 border-r-emerald-500/30 bg-[#050a0a]/80 backdrop-blur-md px-4 py-1.5 text-xs text-white/70 mb-8 shadow-[2px_-2px_20px_rgba(52,211,153,0.15)] hover:border-emerald-500/50 transition-all cursor-default"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
             Now with multi-planner workspaces
@@ -151,6 +151,7 @@ function Landing() {
               <motion.span
                 key={i}
                 className="text-white/90"
+                style={{ textShadow: "-5px 5px 15px rgba(0,0,0,0.8)" }}
                 variants={{
                   hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
                   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } }
@@ -160,7 +161,8 @@ function Landing() {
               </motion.span>
             ))}
             <motion.span
-              className="text-emerald-300 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]"
+              className="text-emerald-300"
+              style={{ textShadow: "-5px 5px 15px rgba(0,0,0,0.8), 0 0 35px rgba(52,211,153,0.5)" }}
               variants={{
                   hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
                   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } }
@@ -173,6 +175,7 @@ function Landing() {
               <motion.span
                 key={i}
                 className={i === 0 ? "text-white/70" : i === 1 ? "text-white/50" : "text-white/30"}
+                style={{ textShadow: "-5px 5px 15px rgba(0,0,0,0.8)" }}
                 variants={{
                   hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
                   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } }
