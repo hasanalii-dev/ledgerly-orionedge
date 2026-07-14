@@ -386,20 +386,20 @@ function Landing() {
         </section>
 
         {/* CTA */}
-        <section id="pricing" className="relative z-20 px-4 md:px-8 max-w-5xl mx-auto w-full pt-12">
-          <div className="rounded-[40px] md:rounded-[40px] border border-white/5 bg-[#030a0a] shadow-[0_0_80px_-20px_rgba(16,185,129,0.15)] relative overflow-hidden pt-12 pb-12 translate-y-1/2">
-            {/* Background gradient image — normal */}
-            <div className="absolute inset-x-0 top-0 z-0 w-full pointer-events-none select-none flex items-start opacity-70">
+        <section id="pricing" className="relative z-20 px-4 md:px-8 max-w-5xl mx-auto w-full pt-8">
+          <div className="rounded-[40px] border border-white/5 bg-[#030a0a] shadow-[0_0_80px_-20px_rgba(16,185,129,0.15)] relative overflow-hidden pt-10 pb-8 translate-y-1/2">
+            {/* Background gradient image — bottom */}
+            <div className="absolute inset-x-0 bottom-0 z-0 w-full pointer-events-none select-none flex items-end opacity-100">
               <img
                 src="/bg-gradient.png"
                 alt=""
-                className="w-full h-auto object-cover opacity-90"
+                className="w-full h-auto object-cover opacity-100"
                 draggable={false}
                 loading="lazy"
               />
             </div>
-            {/* Blending overlay */}
-            <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-[#030a0a] to-transparent z-0 pointer-events-none" />
+            {/* Blending overlay to merge the top edge of the image */}
+            <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#030a0a]/50 to-transparent z-0 pointer-events-none" />
             
             <div className="absolute inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/10 rounded-full blur-[100px]" />
@@ -446,7 +446,7 @@ function Landing() {
         </section>
 
         {/* Footer */}
-        <footer className="pt-32 pb-8 text-sm text-muted-foreground relative z-10 overflow-hidden bg-black border-t border-white/5 shadow-2xl mt-8">
+        <footer className="pt-32 pb-4 text-sm text-muted-foreground relative z-10 overflow-hidden bg-black border-t border-white/5 shadow-2xl mt-8">
           <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen opacity-100">
             <div className="absolute inset-0">
                <SideRays 
@@ -525,13 +525,13 @@ function Landing() {
             </div>
             </div>
             
-            <div className="w-full overflow-hidden flex justify-center items-center opacity-100 select-none pointer-events-none mt-16 mb-12 relative z-10 px-4">
+            <div className="w-full overflow-hidden flex justify-center items-center opacity-100 select-none pointer-events-none mt-16 mb-2 relative z-10 px-4">
                <h1 className="text-[clamp(6rem,15vw,22rem)] font-display font-bold text-transparent bg-clip-text bg-gradient-to-t from-emerald-400/30 via-emerald-500/5 to-transparent leading-none tracking-tighter mix-blend-plus-lighter">
                  Lumen
                </h1>
             </div>
 
-            <div className="max-w-7xl mx-auto px-10 border-t border-hairline flex flex-col md:flex-row items-center justify-between gap-4 text-xs pt-8">
+            <div className="max-w-7xl mx-auto px-10 border-t border-hairline flex flex-col md:flex-row items-center justify-between gap-4 text-xs pt-4">
               <div>© {new Date().getFullYear()} Lumen. All rights reserved.</div>
               <div className="flex gap-6">
                 <Link to="/coming-soon" className="hover:text-primary transition-colors">Privacy Policy</Link>
