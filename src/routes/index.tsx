@@ -387,9 +387,9 @@ function Landing() {
 
         {/* CTA */}
         <section id="pricing" className="relative z-20 px-4 md:px-8 max-w-5xl mx-auto w-full pt-8">
-          <div className="rounded-[40px] border border-white/5 bg-[#030a0a] shadow-[0_0_80px_-20px_rgba(16,185,129,0.15)] relative overflow-hidden pt-10 pb-8 translate-y-1/2">
+          <div className="rounded-3xl border border-white/5 bg-[#030a0a] shadow-[0_0_80px_-20px_rgba(16,185,129,0.15)] relative overflow-hidden pt-10 pb-8 translate-y-1/2">
             {/* Background gradient image — bottom */}
-            <div className="absolute inset-x-0 bottom-0 z-0 w-full pointer-events-none select-none flex items-end opacity-100">
+            <div className="absolute inset-x-0 bottom-0 z-0 w-full pointer-events-none select-none flex items-end opacity-100 translate-y-[20%]">
               <img
                 src="/bg-gradient.png"
                 alt=""
