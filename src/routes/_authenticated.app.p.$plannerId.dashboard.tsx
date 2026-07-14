@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Bell } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/dashboard")({
   component: DashboardPage,
@@ -167,9 +168,9 @@ function DashboardPage() {
           </div>
           
           <div className="order-1 md:order-2 self-center md:self-auto flex items-center relative">
-            <Avatar className="h-16 w-16 border-2 border-white/10 ring-2 ring-primary/20 shadow-xl">
+            <Avatar className="h-20 w-20 border-2 border-white/10 ring-2 ring-primary/20 shadow-xl">
               <AvatarImage src={profile?.avatar_url} />
-              <AvatarFallback className="bg-primary/20 text-primary text-2xl font-medium">
+              <AvatarFallback className="bg-primary/20 text-primary text-3xl font-medium">
                 {(profile?.display_name || "U").charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -177,12 +178,17 @@ function DashboardPage() {
               variant="outline" 
               size="icon" 
               asChild 
-              className="absolute -top-1 -right-1 rounded-full h-9 w-9 z-10 bg-background/95 backdrop-blur-md shadow-lg border-white/20"
+              className="absolute -top-1 -right-1 rounded-full h-9 w-9 z-10 bg-background/95 backdrop-blur-md shadow-lg border-white/20 hover:scale-110 transition-transform"
             >
               <Link to="/app/p/$plannerId/notifications" params={{ plannerId }}>
-                <Bell className="h-4 w-4 text-foreground" />
+                <motion.div
+                  animate={{ rotate: [0, -15, 15, -15, 15, 0] }}
+                  transition={{ repeat: Infinity, repeatDelay: 3, duration: 0.6 }}
+                >
+                  <Bell className="h-4 w-4 text-foreground" />
+                </motion.div>
                 {pendingInvites.length > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-white text-[9px] font-bold rounded-full border-2 border-background flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-white text-[9px] font-bold rounded-full border-2 border-background flex items-center justify-center animate-pulse">
                     {pendingInvites.length}
                   </span>
                 )}
