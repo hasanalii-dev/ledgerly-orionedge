@@ -258,15 +258,18 @@ function RootComponent() {
       {isDashboard ? (
         <Outlet />
       ) : (
-        <motion.div
-          key={location.pathname}
-          initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)", transitionEnd: { filter: "none", transform: "none" } }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="flex min-h-screen flex-col"
-        >
-          <Outlet />
-        </motion.div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, filter: "blur(8px)", scale: 0.98 }}
+            animate={{ opacity: 1, filter: "blur(0px)", scale: 1, transitionEnd: { filter: "none", transform: "none" } }}
+            exit={{ opacity: 0, filter: "blur(8px)", scale: 1.02 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="flex min-h-screen flex-col"
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       )}
       <Toaster theme="dark" position="bottom-right" />
     </QueryClientProvider>
