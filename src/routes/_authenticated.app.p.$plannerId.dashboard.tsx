@@ -188,7 +188,10 @@ function DashboardPage() {
                       {expensePie.map((_, i) => <Cell key={i} fill={pieColors[i % pieColors.length]} />)}
                     </Pie>
                     <Tooltip 
-                      formatter={(val: number) => formatMoney(val, currency)}
+                      formatter={(val: number, name: string, props: any) => {
+                        const percent = props?.payload?.percent ? `(${(props.payload.percent * 100).toFixed(1)}%)` : '';
+                        return [`${formatMoney(val, currency)} ${percent}`, name];
+                      }}
                       contentStyle={{ background: "oklch(0.22 0.008 155)", border: "1px solid oklch(1 0 0 / 0.08)", borderRadius: 12, color: "white" }} 
                       itemStyle={{ color: "white" }}
                     />

@@ -53,8 +53,8 @@ function NotesPage() {
   }
 
   return (
-    <div className="grid grid-cols-[280px_1fr] gap-6 h-[calc(100vh-160px)]">
-      <div className="rounded-2xl border border-hairline bg-card overflow-hidden flex flex-col">
+    <div className="flex flex-col md:grid md:grid-cols-[280px_1fr] gap-6 h-[calc(100vh-160px)]">
+      <div className="rounded-2xl border border-hairline bg-card overflow-hidden flex flex-col min-h-[30%]">
         <div className="p-3 border-b border-hairline flex items-center justify-between">
           <div className="text-sm font-medium">Notes</div>
           <Button size="sm" variant="ghost" onClick={addNote}><Plus className="h-4 w-4" /></Button>

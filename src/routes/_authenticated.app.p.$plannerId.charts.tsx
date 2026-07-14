@@ -71,7 +71,10 @@ function ChartsPage() {
                 {byCat.map((c, i) => <Cell key={c.name} fill={c.color || COLORS[i % COLORS.length]} />)}
               </Pie>
               <Tooltip 
-                formatter={(val: number) => formatMoney(val, currency)}
+                formatter={(val: number, name: string, props: any) => {
+                  const percent = props?.payload?.percent ? `(${(props.payload.percent * 100).toFixed(1)}%)` : '';
+                  return [`${formatMoney(val, currency)} ${percent}`, name];
+                }}
                 contentStyle={{ background: "oklch(0.2 0 0)", border: "1px solid oklch(1 0 0 / 10%)", borderRadius: 10, color: "white" }} 
                 itemStyle={{ color: "white" }}
               />

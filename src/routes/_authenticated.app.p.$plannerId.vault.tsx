@@ -72,7 +72,7 @@ function VaultPage() {
         <input ref={fileRef} type="file" multiple hidden onChange={(e) => upload(e.target.files)} />
         <Button onClick={() => fileRef.current?.click()} className="glow-emerald"><Upload className="h-4 w-4 mr-1" />Upload</Button>
       </div>
-      <div className="grid grid-cols-[240px_1fr] gap-6">
+      <div className="flex flex-col md:grid md:grid-cols-[240px_1fr] gap-6">
         <div className="rounded-2xl border border-hairline bg-card p-2 h-fit">
           <button onClick={() => setActiveFolder(null)} className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center gap-2 ${!activeFolder ? "bg-elevated" : "hover:bg-elevated/60"}`}>
             <Folder className="h-4 w-4" />All files

@@ -2,6 +2,26 @@
 @source "../src";
 @import "tw-animate-css";
 
+@font-face {
+  font-family: 'Samsung Sharp Sans';
+  src: url('/fonts/samsungsharpsans.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Samsung Sharp Sans';
+  src: url('/fonts/samsungsharpsans-medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Samsung Sharp Sans';
+  src: url('/fonts/samsungsharpsans-bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
 @custom-variant dark (&:is(.dark *));
 
 /*
