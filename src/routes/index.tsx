@@ -96,8 +96,18 @@ function Landing() {
       {/* Hero */}
       <section className="relative overflow-hidden pt-24 min-h-[90vh] flex flex-col justify-center bg-background z-0">
         
-        {/* Top-Right Light Rays */}
-        <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen opacity-100">
+        {/* Background gradient image — full width at the bottom of hero */}
+        <div className="absolute inset-x-0 bottom-0 z-0 w-full pointer-events-none select-none flex items-end opacity-80">
+          <img
+            src="/bg-gradient.png"
+            alt=""
+            className="w-full h-auto object-cover opacity-90"
+            draggable={false}
+          />
+        </div>
+
+        {/* Top-Right Light Rays (Positioned above bg image but below text) */}
+        <div className="absolute inset-0 z-[5] pointer-events-none mix-blend-screen opacity-100">
            <SideRays 
               speed={1.5}
               rayColor1="#10B981" 
@@ -110,16 +120,6 @@ function Landing() {
               blend={0.5}
               opacity={1.0}
            />
-        </div>
-
-        {/* Background gradient image — full width at the bottom of hero */}
-        <div className="absolute inset-x-0 bottom-0 z-0 w-full pointer-events-none select-none flex items-end opacity-80">
-          <img
-            src="/bg-gradient.png"
-            alt=""
-            className="w-full h-auto object-cover opacity-90"
-            draggable={false}
-          />
         </div>
         
         {/* Subtle grain/noise overlay */}
@@ -145,9 +145,9 @@ function Landing() {
             }}
             initial="hidden"
             animate="visible"
-            className="text-5xl md:text-7xl font-display tracking-tight leading-[1.02] max-w-4xl mx-auto flex flex-wrap justify-center gap-x-4"
+            className="text-5xl md:text-7xl font-display tracking-tight leading-[1.02] max-w-4xl mx-auto flex flex-wrap justify-center gap-x-4 bg-gradient-to-bl from-emerald-100 via-white to-white/60 bg-clip-text text-transparent drop-shadow-sm pb-2"
           >
-            {["Illuminating", "your"].map((word, i) => (
+            {["The", "financial"].map((word, i) => (
               <motion.span
                 key={i}
                 variants={{
@@ -159,16 +159,16 @@ function Landing() {
               </motion.span>
             ))}
             <motion.span
-              className="text-primary"
+              className="text-emerald-400"
               variants={{
                   hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
                   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } }
               }}
             >
-              financial universe
+              operating system
             </motion.span>
             <motion.div className="w-full h-0 hidden md:block" />
-            {["with", "absolute", "clarity."].map((word, i) => (
+            {["built", "for", "entrepreneurs."].map((word, i) => (
               <motion.span
                 key={i}
                 variants={{
