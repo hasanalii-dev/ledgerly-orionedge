@@ -130,10 +130,12 @@ function Landing() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-            className="inline-flex items-center gap-2 rounded-full border border-white/5 border-t-emerald-500/30 border-r-emerald-500/30 bg-[#050a0a]/80 backdrop-blur-md px-4 py-1.5 text-xs text-white/70 mb-8 shadow-[2px_-2px_20px_rgba(52,211,153,0.15)] hover:border-emerald-500/50 transition-all cursor-default"
+            className="p-[1px] rounded-full bg-gradient-to-bl from-emerald-500/50 to-white/5 mb-8 inline-flex"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-            Now with multi-planner workspaces
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#050a0a]/80 backdrop-blur-md px-4 py-1.5 text-xs text-white/70 shadow-[2px_-2px_20px_rgba(52,211,153,0.15)] cursor-default">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+              Now with multi-planner workspaces
+            </div>
           </motion.div>
           <motion.h1
             variants={{
@@ -145,40 +147,26 @@ function Landing() {
             }}
             initial="hidden"
             animate="visible"
-            className="text-5xl md:text-7xl font-display tracking-tight leading-[1.02] max-w-4xl mx-auto flex flex-wrap justify-center gap-x-4 pb-2"
+            className="text-5xl md:text-7xl font-display tracking-tight leading-[1.02] max-w-4xl mx-auto flex flex-wrap justify-center gap-x-4 pb-2 bg-gradient-to-bl from-emerald-400 via-white to-white/80 bg-clip-text text-transparent"
           >
-            {["The", "financial"].map((word, i) => (
+            {["The", "financial", "operating", "system"].map((word, i) => (
               <motion.span
                 key={i}
-                className="text-white/90"
-                style={{ textShadow: "-5px 5px 15px rgba(0,0,0,0.8)" }}
                 variants={{
-                  hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
-                  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } }
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
                 }}
               >
                 {word}
               </motion.span>
             ))}
-            <motion.span
-              className="text-emerald-300"
-              style={{ textShadow: "-5px 5px 15px rgba(0,0,0,0.8), 0 0 35px rgba(52,211,153,0.5)" }}
-              variants={{
-                  hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
-                  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } }
-              }}
-            >
-              operating system
-            </motion.span>
             <motion.div className="w-full h-0 hidden md:block" />
             {["built", "for", "entrepreneurs."].map((word, i) => (
               <motion.span
-                key={i}
-                className={i === 0 ? "text-white/70" : i === 1 ? "text-white/50" : "text-white/30"}
-                style={{ textShadow: "-5px 5px 15px rgba(0,0,0,0.8)" }}
+                key={`b-${i}`}
                 variants={{
-                  hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
-                  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } }
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
                 }}
               >
                 {word}
