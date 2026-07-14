@@ -189,7 +189,7 @@ export function CellInput({ value, onChange, type = "text", className = "" }: { 
       onBlur={() => { if (local !== value) onChange(local); }}
       onKeyDown={(e) => { if (e.key === "Enter") { e.currentTarget.blur(); } }}
       step={type === "number" ? "any" : undefined}
-      className={`w-full bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-elevated rounded-md focus:ring-1 focus:ring-primary/40 ${className}`}
+      className={`w-full bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-elevated rounded-md focus:ring-1 focus:ring-primary/40 focus:min-w-[200px] focus:z-10 relative transition-all duration-200 ${className}`}
     />
   );
 }

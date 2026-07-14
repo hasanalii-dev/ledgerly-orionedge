@@ -10,6 +10,10 @@ import { Clock, TrendingUp, TrendingDown, Wallet, Activity, Target, PieChart, Pi
 import { format, subMonths, startOfMonth, endOfMonth, startOfYear } from "date-fns";
 import { PageTransition } from "@/components/page-transition";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Bell } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/dashboard")({
   component: DashboardPage,
@@ -49,6 +53,8 @@ function DashboardPage() {
     },
   });
 
+
+
   const { data: income = [] } = useQuery({
     queryKey: ["income", plannerId],
     queryFn: async () => (await supabase.from("income_entries").select("*, clients(name)").eq("planner_id", plannerId).order("date", { ascending: false })).data ?? [],
@@ -69,6 +75,36 @@ function DashboardPage() {
     queryKey: ["activity", plannerId],
     queryFn: async () => (await supabase.from("activity_events").select("*").eq("planner_id", plannerId).order("created_at", { ascending: false }).limit(8)).data ?? [],
   });
+
+  const { data: pendingInvites = [], refetch: refetchInvites } = useQuery({
+    queryKey: ["pending_invites", profile?.email],
+    queryFn: async () => {
+      if (!profile?.email) return [];
+      return (await supabase.from("planner_invites").select("*, planners(name)").eq("invitee_email", profile.email).eq("status", "pending")).data ?? [];
+    },
+    enabled: !!profile?.email,
+  });
+
+  const handleInviteAction = async (inviteId: string, action: 'accepted' | 'declined') => {
+    const { error } = await supabase.from("planner_invites").update({ status: action }).eq("id", inviteId);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    if (action === 'accepted') {
+      const invite = pendingInvites.find(i => i.id === inviteId);
+      if (invite) {
+        const { data: { user } } = await supabase.auth.getUser();
+        await supabase.from("planner_collaborators").insert({
+          planner_id: invite.planner_id,
+          user_id: user?.id,
+          role: invite.role,
+        });
+      }
+    }
+    toast.success(`Invite ${action}`);
+    refetchInvites();
+  };
 
   const totalIncome = income.reduce((s, r) => s + Number(r.amount || 0), 0);
   const totalExpenses = expenses.reduce((s, r) => s + Number(r.amount || 0), 0);
@@ -120,6 +156,8 @@ function DashboardPage() {
   return (
     <div className="relative min-h-[calc(100vh-4rem)]">
       <div className="relative z-10 space-y-6 max-w-[1600px] mx-auto pb-20 pt-4">
+
+
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0">
           <div className="order-2 md:order-1 text-center md:text-left">
             <h1 className="text-3xl font-display tracking-tight">
@@ -127,12 +165,25 @@ function DashboardPage() {
             </h1>
             <p className="text-sm text-muted-foreground mt-1">Snapshot of {planner?.name ?? "your planner"}</p>
           </div>
-          <Avatar className="h-12 w-12 border-2 border-white/10 ring-2 ring-primary/20 shadow-lg order-1 md:order-2 self-center md:self-auto">
-            <AvatarImage src={profile?.avatar_url} />
-            <AvatarFallback className="bg-primary/20 text-primary text-lg font-medium">
-              {(profile?.display_name || "U").charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          
+          <div className="order-1 md:order-2 self-center md:self-auto flex items-center gap-4">
+            <Button variant="outline" size="icon" asChild className="rounded-full h-10 w-10 relative">
+              <Link to="/app/p/$plannerId/notifications" params={{ plannerId }}>
+                <Bell className="h-5 w-5 text-muted-foreground" />
+                {pendingInvites.length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-destructive text-white text-[10px] font-bold rounded-full border-2 border-background flex items-center justify-center">
+                    {pendingInvites.length}
+                  </span>
+                )}
+              </Link>
+            </Button>
+            <Avatar className="h-12 w-12 border-2 border-white/10 ring-2 ring-primary/20 shadow-lg">
+              <AvatarImage src={profile?.avatar_url} />
+              <AvatarFallback className="bg-primary/20 text-primary text-lg font-medium">
+                {(profile?.display_name || "U").charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <KpiCard icon={TrendingUp} label="Total Income" value={formatMoney(totalIncome, currency)} compactValue={formatMoney(totalIncome, currency, true)} accent />

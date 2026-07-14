@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Loader2, ArrowRight, ArrowLeft, Mail, Home, Dice5 } from "lucide-react";
+import { Loader2, ArrowRight, ArrowLeft, Mail, Home, Dice5, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import SideRays from "@/components/magic/SideRays";
 
@@ -34,8 +34,19 @@ function AuthBetaPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState(() => `https://api.dicebear.com/7.x/notionists/svg?seed=${Math.random().toString(36).substring(7)}`);
+  const [avatarUrl, setAvatarUrl] = useState(`https://api.dicebear.com/7.x/notionists/svg?seed=initial`);
   const [otp, setOtp] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [resendTimer, setResendTimer] = useState(60);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (mode === "signup" && step === 3 && resendTimer > 0) {
+      interval = setInterval(() => setResendTimer((prev) => prev - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [mode, step, resendTimer]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -112,12 +123,18 @@ function AuthBetaPage() {
       
       if (error) throw error;
       
+      // Supabase returns an empty identities array if the user already exists (to prevent enumeration, but we want to tell the user)
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        throw new Error("This email is already registered. Please sign in instead.");
+      }
+      
       if (data.session) {
         toast.success("Welcome aboard! (Auto-login: Email confirmation is disabled in Supabase)");
         // The onAuthStateChange listener will automatically redirect to /app
       } else {
         toast.success("Code sent to your email!");
         setStep(3);
+        setResendTimer(60);
       }
     } catch (err: any) {
       toast.error(err.message || err.errors[0].message);
@@ -140,6 +157,23 @@ function AuthBetaPage() {
       navigate({ to: "/app" });
     } catch (err: any) {
       toast.error(err.message);
+      setLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+      });
+      if (error) throw error;
+      toast.success("Verification code resent!");
+      setResendTimer(60);
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
       setLoading(false);
     }
   };
@@ -305,7 +339,12 @@ function AuthBetaPage() {
                         <span className="text-sm font-medium text-emerald-400">{email}</span>
                         <button onClick={() => setStep(0)} className="text-xs text-muted-foreground hover:text-white transition-colors">Edit</button>
                       </div>
-                      <Input type="password" placeholder="Enter Password" value={password} onChange={e => setPassword(e.target.value)} className="h-14 bg-[#030606] border-white/5 text-white placeholder:text-muted-foreground/40 focus-visible:ring-emerald-500/30 rounded-2xl px-4 text-sm transition-all" onKeyDown={e => e.key === 'Enter' && handleLoginSubmit()} autoFocus />
+                      <div className="relative">
+                        <Input type={showPassword ? "text" : "password"} placeholder="Enter Password" value={password} onChange={e => setPassword(e.target.value)} className="h-14 bg-[#030606] border-white/5 text-white placeholder:text-muted-foreground/40 focus-visible:ring-emerald-500/30 rounded-2xl px-4 pr-12 text-sm transition-all" onKeyDown={e => e.key === 'Enter' && handleLoginSubmit()} autoFocus />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors">
+                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
                     </div>
                     <Button className="w-full h-14 bg-emerald-400 hover:bg-emerald-300 text-[#030808] font-semibold text-base rounded-2xl mt-4" onClick={handleLoginSubmit} disabled={loading}>
                       {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Sign In"}
@@ -361,7 +400,12 @@ function AuthBetaPage() {
                     <div className="space-y-5">
                       <div className="space-y-3">
                         <label className="text-sm font-medium text-white/80 pl-1">Create a secure password</label>
-                        <Input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="h-14 bg-[#030606] border-white/5 text-white placeholder:text-muted-foreground/40 focus-visible:ring-emerald-500/30 rounded-2xl px-4 text-sm transition-all" autoFocus />
+                        <div className="relative">
+                          <Input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="h-14 bg-[#030606] border-white/5 text-white placeholder:text-muted-foreground/40 focus-visible:ring-emerald-500/30 rounded-2xl px-4 pr-12 text-sm transition-all" autoFocus />
+                          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors">
+                            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                          </button>
+                        </div>
                         {password.length > 0 && (
                           <div className="flex items-center gap-2 px-1 pt-1">
                             <div className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${password.length >= 6 ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-red-500/50'}`} />
@@ -371,7 +415,12 @@ function AuthBetaPage() {
                         )}
                       </div>
                       <div className="space-y-3">
-                        <Input type="password" placeholder="Re-enter Password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="h-14 bg-[#030606] border-white/5 text-white placeholder:text-muted-foreground/40 focus-visible:ring-emerald-500/30 rounded-2xl px-4 text-sm transition-all" onKeyDown={e => e.key === 'Enter' && handleSignupSubmit()} />
+                        <div className="relative">
+                          <Input type={showConfirmPassword ? "text" : "password"} placeholder="Re-enter Password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="h-14 bg-[#030606] border-white/5 text-white placeholder:text-muted-foreground/40 focus-visible:ring-emerald-500/30 rounded-2xl px-4 pr-12 text-sm transition-all" onKeyDown={e => e.key === 'Enter' && handleSignupSubmit()} />
+                          <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors">
+                            {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <Button className="w-full h-14 bg-emerald-400 hover:bg-emerald-300 text-[#030808] font-semibold text-base rounded-2xl mt-4 group" onClick={handleSignupSubmit} disabled={loading || !password || !confirmPassword}>
@@ -388,9 +437,18 @@ function AuthBetaPage() {
                     </div>
                     <p className="text-sm text-white/80 mb-6 leading-relaxed">We sent an 8-digit verification code to <br/><strong className="text-emerald-400">{email}</strong>.</p>
                     <Input type="text" placeholder="• • • • • • • •" value={otp} onChange={e => setOtp(e.target.value)} className="h-16 text-center text-2xl tracking-[0.5em] font-mono bg-[#030606] border-white/5 text-white placeholder:text-muted-foreground/30 focus-visible:ring-emerald-500/30 rounded-2xl transition-all" maxLength={8} onKeyDown={e => e.key === 'Enter' && handleOtpSubmit()} autoFocus />
-                    <Button className="w-full h-14 bg-emerald-400 hover:bg-emerald-300 text-[#030808] font-semibold text-base rounded-2xl mt-6 group" onClick={handleOtpSubmit} disabled={loading || otp.length < 8}>
+                    <Button className="w-full h-14 bg-emerald-400 hover:bg-emerald-300 text-[#030808] font-semibold text-base rounded-2xl mt-6 group" onClick={handleOtpSubmit} disabled={loading || otp.length < 6}>
                       {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify Code"}
                     </Button>
+                    <div className="mt-4 flex justify-center">
+                      <button
+                        className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={handleResendCode}
+                        disabled={loading || resendTimer > 0}
+                      >
+                        {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Resend code"}
+                      </button>
+                    </div>
                   </motion.div>
                 )}
 

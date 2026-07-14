@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { CURRENCIES } from "@/lib/format";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
-import { User, Dice5, Pencil, Bug } from "lucide-react";
+import { User, Dice5, Pencil, Bug, Mail, ArrowRight } from "lucide-react";
 import { formatMoney } from "@/lib/format";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -32,9 +34,22 @@ function ProfilePage() {
     },
   });
 
+  const { data: pendingInvites = [], refetch: refetchInvites } = useQuery({
+    queryKey: ["pending_invites_profile"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !user.email) return [];
+      
+      return (await supabase.from("planner_invites").select("*, planners(name)").eq("invitee_email", user.email).eq("status", "pending")).data ?? [];
+    },
+  });
+
   const [name, setName] = useState(""); 
   const [avatarUrl, setAvatarUrl] = useState("");
   const [signOutOpen, setSignOutOpen] = useState(false);
+  const [bugOpen, setBugOpen] = useState(false);
+  const [bugMsg, setBugMsg] = useState("");
+  const [bugLoading, setBugLoading] = useState(false);
 
   // Fetch data for monthly stats and portfolio
   const activePlannerId = profile?.last_planner_id;
@@ -49,14 +64,37 @@ function ProfilePage() {
   const { data: investments = [] } = useQuery({
     queryKey: ["investments", activePlannerId],
     enabled: !!activePlannerId,
-    queryFn: async () => (await supabase.from("investments").select("quantity, current_price").eq("planner_id", activePlannerId)).data ?? [],
+    queryFn: async () => (await supabase.from("investments").select("current_value").eq("planner_id", activePlannerId)).data ?? [],
   });
 
   const monthEarnings = allocations.filter(a => a.allocation_type === "earning").reduce((s, r) => s + Number(r.amount || 0), 0);
   const monthExpenses = allocations.filter(a => a.allocation_type !== "earning").reduce((s, r) => s + Number(r.amount || 0), 0);
-  const portfolioValue = investments.reduce((sum, inv) => sum + (Number(inv.quantity || 0) * Number(inv.current_price || 0)), 0);
+  const portfolioValue = investments.reduce((sum, inv) => sum + Number(inv.current_value || 0), 0);
 
   const currency = profile?.default_currency ?? "USD";
+
+
+
+  const handleInviteAction = async (inviteId: string, action: 'accepted' | 'declined') => {
+    const { error } = await supabase.from("planner_invites").update({ status: action }).eq("id", inviteId);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    if (action === 'accepted') {
+      const invite = pendingInvites.find(i => i.id === inviteId);
+      if (invite) {
+        const { data: { user } } = await supabase.auth.getUser();
+        await supabase.from("planner_collaborators").insert({
+          planner_id: invite.planner_id,
+          user_id: user?.id,
+          role: invite.role,
+        });
+      }
+    }
+    toast.success(`Invite ${action}`);
+    refetchInvites();
+  };
 
   useEffect(() => { 
     if (profile) { 
@@ -88,6 +126,26 @@ function ProfilePage() {
     const seed = Math.random().toString(36).substring(7); // Random seed every time
     const newAvatar = `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(seed)}`;
     setAvatarUrl(newAvatar);
+  }
+
+  async function submitBug() {
+    if (!bugMsg) return;
+    setBugLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const logs = JSON.stringify((window as any).__APP_LOGS__ || []);
+    const { error } = await supabase.from("bug_reports").insert({
+      user_id: user?.id,
+      message: bugMsg,
+      logs: logs
+    });
+    setBugLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Bug report submitted. Thank you!");
+      setBugOpen(false);
+      setBugMsg("");
+    }
   }
 
   return (
@@ -167,18 +225,67 @@ function ProfilePage() {
               </div>
             </section>
 
+            {profile?.email === 'hasanalijaffe@gmail.com' && (
+              <section className="space-y-4">
+                <h2 className="text-sm font-semibold tracking-wider uppercase text-emerald-400 flex items-center gap-2">Admin Settings</h2>
+                <div className="rounded-2xl border border-emerald-500/20 bg-card p-6 flex flex-col items-start gap-4 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                  <div>
+                    <h3 className="text-foreground font-medium">Administration Panel</h3>
+                    <p className="text-sm text-muted-foreground mt-1">Manage active users and review submitted bug reports.</p>
+                  </div>
+                  <Button asChild className="gap-2 bg-emerald-500 hover:bg-emerald-400 text-black">
+                    <Link to="/app/admin">
+                      Open Admin Panel <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </section>
+            )}
+
             <section className="space-y-4">
               <h2 className="text-sm font-semibold tracking-wider uppercase text-foreground/80 flex items-center gap-2">Support & Feedback</h2>
               <div className="rounded-2xl border border-hairline bg-card p-6 flex flex-col items-start gap-4">
                 <div>
                   <h3 className="text-foreground font-medium">Found a bug or need a feature?</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Help us improve by reporting issues or suggesting changes to the application.</p>
+                  <p className="text-sm text-muted-foreground mt-1">Help us improve by reporting issues or suggesting changes to the application. Console logs will be attached automatically.</p>
                 </div>
-                <Button variant="secondary" className="gap-2" onClick={() => window.open("mailto:support@orionedgedigital.com", "_blank")}>
-                  <Bug className="h-4 w-4" /> Report bugs & request changes
-                </Button>
+                <Dialog open={bugOpen} onOpenChange={setBugOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="secondary" className="gap-2">
+                      <Bug className="h-4 w-4" /> Report bugs & request changes
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader><DialogTitle>Report a Bug</DialogTitle></DialogHeader>
+                    <div className="flex flex-col gap-4 py-4">
+                      <Textarea placeholder="What went wrong?" value={bugMsg} onChange={e => setBugMsg(e.target.value)} className="min-h-[100px]" />
+                      <p className="text-xs text-muted-foreground">Recent console logs will be attached automatically.</p>
+                      <Button onClick={submitBug} disabled={bugLoading || !bugMsg} className="glow-emerald w-full">{bugLoading ? "Sending..." : "Submit Report"}</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </section>
+
+            {pendingInvites.length > 0 && (
+              <section className="space-y-4">
+                <h2 className="text-sm font-semibold tracking-wider uppercase text-foreground/80 flex items-center gap-2"><Mail className="h-4 w-4" /> Pending Invitations</h2>
+                <div className="rounded-2xl border border-hairline bg-card p-6 flex flex-col gap-4">
+                  {pendingInvites.map((inv: any) => (
+                    <div key={inv.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-white/5 rounded-xl bg-background/50">
+                      <div>
+                        <h3 className="text-foreground font-medium">{inv.planners?.name}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">You have been invited as a <span className="capitalize font-medium">{inv.role}</span>.</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" className="glow-emerald px-6" onClick={() => handleInviteAction(inv.id, 'accepted')}>Accept</Button>
+                        <Button size="sm" variant="outline" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleInviteAction(inv.id, 'declined')}>Decline</Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Actions */}
             <div className="flex items-center justify-between pt-4 border-t border-white/5">

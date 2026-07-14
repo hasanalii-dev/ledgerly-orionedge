@@ -386,65 +386,67 @@ function Landing() {
         </section>
 
         {/* CTA */}
-        <section id="pricing" className="pt-32 pb-24 relative overflow-hidden bg-background z-0">
-          {/* Flipped Background gradient image — full width at the top of CTA */}
-          <div className="absolute inset-x-0 top-0 z-0 w-full pointer-events-none select-none flex items-start opacity-70">
-            <img
-              src="/bg-gradient.png"
-              alt=""
-              className="w-full h-auto object-cover opacity-90 rotate-180"
-              draggable={false}
-              loading="lazy"
-            />
-          </div>
-          {/* Blending overlay to merge the top edge of the image with the background smoothly */}
-          <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-background to-transparent z-0 pointer-events-none" />
-          
-          <div className="absolute inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary/10 rounded-full blur-[120px]" />
-          </div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="relative z-10 max-w-4xl mx-auto px-6 text-center"
-          >
-            <h2 className="text-4xl md:text-6xl font-display tracking-tight leading-tight drop-shadow-md">
-              Start with your <span className="text-primary font-medium">first planner</span>.
-            </h2>
-            <p className="mt-6 text-foreground/90 font-medium text-lg max-w-xl mx-auto leading-relaxed drop-shadow-md">
-              Join entrepreneurs and agencies who have brought calm and clarity to their finances. Free while in preview. No credit card required.
-            </p>
+        <section id="pricing" className="relative z-20 px-4 md:px-8 -mb-12 max-w-7xl mx-auto w-full pt-12">
+          <div className="rounded-[40px] md:rounded-[60px] border border-white/5 bg-[#030a0a] shadow-[0_0_80px_-20px_rgba(16,185,129,0.15)] relative overflow-hidden pt-28 pb-28">
+            {/* Background gradient image — flipped vertically */}
+            <div className="absolute inset-x-0 bottom-0 z-0 w-full pointer-events-none select-none flex items-end opacity-70">
+              <img
+                src="/bg-gradient.png"
+                alt=""
+                className="w-full h-auto object-cover opacity-90 scale-y-[-1]"
+                draggable={false}
+                loading="lazy"
+              />
+            </div>
+            {/* Blending overlay */}
+            <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#030a0a] to-transparent z-0 pointer-events-none" />
+            
+            <div className="absolute inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/10 rounded-full blur-[120px]" />
+            </div>
+            
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="relative z-10 max-w-4xl mx-auto px-6 text-center"
             >
-              <Link to="/auth">
-                <Button size="lg" className="h-12 px-6 glow-emerald hover:scale-105 hover:bg-primary/90 transition-all duration-300">
-                  Join Beta <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <div className="flex -space-x-2">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 border-[#030b0c] bg-card/50 backdrop-blur flex items-center justify-center relative overflow-hidden">
-                    <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="" className="w-full h-full object-cover opacity-80 mix-blend-luminosity" />
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-display tracking-tight leading-tight drop-shadow-md">
+                Start with your <span className="text-primary font-medium">first planner</span>.
+              </h2>
+              <p className="mt-6 text-foreground/90 font-medium text-lg max-w-xl mx-auto leading-relaxed drop-shadow-md">
+                Join entrepreneurs and agencies who have brought calm and clarity to their finances. Free while in preview. No credit card required.
+              </p>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4"
+              >
+                <Link to="/auth">
+                  <Button size="lg" className="h-14 px-8 text-base rounded-full glow-emerald hover:scale-105 hover:bg-primary/90 transition-all duration-300">
+                    Join Beta <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <div className="flex -space-x-3 ml-2">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="w-12 h-12 rounded-full border-2 border-[#030a0a] bg-[#0a1616] flex items-center justify-center relative overflow-hidden shadow-md transition-transform hover:scale-110 hover:z-10">
+                      <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=user${i + 42}`} alt="" className="w-9 h-9 object-contain" />
+                    </div>
+                  ))}
+                  <div className="w-12 h-12 rounded-full border-2 border-[#030a0a] bg-elevated flex items-center justify-center text-[11px] font-medium text-muted-foreground shadow-md z-10">
+                    +1k
                   </div>
-                ))}
-                <div className="w-10 h-10 rounded-full border-2 border-[#030b0c] bg-elevated flex items-center justify-center text-[10px] font-medium text-muted-foreground">
-                  +1k
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
+          </div>
         </section>
 
-
         {/* Footer */}
-        <footer className="pt-16 pb-8 text-sm text-muted-foreground relative z-10 overflow-hidden bg-black border-t border-white/5 shadow-2xl">
+        <footer className="pt-24 pb-8 text-sm text-muted-foreground relative z-10 overflow-hidden bg-black border-t border-white/5 shadow-2xl">
           <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen opacity-100">
             <div className="absolute inset-0">
                <SideRays 

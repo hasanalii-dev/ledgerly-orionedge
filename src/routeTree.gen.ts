@@ -20,11 +20,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated.app'
 import { Route as AuthenticatedAppProfileRouteImport } from './routes/_authenticated.app.profile'
 import { Route as AuthenticatedAppPreferencesRouteImport } from './routes/_authenticated.app.preferences'
+import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated.app.admin'
 import { Route as AuthenticatedAppPPlannerIdRouteImport } from './routes/_authenticated.app.p.$plannerId'
 import { Route as AuthenticatedAppPPlannerIdVaultRouteImport } from './routes/_authenticated.app.p.$plannerId.vault'
 import { Route as AuthenticatedAppPPlannerIdTimelineRouteImport } from './routes/_authenticated.app.p.$plannerId.timeline'
 import { Route as AuthenticatedAppPPlannerIdReportsRouteImport } from './routes/_authenticated.app.p.$plannerId.reports'
 import { Route as AuthenticatedAppPPlannerIdProjectsRouteImport } from './routes/_authenticated.app.p.$plannerId.projects'
+import { Route as AuthenticatedAppPPlannerIdNotificationsRouteImport } from './routes/_authenticated.app.p.$plannerId.notifications'
 import { Route as AuthenticatedAppPPlannerIdNotesRouteImport } from './routes/_authenticated.app.p.$plannerId.notes'
 import { Route as AuthenticatedAppPPlannerIdMonthlyRouteImport } from './routes/_authenticated.app.p.$plannerId.monthly'
 import { Route as AuthenticatedAppPPlannerIdInvoicesRouteImport } from './routes/_authenticated.app.p.$plannerId.invoices'
@@ -94,6 +96,11 @@ const AuthenticatedAppPreferencesRoute =
     path: '/preferences',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppAdminRoute = AuthenticatedAppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppPPlannerIdRoute =
   AuthenticatedAppPPlannerIdRouteImport.update({
     id: '/p/$plannerId',
@@ -122,6 +129,12 @@ const AuthenticatedAppPPlannerIdProjectsRoute =
   AuthenticatedAppPPlannerIdProjectsRouteImport.update({
     id: '/projects',
     path: '/projects',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdNotificationsRoute =
+  AuthenticatedAppPPlannerIdNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
     getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
   } as any)
 const AuthenticatedAppPPlannerIdNotesRoute =
@@ -212,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/docs': typeof DocsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/preferences': typeof AuthenticatedAppPreferencesRoute
   '/app/profile': typeof AuthenticatedAppProfileRoute
   '/app/p/$plannerId': typeof AuthenticatedAppPPlannerIdRouteWithChildren
@@ -228,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/app/p/$plannerId/invoices': typeof AuthenticatedAppPPlannerIdInvoicesRoute
   '/app/p/$plannerId/monthly': typeof AuthenticatedAppPPlannerIdMonthlyRoute
   '/app/p/$plannerId/notes': typeof AuthenticatedAppPPlannerIdNotesRoute
+  '/app/p/$plannerId/notifications': typeof AuthenticatedAppPPlannerIdNotificationsRoute
   '/app/p/$plannerId/projects': typeof AuthenticatedAppPPlannerIdProjectsRoute
   '/app/p/$plannerId/reports': typeof AuthenticatedAppPPlannerIdReportsRoute
   '/app/p/$plannerId/timeline': typeof AuthenticatedAppPPlannerIdTimelineRoute
@@ -242,6 +257,7 @@ export interface FileRoutesByTo {
   '/docs': typeof DocsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/preferences': typeof AuthenticatedAppPreferencesRoute
   '/app/profile': typeof AuthenticatedAppProfileRoute
   '/app/p/$plannerId': typeof AuthenticatedAppPPlannerIdRouteWithChildren
@@ -258,6 +274,7 @@ export interface FileRoutesByTo {
   '/app/p/$plannerId/invoices': typeof AuthenticatedAppPPlannerIdInvoicesRoute
   '/app/p/$plannerId/monthly': typeof AuthenticatedAppPPlannerIdMonthlyRoute
   '/app/p/$plannerId/notes': typeof AuthenticatedAppPPlannerIdNotesRoute
+  '/app/p/$plannerId/notifications': typeof AuthenticatedAppPPlannerIdNotificationsRoute
   '/app/p/$plannerId/projects': typeof AuthenticatedAppPPlannerIdProjectsRoute
   '/app/p/$plannerId/reports': typeof AuthenticatedAppPPlannerIdReportsRoute
   '/app/p/$plannerId/timeline': typeof AuthenticatedAppPPlannerIdTimelineRoute
@@ -274,6 +291,7 @@ export interface FileRoutesById {
   '/docs': typeof DocsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/_authenticated/app/admin': typeof AuthenticatedAppAdminRoute
   '/_authenticated/app/preferences': typeof AuthenticatedAppPreferencesRoute
   '/_authenticated/app/profile': typeof AuthenticatedAppProfileRoute
   '/_authenticated/app/p/$plannerId': typeof AuthenticatedAppPPlannerIdRouteWithChildren
@@ -290,6 +308,7 @@ export interface FileRoutesById {
   '/_authenticated/app/p/$plannerId/invoices': typeof AuthenticatedAppPPlannerIdInvoicesRoute
   '/_authenticated/app/p/$plannerId/monthly': typeof AuthenticatedAppPPlannerIdMonthlyRoute
   '/_authenticated/app/p/$plannerId/notes': typeof AuthenticatedAppPPlannerIdNotesRoute
+  '/_authenticated/app/p/$plannerId/notifications': typeof AuthenticatedAppPPlannerIdNotificationsRoute
   '/_authenticated/app/p/$plannerId/projects': typeof AuthenticatedAppPPlannerIdProjectsRoute
   '/_authenticated/app/p/$plannerId/reports': typeof AuthenticatedAppPPlannerIdReportsRoute
   '/_authenticated/app/p/$plannerId/timeline': typeof AuthenticatedAppPPlannerIdTimelineRoute
@@ -306,6 +325,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/reset-password'
     | '/app'
+    | '/app/admin'
     | '/app/preferences'
     | '/app/profile'
     | '/app/p/$plannerId'
@@ -322,6 +342,7 @@ export interface FileRouteTypes {
     | '/app/p/$plannerId/invoices'
     | '/app/p/$plannerId/monthly'
     | '/app/p/$plannerId/notes'
+    | '/app/p/$plannerId/notifications'
     | '/app/p/$plannerId/projects'
     | '/app/p/$plannerId/reports'
     | '/app/p/$plannerId/timeline'
@@ -336,6 +357,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/reset-password'
     | '/app'
+    | '/app/admin'
     | '/app/preferences'
     | '/app/profile'
     | '/app/p/$plannerId'
@@ -352,6 +374,7 @@ export interface FileRouteTypes {
     | '/app/p/$plannerId/invoices'
     | '/app/p/$plannerId/monthly'
     | '/app/p/$plannerId/notes'
+    | '/app/p/$plannerId/notifications'
     | '/app/p/$plannerId/projects'
     | '/app/p/$plannerId/reports'
     | '/app/p/$plannerId/timeline'
@@ -367,6 +390,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/reset-password'
     | '/_authenticated/app'
+    | '/_authenticated/app/admin'
     | '/_authenticated/app/preferences'
     | '/_authenticated/app/profile'
     | '/_authenticated/app/p/$plannerId'
@@ -383,6 +407,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/p/$plannerId/invoices'
     | '/_authenticated/app/p/$plannerId/monthly'
     | '/_authenticated/app/p/$plannerId/notes'
+    | '/_authenticated/app/p/$plannerId/notifications'
     | '/_authenticated/app/p/$plannerId/projects'
     | '/_authenticated/app/p/$plannerId/reports'
     | '/_authenticated/app/p/$plannerId/timeline'
@@ -479,6 +504,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppPreferencesRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/admin': {
+      id: '/_authenticated/app/admin'
+      path: '/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AuthenticatedAppAdminRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/p/$plannerId': {
       id: '/_authenticated/app/p/$plannerId'
       path: '/p/$plannerId'
@@ -512,6 +544,13 @@ declare module '@tanstack/react-router' {
       path: '/projects'
       fullPath: '/app/p/$plannerId/projects'
       preLoaderRoute: typeof AuthenticatedAppPPlannerIdProjectsRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
+    '/_authenticated/app/p/$plannerId/notifications': {
+      id: '/_authenticated/app/p/$plannerId/notifications'
+      path: '/notifications'
+      fullPath: '/app/p/$plannerId/notifications'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdNotificationsRouteImport
       parentRoute: typeof AuthenticatedAppPPlannerIdRoute
     }
     '/_authenticated/app/p/$plannerId/notes': {
@@ -622,6 +661,7 @@ interface AuthenticatedAppPPlannerIdRouteChildren {
   AuthenticatedAppPPlannerIdInvoicesRoute: typeof AuthenticatedAppPPlannerIdInvoicesRoute
   AuthenticatedAppPPlannerIdMonthlyRoute: typeof AuthenticatedAppPPlannerIdMonthlyRoute
   AuthenticatedAppPPlannerIdNotesRoute: typeof AuthenticatedAppPPlannerIdNotesRoute
+  AuthenticatedAppPPlannerIdNotificationsRoute: typeof AuthenticatedAppPPlannerIdNotificationsRoute
   AuthenticatedAppPPlannerIdProjectsRoute: typeof AuthenticatedAppPPlannerIdProjectsRoute
   AuthenticatedAppPPlannerIdReportsRoute: typeof AuthenticatedAppPPlannerIdReportsRoute
   AuthenticatedAppPPlannerIdTimelineRoute: typeof AuthenticatedAppPPlannerIdTimelineRoute
@@ -654,6 +694,8 @@ const AuthenticatedAppPPlannerIdRouteChildren: AuthenticatedAppPPlannerIdRouteCh
     AuthenticatedAppPPlannerIdMonthlyRoute:
       AuthenticatedAppPPlannerIdMonthlyRoute,
     AuthenticatedAppPPlannerIdNotesRoute: AuthenticatedAppPPlannerIdNotesRoute,
+    AuthenticatedAppPPlannerIdNotificationsRoute:
+      AuthenticatedAppPPlannerIdNotificationsRoute,
     AuthenticatedAppPPlannerIdProjectsRoute:
       AuthenticatedAppPPlannerIdProjectsRoute,
     AuthenticatedAppPPlannerIdReportsRoute:
@@ -669,12 +711,14 @@ const AuthenticatedAppPPlannerIdRouteWithChildren =
   )
 
 interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRoute
   AuthenticatedAppPreferencesRoute: typeof AuthenticatedAppPreferencesRoute
   AuthenticatedAppProfileRoute: typeof AuthenticatedAppProfileRoute
   AuthenticatedAppPPlannerIdRoute: typeof AuthenticatedAppPPlannerIdRouteWithChildren
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppAdminRoute: AuthenticatedAppAdminRoute,
   AuthenticatedAppPreferencesRoute: AuthenticatedAppPreferencesRoute,
   AuthenticatedAppProfileRoute: AuthenticatedAppProfileRoute,
   AuthenticatedAppPPlannerIdRoute: AuthenticatedAppPPlannerIdRouteWithChildren,

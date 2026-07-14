@@ -11,10 +11,25 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-
 import appCss from "../styles.css?url";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+
+// Global log buffer for bug reporting
+declare global {
+  interface Window {
+    __APP_LOGS__: any[];
+  }
+}
+if (typeof window !== "undefined") {
+  window.__APP_LOGS__ = window.__APP_LOGS__ || [];
+  const originalError = console.error;
+  const originalWarn = console.warn;
+  const originalLog = console.log;
+  console.error = (...args) => { window.__APP_LOGS__.push({ type: 'error', time: new Date().toISOString(), args }); originalError(...args); };
+  console.warn = (...args) => { window.__APP_LOGS__.push({ type: 'warn', time: new Date().toISOString(), args }); originalWarn(...args); };
+  console.log = (...args) => { window.__APP_LOGS__.push({ type: 'log', time: new Date().toISOString(), args }); originalLog(...args); };
+}
 
 function NotFoundComponent() {
   return (
@@ -223,6 +238,16 @@ function RootComponent() {
     });
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient, location.pathname]);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      supabase.from("site_analytics").insert({ 
+        event_type: "page_view", 
+        page_path: location.pathname,
+        user_id: user?.id || null
+      }).then();
+    });
+  }, [location.pathname]);
 
   const isDashboard = location.pathname.startsWith('/app');
 

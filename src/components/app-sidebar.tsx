@@ -19,8 +19,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Plus, Settings, LogOut, ChevronDown, LayoutDashboard, TrendingUp, TrendingDown, LineChart, 
   Wallet, Users, FolderKanban, FileText, CandlestickChart, Target, ArrowLeftRight, FileBarChart, 
-  PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Globe, Hexagon, Book 
+  PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Globe, Hexagon, Book, UserPlus
 } from "lucide-react";
+import { InviteDialog } from "./invite-dialog";
 
 import { toast } from "sonner";
 
@@ -173,6 +174,12 @@ export function AppSidebar() {
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
+              {active && (
+                <InviteDialog 
+                  plannerId={active.id} 
+                  trigger={<DropdownMenuItem onSelect={(e) => e.preventDefault()}><UserPlus className="h-4 w-4 mr-2" />Invite to planner</DropdownMenuItem>} 
+                />
+              )}
               <DropdownMenuItem onClick={() => setDialogOpen("new")}><Plus className="h-4 w-4 mr-2" />New planner</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setDialogOpen("rename")}><Pencil className="h-4 w-4 mr-2" />Rename</DropdownMenuItem>
               <DropdownMenuItem onClick={duplicatePlanner}><Copy className="h-4 w-4 mr-2" />Duplicate</DropdownMenuItem>

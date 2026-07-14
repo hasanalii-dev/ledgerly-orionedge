@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect, useRouter, useLocation } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,6 +74,23 @@ function OnboardingWizard() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  
+  // Double-check planners in case loader ran before session was fully established
+  const { data: existingPlanners } = useQuery({
+    queryKey: ["planners_check_onboarding"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("planners").select("id").limit(1);
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  useEffect(() => {
+    if (existingPlanners && existingPlanners.length > 0) {
+      router.navigate({ to: "/app/p/$plannerId/dashboard", params: { plannerId: existingPlanners[0].id }, replace: true });
+    }
+  }, [existingPlanners, router]);
+
   
   // State for onboarding fields
   const [country, setCountry] = useState("");
@@ -332,9 +350,9 @@ function OnboardingWizard() {
                       <p className="font-medium text-emerald-400 mb-1">We're in active development</p>
                       <p className="text-xs mb-3">If you encounter any issues or have feedback, please let us know at the links below.</p>
                       <div className="flex gap-4">
-                        <a href="#" className="text-xs font-semibold text-white hover:text-emerald-300 transition-colors underline decoration-white/20 underline-offset-4">Report Issue</a>
-                        <a href="#" className="text-xs font-semibold text-white hover:text-emerald-300 transition-colors underline decoration-white/20 underline-offset-4">Give Feedback</a>
-                        <a href="#" className="text-xs font-semibold text-white hover:text-emerald-300 transition-colors underline decoration-white/20 underline-offset-4">Support</a>
+                        <span className="text-xs font-bold text-white">Report Issue</span>
+                        <span className="text-xs font-bold text-white">Give Feedback</span>
+                        <span className="text-xs font-bold text-white">Support</span>
                       </div>
                     </div>
                   </div>
