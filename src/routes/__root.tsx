@@ -259,15 +259,36 @@ function RootComponent() {
         <Outlet />
       ) : (
         <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, filter: "blur(8px)", scale: 0.98 }}
-            animate={{ opacity: 1, filter: "blur(0px)", scale: 1, transitionEnd: { filter: "none", transform: "none" } }}
-            exit={{ opacity: 0, filter: "blur(8px)", scale: 1.02 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="flex min-h-screen flex-col"
-          >
-            <Outlet />
+          <motion.div key={location.pathname} className="flex min-h-screen flex-col w-full relative">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98, filter: "blur(4px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)", transitionEnd: { filter: "none", transform: "none" } }}
+              exit={{ opacity: 0, scale: 1.02, filter: "blur(4px)" }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="flex min-h-screen flex-col w-full"
+            >
+              <Outlet />
+            </motion.div>
+            
+            {/* The Wipe Overlays */}
+            <motion.div
+              className="fixed inset-0 z-[999] bg-[#020505] origin-bottom border-t border-emerald-500/20"
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 0 }}
+              exit={{ scaleY: 1 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            >
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <div className="w-12 h-12 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
+               </div>
+            </motion.div>
+            <motion.div
+              className="fixed inset-0 z-[999] bg-[#020505] origin-top border-b border-emerald-500/20"
+              initial={{ scaleY: 1 }}
+              animate={{ scaleY: 0 }}
+              exit={{ scaleY: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            />
           </motion.div>
         </AnimatePresence>
       )}

@@ -145,11 +145,12 @@ function Landing() {
             }}
             initial="hidden"
             animate="visible"
-            className="text-5xl md:text-7xl font-display tracking-tight leading-[1.02] max-w-4xl mx-auto flex flex-wrap justify-center gap-x-4 bg-gradient-to-bl from-emerald-100 via-white to-white/60 bg-clip-text text-transparent drop-shadow-sm pb-2"
+            className="text-5xl md:text-7xl font-display tracking-tight leading-[1.02] max-w-4xl mx-auto flex flex-wrap justify-center gap-x-4 pb-2"
           >
             {["The", "financial"].map((word, i) => (
               <motion.span
                 key={i}
+                className="text-white/90"
                 variants={{
                   hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
                   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } }
@@ -159,7 +160,7 @@ function Landing() {
               </motion.span>
             ))}
             <motion.span
-              className="text-emerald-400"
+              className="text-emerald-300 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]"
               variants={{
                   hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
                   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } }
@@ -171,6 +172,7 @@ function Landing() {
             {["built", "for", "entrepreneurs."].map((word, i) => (
               <motion.span
                 key={i}
+                className={i === 0 ? "text-white/70" : i === 1 ? "text-white/50" : "text-white/30"}
                 variants={{
                   hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
                   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } }
