@@ -252,16 +252,16 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <InitialSplash />
       <PageLoader />
-      <ReactLenis root options={{ lerp: 0.08, syncTouch: true }}>
+      <ReactLenis root options={{ lerp: 0.1, duration: 1.5, smoothWheel: true }}>
         {isDashboard ? (
           <Outlet />
         ) : (
           <AnimatePresence mode="wait">
             <motion.div key={location.pathname} className="flex min-h-screen flex-col w-full relative">
               <motion.div
-                initial={{ opacity: 0, scale: 0.98, filter: "blur(4px)" }}
-                animate={{ opacity: 1, scale: 1, filter: "blur(0px)", transitionEnd: { filter: "none", transform: "none" } }}
-                exit={{ opacity: 0, scale: 1.02, filter: "blur(4px)" }}
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1, transitionEnd: { transform: "none" } }}
+                exit={{ opacity: 0, scale: 1.02 }}
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                 className="flex min-h-screen flex-col w-full"
               >
