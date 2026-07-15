@@ -43,27 +43,16 @@ function PlannerLayout() {
       if (!planner) return [];
       
       try {
-        // Try to fetch from our secure Vercel API route which returns emails
-        const { data: sessionData } = await supabase.auth.getSession();
-        const token = sessionData?.session?.access_token;
-        
-        if (token) {
-          const res = await fetch(`/api/collaborators?plannerId=${plannerId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          
-          if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data) && data.length > 0) {
-              return data;
-            }
-          }
+        // Since the user ran the SQL snippet, we can use the secure RPC directly!
+        const { data, error } = await supabase.rpc("get_planner_collaborators", { p_id: plannerId });
+        if (!error && data && data.length > 0) {
+          return data;
         }
       } catch (err) {
-        console.error("Failed to fetch from API, falling back to direct DB query", err);
+        console.error("RPC failed, falling back", err);
       }
       
-      // FALLBACK: If API fails (e.g. in local dev without Vercel CLI), revert to the original logic
+      // FALLBACK: If RPC is missing/fails, revert to the original logic so avatars don't disappear
       const { data: ownerProfile } = await supabase.from("profiles").select("*").eq("id", planner.user_id).maybeSingle();
       const { data: collabs } = await supabase.from("planner_collaborators").select("user_id").eq("planner_id", plannerId);
       const collabIds = (collabs || []).map(c => c.user_id);
