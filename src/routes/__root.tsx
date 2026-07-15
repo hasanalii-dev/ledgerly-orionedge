@@ -66,8 +66,14 @@ function ErrorComponent({ error }: { error: any }) {
     }
 
     if (error === undefined || error?.message?.includes("undefined") || String(error) === "undefined") {
+      // If there's an OAuth hash causing clock skew loops, wipe it
+      if (window.location.hash) {
+        window.location.hash = "";
+      }
       sessionStorage.setItem(reloadKey, "true");
-      window.location.reload();
+      supabase.auth.signOut().then(() => {
+        window.location.href = "/auth";
+      });
     }
   }, [error]);
 
