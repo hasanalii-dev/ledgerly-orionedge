@@ -41,36 +41,10 @@ function PlannerLayout() {
     queryKey: ["collaborators", plannerId],
     queryFn: async () => {
       if (!planner) return [];
-      
-      try {
-        // Try to fetch from our secure Vercel API route which returns emails
-        const { data: sessionData } = await supabase.auth.getSession();
-        const token = sessionData?.session?.access_token;
-        
-        if (token) {
-          const res = await fetch(`/api/collaborators?plannerId=${plannerId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          
-          if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data) && data.length > 0) {
-              return data;
-            }
-          } else {
-             console.warn("Vercel API returned non-ok status:", res.status);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch from API, falling back to direct DB query", err);
-      }
-      
-      // FALLBACK: If API fails (e.g. in local dev without Vercel CLI), revert to the original logic
       const { data: ownerProfile } = await supabase.from("profiles").select("*").eq("id", planner.user_id).maybeSingle();
       const { data: collabs } = await supabase.from("planner_collaborators").select("user_id").eq("planner_id", plannerId);
       const collabIds = (collabs || []).map(c => c.user_id);
       let allUsers = ownerProfile ? [ownerProfile] : [];
-      
       if (collabIds.length > 0) {
         const { data: collabProfiles } = await supabase.from("profiles").select("*").in("id", collabIds);
         if (collabProfiles) allUsers = [...allUsers, ...collabProfiles];
@@ -152,9 +126,9 @@ function PlannerLayout() {
                     {collaborators.slice(0, 5).map((collab: any, i: number) => {
                       const isOwner = collab.id === planner.user_id;
                       return (
-                        <Dialog 
-                          key={collab.id || i} 
-                          open={openDialogs[collab.id]} 
+                        <Dialog
+                          key={collab.id || i}
+                          open={openDialogs[collab.id]}
                           onOpenChange={(open) => setOpenDialogs(prev => ({ ...prev, [collab.id]: open }))}
                         >
                           <Tooltip>
@@ -191,7 +165,7 @@ function PlannerLayout() {
                               </Avatar>
                               <h3 className="text-lg font-display">{collab.display_name || "Unknown User"}</h3>
                               <p className="text-sm text-muted-foreground">{collab.email}</p>
-                              
+
                               <div className="mt-6 w-full flex items-center justify-between p-4 bg-white/5 rounded-xl border border-hairline">
                                 <div className="flex items-center gap-3">
                                   {isOwner ? <Key className="h-5 w-5 text-emerald-500" /> : <ShieldAlert className="h-5 w-5 text-blue-400" />}
@@ -266,5 +240,34 @@ function PlannerLayout() {
         <MobileBottomNav />
       </div>
     </SidebarProvider>
+  );
+}
+toast.success(`Currency set to ${v}`);
+                    }}
+                  >
+                    <SelectTrigger className="h-8 w-[92px] bg-card border-hairline"><SelectValue /></SelectTrigger>
+                    <SelectContent>{CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                  </Select >
+                </div >
+              </div >
+            )}
+          </header >
+
+  {/* Mobile Top Bar */ }
+  < header className = "md:hidden sticky top-0 z-20 h-14 flex items-center justify-center px-4 border-b border-white/5 bg-background/90 backdrop-blur-xl" >
+    <div className="font-display font-medium text-base truncate">
+      {planner?.name ?? "Planner"}
+    </div>
+          </header >
+
+  <main className="p-4 md:p-6 overflow-y-auto">
+    <PageTransition>
+      <Outlet />
+    </PageTransition>
+  </main>
+        </SidebarInset >
+  <MobileBottomNav />
+      </div >
+    </SidebarProvider >
   );
 }
