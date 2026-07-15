@@ -44,7 +44,7 @@ function AdminPanel() {
   const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ["admin_users"],
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+      const { data } = await supabase.rpc("get_admin_users");
       return data || [];
     },
     enabled: profile?.email === 'hasanalijaffe@gmail.com',
