@@ -242,32 +242,4 @@ function PlannerLayout() {
     </SidebarProvider>
   );
 }
-toast.success(`Currency set to ${v}`);
-                    }}
-                  >
-                    <SelectTrigger className="h-8 w-[92px] bg-card border-hairline"><SelectValue /></SelectTrigger>
-                    <SelectContent>{CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                  </Select >
-                </div >
-              </div >
-            )}
-          </header >
 
-  {/* Mobile Top Bar */ }
-  < header className = "md:hidden sticky top-0 z-20 h-14 flex items-center justify-center px-4 border-b border-white/5 bg-background/90 backdrop-blur-xl" >
-    <div className="font-display font-medium text-base truncate">
-      {planner?.name ?? "Planner"}
-    </div>
-          </header >
-
-  <main className="p-4 md:p-6 overflow-y-auto">
-    <PageTransition>
-      <Outlet />
-    </PageTransition>
-  </main>
-        </SidebarInset >
-  <MobileBottomNav />
-      </div >
-    </SidebarProvider >
-  );
-}
