@@ -134,15 +134,22 @@ function OnboardingWizard() {
       const { error: profileError } = await supabase.from("profiles").update({
         display_name: displayName.trim() || undefined,
         avatar_url: avatarUrl,
-        country,
-        purpose,
-        company_name: companyName,
-        website,
-        source
-      } as any).eq("id", user.user.id);
+      }).eq("id", user.user.id);
 
       if (profileError) {
         console.error("Failed to save profile details:", profileError);
+      }
+      
+      const { error: onboardingError } = await supabase.from("user_onboarding").insert({
+        id: user.user.id,
+        country,
+        purpose,
+        company_name: companyName,
+        role: "", // No role state in wizard currently, but added to schema
+        team_size: "", // No team size state currently
+      });
+      if (onboardingError) {
+        console.error("Failed to save onboarding details:", onboardingError);
       }
       
       const { error } = await supabase.from("planners").insert({ 

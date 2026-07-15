@@ -124,7 +124,8 @@ function VaultPage() {
           {docs.length === 0 ? (
             <div className="p-16 text-center text-sm text-muted-foreground">
               <Upload className="h-8 w-8 mx-auto mb-3 opacity-40" />
-              Drop files or click Upload to get started.
+              <p>Click Upload to add a link to your documents.</p>
+              <p className="text-xs opacity-60 mt-1 max-w-xs mx-auto">Direct file uploading via drag and drop is a Premium feature. Upgrade your subscription to unlock.</p>
             </div>
           ) : (
             <div>
