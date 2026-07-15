@@ -43,36 +43,18 @@ function PlannerLayout() {
       if (!planner) return [];
 
       try {
-        // Try to fetch from our secure Vercel API route which returns emails
-        const { data: sessionData } = await supabase.auth.getSession();
-        const token = sessionData?.session?.access_token;
-        
-        if (token) {
-          const res = await fetch(`/api/collaborators?plannerId=${plannerId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          
-          if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data) && data.length > 0) {
-              return data;
-            }
-          }
+        const { data, error } = await supabase.rpc("get_collaborator_details", { p_planner_id: plannerId });
+        if (error) {
+          console.error("RPC get_collaborator_details failed", error);
+          throw error;
+        }
+        if (data && Array.isArray(data) && data.length > 0) {
+          return data;
         }
       } catch (err) {
-        console.error("Failed to fetch from API, falling back to direct DB query", err);
+        console.error("Failed to fetch collaborators from RPC", err);
       }
-
-      // FALLBACK: If API fails
-      const { data: ownerProfile } = await supabase.from("profiles").select("*").eq("id", planner.user_id).maybeSingle();
-      const { data: collabs } = await supabase.from("planner_collaborators").select("user_id").eq("planner_id", plannerId);
-      const collabIds = (collabs || []).map(c => c.user_id);
-      let allUsers = ownerProfile ? [ownerProfile] : [];
-      if (collabIds.length > 0) {
-        const { data: collabProfiles } = await supabase.from("profiles").select("*").in("id", collabIds);
-        if (collabProfiles) allUsers = [...allUsers, ...collabProfiles];
-      }
-      return allUsers;
+      return [];
     },
     enabled: !!planner,
   });
