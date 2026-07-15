@@ -41,12 +41,26 @@ function PlannerLayout() {
     queryKey: ["collaborators", plannerId],
     queryFn: async () => {
       if (!planner) return [];
+      
+      // Attempt to use the new secure RPC to fetch emails
       const { data, error } = await supabase.rpc("get_planner_collaborators", { p_id: plannerId });
-      if (error) {
-        console.error("Error fetching collaborators:", error);
-        return [];
+      
+      // If RPC succeeds and returns data, use it
+      if (!error && data) {
+        return data;
       }
-      return data || [];
+      
+      // FALLBACK: If RPC is missing/fails, revert to the original logic so avatars don't disappear
+      const { data: ownerProfile } = await supabase.from("profiles").select("*").eq("id", planner.user_id).maybeSingle();
+      const { data: collabs } = await supabase.from("planner_collaborators").select("user_id").eq("planner_id", plannerId);
+      const collabIds = (collabs || []).map(c => c.user_id);
+      let allUsers = ownerProfile ? [ownerProfile] : [];
+      
+      if (collabIds.length > 0) {
+        const { data: collabProfiles } = await supabase.from("profiles").select("*").in("id", collabIds);
+        if (collabProfiles) allUsers = [...allUsers, ...collabProfiles];
+      }
+      return allUsers;
     },
     enabled: !!planner,
   });
