@@ -123,9 +123,18 @@ function VaultPage() {
         <div className="rounded-2xl border border-hairline bg-card overflow-hidden">
           {docs.length === 0 ? (
             <div className="p-16 text-center text-sm text-muted-foreground">
-              <Upload className="h-8 w-8 mx-auto mb-3 opacity-40" />
-              <p>Click Upload to add a link to your documents.</p>
-              <p className="text-xs opacity-60 mt-1 max-w-xs mx-auto">Direct file uploading via drag and drop is a Premium feature. Upgrade your subscription to unlock.</p>
+              {userEmail === "hasanalijaffe@gmail.com" ? (
+                <>
+                  <Upload className="h-8 w-8 mx-auto mb-3 opacity-40" />
+                  <p>Click Upload to add a file to your documents.</p>
+                  <p className="text-xs opacity-60 mt-1 max-w-xs mx-auto">Direct file uploading via drag and drop is a Premium feature. Upgrade your subscription to unlock.</p>
+                </>
+              ) : (
+                <>
+                  <Link className="h-8 w-8 mx-auto mb-3 opacity-40" />
+                  <p>Click Add Link to add a URL to your documents.</p>
+                </>
+              )}
             </div>
           ) : (
             <div>
