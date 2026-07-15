@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, ArrowRight, ArrowLeft, Globe, Building2, Briefcase, User, Lightbulb } from "lucide-react";
+import { Loader2, ArrowRight, ArrowLeft, Globe, Building2, Briefcase, User, Lightbulb, Dice5 } from "lucide-react";
 import { CURRENCIES } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/app")({
@@ -93,6 +93,8 @@ function OnboardingWizard() {
 
   
   // State for onboarding fields
+  const [displayName, setDisplayName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState(`https://api.dicebear.com/7.x/notionists/svg?seed=initial`);
   const [country, setCountry] = useState("");
   const [purpose, setPurpose] = useState<"personal" | "business" | "">("");
   const [companyName, setCompanyName] = useState("");
@@ -100,6 +102,23 @@ function OnboardingWizard() {
   const [source, setSource] = useState("");
   const [plannerName, setPlannerName] = useState("");
   const [currency, setCurrency] = useState("USD");
+
+  const { data: profile } = useQuery({
+    queryKey: ["onboarding_profile"],
+    queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return null;
+      const { data } = await supabase.from("profiles").select("*").eq("id", user.user.id).single();
+      return data;
+    }
+  });
+
+  useEffect(() => {
+    if (profile) {
+      if (profile.display_name && profile.display_name !== "User") setDisplayName(profile.display_name);
+      if (profile.avatar_url) setAvatarUrl(profile.avatar_url);
+    }
+  }, [profile]);
 
   const handleFinish = async () => {
     try {
@@ -113,6 +132,8 @@ function OnboardingWizard() {
       
       // Save onboarding details to the profile
       const { error: profileError } = await supabase.from("profiles").update({
+        display_name: displayName.trim() || undefined,
+        avatar_url: avatarUrl,
         country,
         purpose,
         company_name: companyName,
@@ -143,24 +164,27 @@ function OnboardingWizard() {
 
   const nextStep = () => {
     if (step === 0) {
+      if (!displayName.trim()) return toast.error("Please enter your name");
+      setStep(1);
+    } else if (step === 1) {
       if (!country.trim()) return toast.error("Please enter your country");
       if (!purpose) return toast.error("Please select a purpose");
       if (purpose === "personal") {
-        setStep(2);
+        setStep(3);
       } else {
-        setStep(1);
+        setStep(2);
       }
-    } else if (step === 1) {
-      if (!companyName.trim()) return toast.error("Please enter your business name");
-      setStep(2);
     } else if (step === 2) {
+      if (!companyName.trim()) return toast.error("Please enter your business name");
       setStep(3);
+    } else if (step === 3) {
+      setStep(4);
     }
   };
 
   const prevStep = () => {
-    if (step === 2 && purpose === "personal") {
-      setStep(0);
+    if (step === 3 && purpose === "personal") {
+      setStep(1);
     } else {
       setStep(step - 1);
     }
@@ -209,7 +233,7 @@ function OnboardingWizard() {
           <div className="relative flex-1">
             {/* Step Timeline */}
             <div className="flex justify-center items-center mb-8">
-              {(purpose === "personal" ? [0, 2, 3] : [0, 1, 2, 3]).map((s, i, arr) => (
+              {(purpose === "personal" ? [0, 1, 3, 4] : [0, 1, 2, 3, 4]).map((s, i, arr) => (
                 <div key={s} className="flex items-center">
                   <div 
                     className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-500 ${
@@ -238,9 +262,47 @@ function OnboardingWizard() {
             </div>
 
             <AnimatePresence mode="wait">
-              
-              {/* Step 0: Country & Purpose */}
+
+              {/* Step 0: Profile Setup */}
               {step === 0 && (
+                <motion.div key="step-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
+                  <div className="flex flex-col items-center justify-center mb-6">
+                    <div className="relative group">
+                      <img src={avatarUrl} alt="Avatar" className="w-24 h-24 rounded-full border-4 border-[#030606] shadow-xl bg-white/5 object-cover" />
+                      <button 
+                        onClick={() => setAvatarUrl(`https://api.dicebear.com/7.x/notionists/svg?seed=${Math.random().toString(36).substring(7)}`)} 
+                        className="absolute bottom-0 right-0 p-2 bg-emerald-400 text-[#030808] rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all"
+                        title="Generate New Avatar"
+                      >
+                        <Dice5 className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <span className="text-xs text-muted-foreground mt-3 font-medium">Choose your avatar</span>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-white/80 pl-1">Your Name</label>
+                    <div className="relative">
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 z-10" />
+                      <Input 
+                        type="text" 
+                        placeholder="e.g. Alex Stone" 
+                        value={displayName} 
+                        onChange={e => setDisplayName(e.target.value)} 
+                        className="h-14 bg-[#030606] border-white/5 text-white placeholder:text-muted-foreground/40 focus-visible:ring-emerald-500/30 rounded-2xl pl-11 pr-4 text-sm transition-all" 
+                        onKeyDown={e => e.key === 'Enter' && nextStep()}
+                        autoFocus 
+                      />
+                    </div>
+                  </div>
+                  <Button className="w-full h-14 bg-emerald-400 hover:bg-emerald-300 text-[#030808] font-semibold text-base rounded-2xl mt-4 group" onClick={nextStep}>
+                    Continue <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </motion.div>
+              )}
+              
+              {/* Step 1: Country & Purpose */}
+              {step === 1 && (
                 <motion.div key="step-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
                   <div className="space-y-3">
                     <label className="text-sm font-medium text-white/80 pl-1">Where are you located?</label>
@@ -287,8 +349,8 @@ function OnboardingWizard() {
                 </motion.div>
               )}
 
-              {/* Step 1: Business Details */}
-              {step === 1 && (
+              {/* Step 2: Business Details */}
+              {step === 2 && (
                 <motion.div key="step-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
                   <div className="space-y-3">
                     <label className="text-sm font-medium text-white/80 pl-1">Business Name</label>
@@ -325,8 +387,8 @@ function OnboardingWizard() {
                 </motion.div>
               )}
 
-              {/* Step 2: Source & Notice */}
-              {step === 2 && (
+              {/* Step 3: Source & Notice */}
+              {step === 3 && (
                 <motion.div key="step-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
                   <div className="space-y-3">
                     <label className="text-sm font-medium text-white/80 pl-1">How did you hear about us? <span className="text-muted-foreground/50 font-normal">(Optional)</span></label>
@@ -363,8 +425,8 @@ function OnboardingWizard() {
                 </motion.div>
               )}
 
-              {/* Step 3: Create Planner */}
-              {step === 3 && (
+              {/* Step 4: Create Planner */}
+              {step === 4 && (
                 <motion.div key="step-3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
                   <div className="text-center mb-6">
                     <div className="mx-auto w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-4 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.15)] relative overflow-hidden">
