@@ -239,11 +239,11 @@ function OnboardingWizard() {
 
           <div className="relative flex-1">
             {/* Step Timeline */}
-            <div className="flex justify-center items-center mb-8">
+            <div className="flex justify-between items-center mb-8 w-full max-w-sm mx-auto px-2">
               {(purpose === "personal" ? [0, 1, 3, 4] : [0, 1, 2, 3, 4]).map((s, i, arr) => (
-                <div key={s} className="flex items-center">
+                <div key={s} className="flex items-center flex-1 last:flex-none">
                   <div 
-                    className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-500 ${
+                    className={`h-8 w-8 shrink-0 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-500 ${
                       step === s 
                         ? 'bg-emerald-500 text-[#030808] shadow-[0_0_15px_rgba(16,185,129,0.4)]' 
                         : step > s 
@@ -260,7 +260,7 @@ function OnboardingWizard() {
                     )}
                   </div>
                   {i < arr.length - 1 && (
-                    <div className={`w-8 sm:w-12 h-[2px] transition-all duration-500 mx-2 rounded-full ${
+                    <div className={`flex-1 h-[2px] transition-all duration-500 mx-1 sm:mx-2 rounded-full ${
                       step > s ? 'bg-emerald-500/50' : 'bg-white/5'
                     }`} />
                   )}
