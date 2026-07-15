@@ -41,6 +41,29 @@ function PlannerLayout() {
     queryKey: ["collaborators", plannerId],
     queryFn: async () => {
       if (!planner) return [];
+
+      try {
+        // Try to fetch from our secure Vercel API route which returns emails
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData?.session?.access_token;
+        
+        if (token) {
+          const res = await fetch(`/api/collaborators?plannerId=${plannerId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+              return data;
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch from API, falling back to direct DB query", err);
+      }
+
+      // FALLBACK: If API fails
       const { data: ownerProfile } = await supabase.from("profiles").select("*").eq("id", planner.user_id).maybeSingle();
       const { data: collabs } = await supabase.from("planner_collaborators").select("user_id").eq("planner_id", plannerId);
       const collabIds = (collabs || []).map(c => c.user_id);
