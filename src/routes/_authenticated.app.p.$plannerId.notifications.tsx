@@ -28,7 +28,12 @@ function NotificationsPage() {
     queryKey: ["pending_invites_notifications", profile?.email],
     queryFn: async () => {
       if (!profile?.email) return [];
-      return (await supabase.from("planner_invites").select("*, planners(name)").eq("invitee_email", profile.email).eq("status", "pending")).data ?? [];
+      const { data, error } = await supabase.rpc("get_pending_invites_with_details", { p_email: profile.email });
+      if (error) {
+        console.error("Error fetching pending invites:", error);
+        return [];
+      }
+      return data ?? [];
     },
     enabled: !!profile?.email,
   });
@@ -82,7 +87,7 @@ function NotificationsPage() {
                   <div>
                     <h3 className="font-medium text-base">Planner Invitation</h3>
                     <p className="text-sm text-muted-foreground mt-0.5">
-                      You've been invited to collaborate on <strong className="text-white">{inv.planners?.name}</strong>.
+                      <strong className="text-white">{inv.inviter_email}</strong> invited you to collaborate on <strong className="text-white">{inv.planner_name}</strong>.
                     </p>
                     <p className="text-xs text-muted-foreground mt-1 opacity-70">
                       Sent to: {inv.invitee_email}
