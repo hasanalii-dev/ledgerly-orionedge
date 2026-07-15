@@ -1,4 +1,4 @@
-create table public.site_analytics (
+create table if not exists public.site_analytics (
   id uuid primary key default gen_random_uuid(),
   event_type text not null, -- 'page_view'
   page_path text,
@@ -13,10 +13,12 @@ grant all on public.site_analytics to service_role;
 alter table public.site_analytics enable row level security;
 
 -- Anyone can insert
+drop policy if exists "anyone can insert analytics" on public.site_analytics;
 create policy "anyone can insert analytics" on public.site_analytics 
   for insert with check (true);
 
 -- Only admin can read
+drop policy if exists "admin can read analytics" on public.site_analytics;
 create policy "admin can read analytics" on public.site_analytics 
   for select using (
     (select email from auth.users where id = auth.uid()) = 'hasanalijaffe@gmail.com'

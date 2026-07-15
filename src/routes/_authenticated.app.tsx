@@ -108,7 +108,7 @@ function OnboardingWizard() {
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return null;
-      const { data } = await supabase.from("profiles").select("*").eq("id", user.user.id).single();
+      const { data } = await supabase.from("profiles").select("*").eq("id", user.user.id).maybeSingle();
       return data;
     }
   });
