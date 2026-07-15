@@ -63,7 +63,12 @@ function AuthBetaPage() {
       setLoading(true);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${window.location.origin}/app` },
+        options: { 
+          redirectTo: `${window.location.origin}/app`,
+          queryParams: {
+            prompt: 'select_account'
+          }
+        },
       });
       if (error) throw error;
     } catch (err: any) {

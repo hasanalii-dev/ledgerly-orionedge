@@ -98,6 +98,7 @@ export function AuthLegacy() {
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/app`,
+          queryParams: { prompt: 'select_account' }
         },
       });
       if (error) throw error;
