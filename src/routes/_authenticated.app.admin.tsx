@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { Users, Bug, CheckCircle, Clock, LineChart as LineChartIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { LineChart, BarChart, Bar, Line, XAxis, YAxis, Tooltip as RTooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 export const Route = createFileRoute("/_authenticated/app/admin")({
@@ -19,6 +20,10 @@ export const Route = createFileRoute("/_authenticated/app/admin")({
 function AdminPanel() {
   const navigate = useNavigate();
   const qc = useQueryClient();
+
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [userChartType, setUserChartType] = useState<"bar" | "line">("bar");
+  const [visitorChartType, setVisitorChartType] = useState<"bar" | "line">("line");
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["profile"],
@@ -43,6 +48,16 @@ function AdminPanel() {
       return data || [];
     },
     enabled: profile?.email === 'hasanalijaffe@gmail.com',
+  });
+
+  const { data: selectedUserOnboarding, isLoading: onboardingLoading } = useQuery({
+    queryKey: ["admin_user_onboarding", selectedUser?.id],
+    queryFn: async () => {
+      if (!selectedUser?.id) return null;
+      const { data } = await supabase.from("user_onboarding").select("*").eq("id", selectedUser.id).maybeSingle();
+      return data || { noData: true };
+    },
+    enabled: !!selectedUser?.id && profile?.email === 'hasanalijaffe@gmail.com',
   });
 
   const { data: bugReports, isLoading: bugsLoading, error: bugsError } = useQuery({
@@ -152,20 +167,36 @@ function AdminPanel() {
                 
                 {/* Monthly Users Chart */}
                 <div className="rounded-2xl border border-hairline bg-card p-6">
-                  <h3 className="font-medium text-foreground mb-4">New Users (Monthly)</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-medium text-foreground">New Users (Monthly)</h3>
+                    <div className="flex items-center gap-1 bg-black/40 p-1 rounded-lg border border-hairline">
+                      <Button variant="ghost" size="sm" className={`h-7 px-3 text-xs rounded-md ${userChartType === 'bar' ? 'bg-emerald-500/20 text-emerald-400' : 'text-muted-foreground'}`} onClick={() => setUserChartType('bar')}>Bar</Button>
+                      <Button variant="ghost" size="sm" className={`h-7 px-3 text-xs rounded-md ${userChartType === 'line' ? 'bg-emerald-500/20 text-emerald-400' : 'text-muted-foreground'}`} onClick={() => setUserChartType('line')}>Line</Button>
+                    </div>
+                  </div>
                   <div className="h-64 w-full">
                     {monthlyUsers.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={monthlyUsers}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                          <XAxis dataKey="month" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                          <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                          <RTooltip 
-                            contentStyle={{ backgroundColor: '#0a1212', borderColor: '#ffffff10', borderRadius: '8px' }}
-                            itemStyle={{ color: '#10b981' }}
-                          />
-                          <Bar dataKey="users" fill="#10b981" radius={[4, 4, 0, 0]} />
-                        </BarChart>
+                        {userChartType === 'bar' ? (
+                          <BarChart data={monthlyUsers}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                            <XAxis dataKey="month" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
+                            <RTooltip 
+                              contentStyle={{ backgroundColor: '#0a1212', borderColor: '#ffffff10', borderRadius: '8px' }}
+                              itemStyle={{ color: '#10b981' }}
+                            />
+                            <Bar dataKey="users" fill="#10b981" radius={[4, 4, 0, 0]} />
+                          </BarChart>
+                        ) : (
+                          <LineChart data={monthlyUsers}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                            <XAxis dataKey="month" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
+                            <RTooltip contentStyle={{ backgroundColor: '#0a1212', borderColor: '#ffffff10', borderRadius: '8px' }} />
+                            <Line type="monotone" dataKey="users" name="Users" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981' }} activeDot={{ r: 6 }} />
+                          </LineChart>
+                        )}
                       </ResponsiveContainer>
                     ) : (
                       <div className="h-full flex items-center justify-center text-muted-foreground">Not enough data</div>
@@ -175,19 +206,33 @@ function AdminPanel() {
 
                 {/* Daily Page Views Chart */}
                 <div className="rounded-2xl border border-hairline bg-card p-6">
-                  <h3 className="font-medium text-foreground mb-4">Site Visitors (Daily)</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-medium text-foreground">Site Visitors (Daily)</h3>
+                    <div className="flex items-center gap-1 bg-black/40 p-1 rounded-lg border border-hairline">
+                      <Button variant="ghost" size="sm" className={`h-7 px-3 text-xs rounded-md ${visitorChartType === 'bar' ? 'bg-emerald-500/20 text-emerald-400' : 'text-muted-foreground'}`} onClick={() => setVisitorChartType('bar')}>Bar</Button>
+                      <Button variant="ghost" size="sm" className={`h-7 px-3 text-xs rounded-md ${visitorChartType === 'line' ? 'bg-emerald-500/20 text-emerald-400' : 'text-muted-foreground'}`} onClick={() => setVisitorChartType('line')}>Line</Button>
+                    </div>
+                  </div>
                   <div className="h-64 w-full">
                     {dailyAnalytics.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={dailyAnalytics}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                          <XAxis dataKey="day" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                          <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                          <RTooltip 
-                            contentStyle={{ backgroundColor: '#0a1212', borderColor: '#ffffff10', borderRadius: '8px' }}
-                          />
-                          <Line type="monotone" dataKey="views" name="Page Views" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6' }} activeDot={{ r: 6 }} />
-                        </LineChart>
+                        {visitorChartType === 'line' ? (
+                          <LineChart data={dailyAnalytics}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                            <XAxis dataKey="day" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
+                            <RTooltip contentStyle={{ backgroundColor: '#0a1212', borderColor: '#ffffff10', borderRadius: '8px' }} />
+                            <Line type="monotone" dataKey="views" name="Page Views" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6' }} activeDot={{ r: 6 }} />
+                          </LineChart>
+                        ) : (
+                          <BarChart data={dailyAnalytics}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                            <XAxis dataKey="day" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
+                            <RTooltip contentStyle={{ backgroundColor: '#0a1212', borderColor: '#ffffff10', borderRadius: '8px' }} itemStyle={{ color: '#3b82f6' }} />
+                            <Bar dataKey="views" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                          </BarChart>
+                        )}
                       </ResponsiveContainer>
                     ) : (
                       <div className="h-full flex items-center justify-center text-muted-foreground">Not enough data</div>
@@ -209,7 +254,7 @@ function AdminPanel() {
                       <div className="p-8 text-center text-muted-foreground">No users found.</div>
                     ) : (
                       users?.map(u => (
-                        <div key={u.id} className="p-4 flex items-center gap-4 hover:bg-white/5 transition-colors">
+                        <div key={u.id} className="p-4 flex items-center gap-4 hover:bg-white/5 transition-colors cursor-pointer group" onClick={() => setSelectedUser(u)}>
                           <Avatar className="h-10 w-10 border border-white/10">
                             <AvatarImage src={u.avatar_url} />
                             <AvatarFallback>{u.display_name?.charAt(0) || "U"}</AvatarFallback>
@@ -298,6 +343,56 @@ function AdminPanel() {
             </Tabs>
             
           </main>
+          
+          <Dialog open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
+            <DialogContent className="bg-card border border-hairline text-foreground max-w-md">
+              <DialogHeader>
+                <DialogTitle>User Profile</DialogTitle>
+                <DialogDescription>Details and onboarding responses for {selectedUser?.display_name || 'Unknown'}</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16 border border-white/10">
+                    <AvatarImage src={selectedUser?.avatar_url} />
+                    <AvatarFallback>{selectedUser?.display_name?.charAt(0) || "U"}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-medium text-lg">{selectedUser?.display_name || 'Unknown User'}</h3>
+                    <p className="text-sm text-muted-foreground">{selectedUser?.email}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Joined: {selectedUser?.created_at ? format(new Date(selectedUser.created_at), "PPP") : "Unknown"}</p>
+                  </div>
+                </div>
+                
+                <div className="pt-4 border-t border-hairline">
+                  <h4 className="text-sm font-medium mb-3 text-emerald-400">Onboarding Responses</h4>
+                  {onboardingLoading ? (
+                    <div className="text-sm text-muted-foreground">Loading onboarding data...</div>
+                  ) : selectedUserOnboarding?.noData ? (
+                    <div className="text-sm text-muted-foreground">No onboarding data available for this user.</div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <div className="text-muted-foreground text-xs">Country</div>
+                        <div className="font-medium">{selectedUserOnboarding?.country || "Not provided"}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground text-xs">Purpose</div>
+                        <div className="font-medium capitalize">{selectedUserOnboarding?.purpose || "Not provided"}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground text-xs">Company</div>
+                        <div className="font-medium">{selectedUserOnboarding?.company_name || "Not provided"}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground text-xs">Role</div>
+                        <div className="font-medium">{selectedUserOnboarding?.role || "Not provided"}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </SidebarInset>
       </div>
     </SidebarProvider>
