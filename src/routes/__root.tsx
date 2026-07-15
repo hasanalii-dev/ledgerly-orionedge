@@ -54,13 +54,29 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error }: { error: Error }) {
+function ErrorComponent({ error }: { error: any }) {
+  useEffect(() => {
+    // Plan B: Automatic page refresh for tricky undefined/hydration errors
+    // We use sessionStorage to prevent infinite reload loops
+    const reloadKey = "has_auto_reloaded";
+    if (sessionStorage.getItem(reloadKey)) {
+      // If we already reloaded recently, clear it so a future manual visit can retry, but don't auto-reload now.
+      setTimeout(() => sessionStorage.removeItem(reloadKey), 5000);
+      return;
+    }
+
+    if (error === undefined || error?.message?.includes("undefined") || String(error) === "undefined") {
+      sessionStorage.setItem(reloadKey, "true");
+      window.location.reload();
+    }
+  }, [error]);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-3xl font-bold text-destructive">Something went wrong</h1>
         <p className="mt-4 text-sm text-muted-foreground bg-elevated p-4 rounded-lg text-left overflow-auto break-words font-mono">
-          {error.message}
+          {error?.message || (typeof error === "string" ? error : "An unknown error occurred (undefined)")}
         </p>
         <div className="mt-8">
           <button
