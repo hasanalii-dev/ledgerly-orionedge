@@ -41,15 +41,12 @@ function PlannerLayout() {
     queryKey: ["collaborators", plannerId],
     queryFn: async () => {
       if (!planner) return [];
-      const { data: ownerProfile } = await supabase.from("profiles").select("*").eq("id", planner.user_id).maybeSingle();
-      const { data: collabs } = await supabase.from("planner_collaborators").select("user_id").eq("planner_id", plannerId);
-      const collabIds = (collabs || []).map(c => c.user_id);
-      let allUsers = ownerProfile ? [ownerProfile] : [];
-      if (collabIds.length > 0) {
-        const { data: collabProfiles } = await supabase.from("profiles").select("*").in("id", collabIds);
-        if (collabProfiles) allUsers = [...allUsers, ...collabProfiles];
+      const { data, error } = await supabase.rpc("get_planner_collaborators", { p_id: plannerId });
+      if (error) {
+        console.error("Error fetching collaborators:", error);
+        return [];
       }
-      return allUsers;
+      return data || [];
     },
     enabled: !!planner,
   });
