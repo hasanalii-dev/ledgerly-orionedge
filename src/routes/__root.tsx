@@ -66,14 +66,23 @@ function ErrorComponent({ error }: { error: any }) {
     }
 
     if (error === undefined || error?.message?.includes("undefined") || String(error) === "undefined") {
-      // If there's an OAuth hash causing clock skew loops, wipe it
+      // If there's an OAuth hash causing clock skew loops, wipe it to break the gotrue-js crash loop
       if (window.location.hash) {
         window.location.hash = "";
       }
       sessionStorage.setItem(reloadKey, "true");
-      supabase.auth.signOut().then(() => {
-        window.location.href = "/auth";
-      });
+      
+      // CRITICAL: Do NOT call supabase.auth.signOut() here! 
+      // If gotrue-js is crashing during initialization due to a skewed token, 
+      // accessing the supabase proxy here will re-trigger the exact same crash inside this useEffect,
+      // which causes React to unmount the entire ErrorBoundary and show a 100% blank black screen!
+      try {
+        localStorage.clear(); // Wipe the corrupted session manually
+      } catch (e) {
+        // ignore
+      }
+      
+      window.location.href = "/auth";
     }
   }, [error]);
 
