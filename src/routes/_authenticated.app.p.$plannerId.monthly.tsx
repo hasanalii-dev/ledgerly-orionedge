@@ -470,10 +470,16 @@ function MonthlyTracking() {
             </div>
 
             {pieData.length > 0 ? (
-              <div className="h-64">
+              <div className="h-64 mt-2">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={3}>
+                    <defs>
+                      <filter id="pieGlowMonthly" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                      </filter>
+                    </defs>
+                    <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4} stroke="rgba(0,0,0,0.2)" strokeWidth={2} filter="url(#pieGlowMonthly)">
                       {pieData.map((e, i) => <Cell key={i} fill={e.color} />)}
                     </Pie>
                     <Tooltip 
@@ -482,8 +488,8 @@ function MonthlyTracking() {
                         const percent = total > 0 ? `(${(val / total * 100).toFixed(1)}%)` : '';
                         return [`${formatMoney(val, currency)} ${percent}`, name];
                       }}
-                      contentStyle={{ background: "oklch(0.22 0.008 155)", border: "1px solid oklch(1 0 0 / 0.08)", borderRadius: 12, color: "white" }} 
-                      itemStyle={{ color: "white" }}
+                      contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
+                      itemStyle={{ color: "white", fontWeight: 500, padding: "2px 0" }}
                     />
                   </PieChart>
                 </ResponsiveContainer>

@@ -48,40 +48,54 @@ function ChartsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-2xl border border-hairline bg-card p-6 h-[380px]">
           <div className="text-sm font-medium mb-4">Income vs Expenses</div>
-          <ResponsiveContainer width="100%" height="90%">
-            <BarChart data={monthly}>
-              <CartesianGrid stroke="oklch(1 0 0 / 8%)" vertical={false} />
-              <XAxis dataKey="month" stroke="oklch(0.6 0 0)" fontSize={11} />
-              <YAxis stroke="oklch(0.6 0 0)" fontSize={11} tickFormatter={(val) => formatMoney(val, currency)} />
-              <Tooltip 
-                formatter={(val: number) => formatMoney(val, currency)}
-                contentStyle={{ background: "oklch(0.2 0 0)", border: "1px solid oklch(1 0 0 / 10%)", borderRadius: 10, color: "white" }} 
-                itemStyle={{ color: "white" }}
-              />
-              <Bar dataKey="income" fill="oklch(0.75 0.16 158)" radius={[6, 6, 0, 0]} />
-              <Bar dataKey="expenses" fill="oklch(0.65 0.02 260)" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+            <ResponsiveContainer width="100%" height="90%">
+              <BarChart data={monthly} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <defs>
+                  <filter id="glowBar" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+                <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} strokeDasharray="4 4" />
+                <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dy={10} />
+                <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dx={-10} tickFormatter={(val) => formatMoney(val, currency)} />
+                <Tooltip 
+                  formatter={(val: number) => formatMoney(val, currency)}
+                  contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
+                  itemStyle={{ color: "white", fontWeight: 500, padding: "2px 0" }}
+                  labelStyle={{ color: "rgba(255,255,255,0.6)", marginBottom: "4px", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                />
+                <Bar dataKey="income" fill="#3DDC97" radius={[6, 6, 0, 0]} filter="url(#glowBar)" />
+                <Bar dataKey="expenses" fill="#F56565" radius={[6, 6, 0, 0]} filter="url(#glowBar)" />
+              </BarChart>
+            </ResponsiveContainer>
         </div>
         <div className="rounded-2xl border border-hairline bg-card p-6 h-[380px]">
           <div className="text-sm font-medium mb-4">Expenses by category</div>
-          <ResponsiveContainer width="100%" height="90%">
-            <PieChart>
-              <Pie data={byCat} dataKey="value" nameKey="name" outerRadius={110} innerRadius={60} paddingAngle={2}>
-                {byCat.map((c, i) => <Cell key={c.name} fill={c.color || COLORS[i % COLORS.length]} />)}
-              </Pie>
-              <Tooltip 
-                formatter={(val: number, name: string) => {
-                  const total = byCat.reduce((acc, curr) => acc + curr.value, 0);
-                  const percent = total > 0 ? `(${(val / total * 100).toFixed(1)}%)` : '';
-                  return [`${formatMoney(val, currency)} ${percent}`, name];
-                }}
-                contentStyle={{ background: "oklch(0.2 0 0)", border: "1px solid oklch(1 0 0 / 10%)", borderRadius: 10, color: "white" }} 
-                itemStyle={{ color: "white" }}
-              />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-            </PieChart>
-          </ResponsiveContainer>
+            <ResponsiveContainer width="100%" height="90%">
+              <PieChart>
+                <defs>
+                  <filter id="pieGlowCharts" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+                <Pie data={byCat} dataKey="value" nameKey="name" outerRadius={110} innerRadius={70} paddingAngle={4} stroke="rgba(0,0,0,0.2)" strokeWidth={2} filter="url(#pieGlowCharts)">
+                  {byCat.map((c, i) => <Cell key={c.name} fill={c.color || COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip 
+                  formatter={(val: number, name: string) => {
+                    const total = byCat.reduce((acc, curr) => acc + curr.value, 0);
+                    const percent = total > 0 ? `(${(val / total * 100).toFixed(1)}%)` : '';
+                    return [`${formatMoney(val, currency)} ${percent}`, name];
+                  }}
+                  contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
+                  itemStyle={{ color: "white", fontWeight: 500, padding: "2px 0" }}
+                />
+                <Legend wrapperStyle={{ fontSize: 12, opacity: 0.8, paddingTop: 10 }} />
+              </PieChart>
+            </ResponsiveContainer>
         </div>
       </div>
     </div>

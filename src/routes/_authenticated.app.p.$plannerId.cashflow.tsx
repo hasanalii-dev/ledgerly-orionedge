@@ -54,25 +54,31 @@ function CashflowPage() {
         <StatCard label="Months tracked" value={String(data.length)} />
       </div>
       <div className="rounded-2xl border border-hairline bg-card p-6 h-[420px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="oklch(0.75 0.16 158)" stopOpacity={0.5} />
-                <stop offset="100%" stopColor="oklch(0.75 0.16 158)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid stroke="oklch(1 0 0 / 8%)" vertical={false} />
-            <XAxis dataKey="month" stroke="oklch(0.6 0 0)" fontSize={11} />
-            <YAxis stroke="oklch(0.6 0 0)" fontSize={11} tickFormatter={(val) => formatMoney(val, currency)} />
-            <Tooltip 
-              formatter={(val: number) => formatMoney(val, currency)}
-              contentStyle={{ background: "oklch(0.2 0 0)", border: "1px solid oklch(1 0 0 / 10%)", borderRadius: 10, color: "white" }} 
-              itemStyle={{ color: "white" }}
-            />
-            <Area type="monotone" dataKey="running" stroke="oklch(0.75 0.16 158)" fill="url(#g1)" strokeWidth={2} />
-          </AreaChart>
-        </ResponsiveContainer>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+              <defs>
+                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3DDC97" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="#3DDC97" stopOpacity={0} />
+                </linearGradient>
+                <filter id="glowCashflow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+              <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} strokeDasharray="4 4" />
+              <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dy={10} />
+              <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dx={-10} tickFormatter={(val) => formatMoney(val, currency)} />
+              <Tooltip 
+                formatter={(val: number) => formatMoney(val, currency)}
+                contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
+                itemStyle={{ color: "white", fontWeight: 500, padding: "2px 0" }}
+                labelStyle={{ color: "rgba(255,255,255,0.6)", marginBottom: "4px", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}
+                cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1, strokeDasharray: "4 4" }}
+              />
+              <Area type="natural" dataKey="running" stroke="#3DDC97" fill="url(#g1)" strokeWidth={3} filter="url(#glowCashflow)" activeDot={{ r: 6, strokeWidth: 0, fill: "#3DDC97" }} />
+            </AreaChart>
+          </ResponsiveContainer>
       </div>
     </div>
   );

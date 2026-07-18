@@ -175,30 +175,49 @@ function AdminPanel() {
                     </div>
                   </div>
                   <div className="h-64 w-full">
-                    {monthlyUsers.length > 0 ? (
-                      <ResponsiveContainer width="100%" height="100%">
-                        {userChartType === 'bar' ? (
-                          <BarChart data={monthlyUsers}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                            <XAxis dataKey="month" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                            <RTooltip 
-                              contentStyle={{ backgroundColor: '#0a1212', borderColor: '#ffffff10', borderRadius: '8px' }}
-                              itemStyle={{ color: '#10b981' }}
-                            />
-                            <Bar dataKey="users" fill="#10b981" radius={[4, 4, 0, 0]} />
-                          </BarChart>
-                        ) : (
-                          <LineChart data={monthlyUsers}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                            <XAxis dataKey="month" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                            <RTooltip contentStyle={{ backgroundColor: '#0a1212', borderColor: '#ffffff10', borderRadius: '8px' }} />
-                            <Line type="monotone" dataKey="users" name="Users" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981' }} activeDot={{ r: 6 }} />
-                          </LineChart>
-                        )}
-                      </ResponsiveContainer>
-                    ) : (
+                      {monthlyUsers.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                          {userChartType === 'bar' ? (
+                            <BarChart data={monthlyUsers} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                              <defs>
+                                <filter id="glowBarAdmin1" x="-20%" y="-20%" width="140%" height="140%">
+                                  <feGaussianBlur stdDeviation="3" result="blur" />
+                                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                </filter>
+                              </defs>
+                              <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                              <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
+                              <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} tickLine={false} axisLine={false} dx={-10} />
+                              <RTooltip 
+                                contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
+                                itemStyle={{ color: "#3DDC97", fontWeight: 500, padding: "2px 0" }}
+                                labelStyle={{ color: "rgba(255,255,255,0.6)", marginBottom: "4px", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}
+                                cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                              />
+                              <Bar dataKey="users" fill="#3DDC97" radius={[6, 6, 0, 0]} filter="url(#glowBarAdmin1)" />
+                            </BarChart>
+                          ) : (
+                            <LineChart data={monthlyUsers} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                              <defs>
+                                <filter id="glowLineAdmin1" x="-20%" y="-20%" width="140%" height="140%">
+                                  <feGaussianBlur stdDeviation="3" result="blur" />
+                                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                </filter>
+                              </defs>
+                              <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                              <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
+                              <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} tickLine={false} axisLine={false} dx={-10} />
+                              <RTooltip 
+                                contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
+                                itemStyle={{ color: "#3DDC97", fontWeight: 500, padding: "2px 0" }}
+                                labelStyle={{ color: "rgba(255,255,255,0.6)", marginBottom: "4px", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}
+                                cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1, strokeDasharray: "4 4" }}
+                              />
+                              <Line type="natural" dataKey="users" name="Users" stroke="#3DDC97" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: "#3DDC97" }} filter="url(#glowLineAdmin1)" />
+                            </LineChart>
+                          )}
+                        </ResponsiveContainer>
+                      ) : (
                       <div className="h-full flex items-center justify-center text-muted-foreground">Not enough data</div>
                     )}
                   </div>
@@ -214,27 +233,49 @@ function AdminPanel() {
                     </div>
                   </div>
                   <div className="h-64 w-full">
-                    {dailyAnalytics.length > 0 ? (
-                      <ResponsiveContainer width="100%" height="100%">
-                        {visitorChartType === 'line' ? (
-                          <LineChart data={dailyAnalytics}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                            <XAxis dataKey="day" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                            <RTooltip contentStyle={{ backgroundColor: '#0a1212', borderColor: '#ffffff10', borderRadius: '8px' }} />
-                            <Line type="monotone" dataKey="views" name="Page Views" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6' }} activeDot={{ r: 6 }} />
-                          </LineChart>
-                        ) : (
-                          <BarChart data={dailyAnalytics}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                            <XAxis dataKey="day" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
-                            <RTooltip contentStyle={{ backgroundColor: '#0a1212', borderColor: '#ffffff10', borderRadius: '8px' }} itemStyle={{ color: '#3b82f6' }} />
-                            <Bar dataKey="views" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                          </BarChart>
-                        )}
-                      </ResponsiveContainer>
-                    ) : (
+                      {dailyAnalytics.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                          {visitorChartType === 'line' ? (
+                            <LineChart data={dailyAnalytics} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                              <defs>
+                                <filter id="glowLineAdmin2" x="-20%" y="-20%" width="140%" height="140%">
+                                  <feGaussianBlur stdDeviation="3" result="blur" />
+                                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                </filter>
+                              </defs>
+                              <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                              <XAxis dataKey="day" stroke="rgba(255,255,255,0.4)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
+                              <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} tickLine={false} axisLine={false} dx={-10} />
+                              <RTooltip 
+                                contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
+                                itemStyle={{ color: "#7CC4FF", fontWeight: 500, padding: "2px 0" }}
+                                labelStyle={{ color: "rgba(255,255,255,0.6)", marginBottom: "4px", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}
+                                cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1, strokeDasharray: "4 4" }}
+                              />
+                              <Line type="natural" dataKey="views" name="Page Views" stroke="#7CC4FF" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: "#7CC4FF" }} filter="url(#glowLineAdmin2)" />
+                            </LineChart>
+                          ) : (
+                            <BarChart data={dailyAnalytics} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                              <defs>
+                                <filter id="glowBarAdmin2" x="-20%" y="-20%" width="140%" height="140%">
+                                  <feGaussianBlur stdDeviation="3" result="blur" />
+                                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                </filter>
+                              </defs>
+                              <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                              <XAxis dataKey="day" stroke="rgba(255,255,255,0.4)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
+                              <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} tickLine={false} axisLine={false} dx={-10} />
+                              <RTooltip 
+                                contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
+                                itemStyle={{ color: "#7CC4FF", fontWeight: 500, padding: "2px 0" }}
+                                labelStyle={{ color: "rgba(255,255,255,0.6)", marginBottom: "4px", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}
+                                cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                              />
+                              <Bar dataKey="views" fill="#7CC4FF" radius={[6, 6, 0, 0]} filter="url(#glowBarAdmin2)" />
+                            </BarChart>
+                          )}
+                        </ResponsiveContainer>
+                      ) : (
                       <div className="h-full flex items-center justify-center text-muted-foreground">Not enough data</div>
                     )}
                   </div>

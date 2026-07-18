@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatMoney, formatDate } from "@/lib/format";
 import {
-  LineChart as RLineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid,
+  AreaChart as RAreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid,
   PieChart as RPieChart, Pie, Cell,
 } from "recharts";
 import { Clock, TrendingUp, TrendingDown, Wallet, Activity, Target, PieChart, PiggyBank, Flame, Calendar, Crown, ShieldCheck, Sparkles } from "lucide-react";
@@ -218,23 +218,43 @@ function DashboardPage() {
                 <p className="text-xs text-muted-foreground">Income vs expenses</p>
               </div>
             </div>
-            <div className="h-72">
-              <ResponsiveContainer>
-                <RLineChart data={cashflow}>
-                  <CartesianGrid stroke="oklch(1 0 0 / 0.06)" vertical={false} />
-                  <XAxis dataKey="month" stroke="oklch(0.66 0.02 155)" fontSize={12} />
-                  <YAxis stroke="oklch(0.66 0.02 155)" fontSize={12} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip 
-                    formatter={(val: number) => formatMoney(val, currency)}
-                    contentStyle={{ background: "oklch(0.22 0.008 155)", border: "1px solid oklch(1 0 0 / 0.08)", borderRadius: 12, color: "white" }} 
-                    itemStyle={{ color: "white" }}
-                  />
-                  <Line type="monotone" dataKey="income" stroke="#3DDC97" strokeWidth={2.5} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="expense" stroke="#F56565" strokeWidth={2.5} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="net" stroke="#7CC4FF" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 2 }} />
-                </RLineChart>
-              </ResponsiveContainer>
-            </div>
+            <div className="h-72 mt-4">
+                <ResponsiveContainer>
+                  <AreaChart data={cashflow} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3DDC97" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3DDC97" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#F56565" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#F56565" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorNet" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#7CC4FF" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#7CC4FF" stopOpacity={0}/>
+                      </linearGradient>
+                      <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="4" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                      </filter>
+                    </defs>
+                    <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} strokeDasharray="4 4" />
+                    <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dy={10} />
+                    <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dx={-10} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                    <Tooltip 
+                      formatter={(val: number) => formatMoney(val, currency)}
+                      contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
+                      itemStyle={{ color: "white", fontWeight: 500, padding: "2px 0" }}
+                      labelStyle={{ color: "rgba(255,255,255,0.6)", marginBottom: "4px", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}
+                      cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1, strokeDasharray: "4 4" }}
+                    />
+                    <Area type="natural" dataKey="income" stroke="#3DDC97" fill="url(#colorIncome)" strokeWidth={3} filter="url(#glow)" activeDot={{ r: 6, strokeWidth: 0, fill: "#3DDC97" }} />
+                    <Area type="natural" dataKey="expense" stroke="#F56565" fill="url(#colorExpense)" strokeWidth={3} filter="url(#glow)" activeDot={{ r: 6, strokeWidth: 0, fill: "#F56565" }} />
+                    <Area type="natural" dataKey="net" stroke="#7CC4FF" fill="url(#colorNet)" strokeWidth={2} strokeDasharray="4 4" activeDot={{ r: 5, strokeWidth: 0, fill: "#7CC4FF" }} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
           </div>
 
           <div className="rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-5 hover:bg-card/60 transition-colors duration-300 shadow-sm">
@@ -243,24 +263,30 @@ function DashboardPage() {
             {expensePie.length === 0 ? (
               <div className="h-64 flex items-center justify-center text-sm text-muted-foreground">No expenses yet</div>
             ) : (
-              <div className="h-64">
-                <ResponsiveContainer>
-                  <RPieChart>
-                    <Pie data={expensePie} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2}>
-                      {expensePie.map((_, i) => <Cell key={i} fill={pieColors[i % pieColors.length]} />)}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(val: number, name: string) => {
-                        const total = expensePie.reduce((acc, curr) => acc + curr.value, 0);
-                        const percent = total > 0 ? `(${(val / total * 100).toFixed(1)}%)` : '';
-                        return [`${formatMoney(val, currency)} ${percent}`, name];
-                      }}
-                      contentStyle={{ background: "oklch(0.22 0.008 155)", border: "1px solid oklch(1 0 0 / 0.08)", borderRadius: 12, color: "white" }} 
-                      itemStyle={{ color: "white" }}
-                    />
-                  </RPieChart>
-                </ResponsiveContainer>
-              </div>
+                <div className="h-64 mt-2">
+                  <ResponsiveContainer>
+                    <RPieChart>
+                      <defs>
+                        <filter id="pieGlow" x="-20%" y="-20%" width="140%" height="140%">
+                          <feGaussianBlur stdDeviation="3" result="blur" />
+                          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                      </defs>
+                      <Pie data={expensePie} dataKey="value" nameKey="name" innerRadius={60} outerRadius={90} paddingAngle={4} stroke="rgba(0,0,0,0.2)" strokeWidth={2} filter="url(#pieGlow)">
+                        {expensePie.map((_, i) => <Cell key={i} fill={pieColors[i % pieColors.length]} />)}
+                      </Pie>
+                      <Tooltip 
+                        formatter={(val: number, name: string) => {
+                          const total = expensePie.reduce((acc, curr) => acc + curr.value, 0);
+                          const percent = total > 0 ? `(${(val / total * 100).toFixed(1)}%)` : '';
+                          return [`${formatMoney(val, currency)} ${percent}`, name];
+                        }}
+                        contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
+                        itemStyle={{ color: "white", fontWeight: 500, padding: "2px 0" }}
+                      />
+                    </RPieChart>
+                  </ResponsiveContainer>
+                </div>
             )}
           </div>
         </div>

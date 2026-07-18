@@ -240,18 +240,26 @@ function ReportsPage() {
         <div className="h-72">
           {monthly.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthly}>
-                <CartesianGrid stroke="oklch(1 0 0 / 6%)" vertical={false} />
-                <XAxis dataKey="label" stroke="oklch(0.66 0.02 155)" fontSize={12} />
-                <YAxis stroke="oklch(0.66 0.02 155)" fontSize={12} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+              <BarChart data={monthly} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <filter id="glowBarReports" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+                <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} strokeDasharray="4 4" />
+                <XAxis dataKey="label" stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dy={10} />
+                <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dx={-10} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                 <Tooltip 
                   formatter={(val: number) => formatMoney(val, currency)}
-                  contentStyle={{ background: "oklch(0.22 0.008 155)", border: "1px solid oklch(1 0 0 / 0.08)", borderRadius: 12, color: "white" }} 
-                  itemStyle={{ color: "white" }}
+                  contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
+                  itemStyle={{ color: "white", fontWeight: 500, padding: "2px 0" }}
+                  labelStyle={{ color: "rgba(255,255,255,0.6)", marginBottom: "4px", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                 />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="income" name="Earned" fill="#3DDC97" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="expenses" name="Spent" fill="#F56565" radius={[6, 6, 0, 0]} />
+                <Legend wrapperStyle={{ fontSize: 12, opacity: 0.8, paddingTop: 10 }} />
+                <Bar dataKey="income" name="Earned" fill="#3DDC97" radius={[6, 6, 0, 0]} filter="url(#glowBarReports)" />
+                <Bar dataKey="expenses" name="Spent" fill="#F56565" radius={[6, 6, 0, 0]} filter="url(#glowBarReports)" />
               </BarChart>
             </ResponsiveContainer>
           ) : (
