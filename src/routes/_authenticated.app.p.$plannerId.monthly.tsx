@@ -6,6 +6,7 @@ import { formatMoney } from "@/lib/format";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -28,6 +29,7 @@ type Allocation = {
   category: string;
   description: string | null;
   amount: number;
+  is_completed?: boolean;
 };
 
 function AllocationTable({
@@ -45,6 +47,15 @@ function AllocationTable({
   const [addCat, setAddCat] = useState("");
   const [addDesc, setAddDesc] = useState("");
   const [addAmt, setAddAmt] = useState("");
+
+  const toggleDoneMutation = useMutation({
+    mutationFn: async ({ id, is_completed }: { id: string; is_completed: boolean }) => {
+      const { error } = await (supabase as any).from("monthly_allocations").update({ is_completed }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["monthly_allocations", plannerId, monthYear] }),
+    onError: (e) => toast.error(e.message),
+  });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -134,6 +145,7 @@ function AllocationTable({
           <table className="w-full text-left text-sm hidden md:table">
             <thead className="text-xs uppercase tracking-wider text-muted-foreground bg-white/5 sticky top-0 z-10">
               <tr>
+                <th className="px-5 py-3 font-medium w-12 text-center">Done</th>
                 <th className="px-5 py-3 font-medium">Category</th>
                 <th className="px-5 py-3 font-medium">Description</th>
                 <th className="px-5 py-3 font-medium text-right">Amount</th>
@@ -142,12 +154,13 @@ function AllocationTable({
             </thead>
             <tbody className="divide-y divide-white/5">
               {items.length === 0 && !isAdding ? (
-                <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground text-sm">No items yet</td></tr>
+                <tr><td colSpan={5} className="px-5 py-8 text-center text-muted-foreground text-sm">No items yet</td></tr>
               ) : (
                 items.map((item: any) => (
-                  <tr key={item.id} className="group hover:bg-white/5 transition-colors">
+                  <tr key={item.id} className={`group hover:bg-white/5 transition-all ${item.is_completed ? 'opacity-50 grayscale' : ''}`}>
                     {editingId === item.id ? (
                       <>
+                        <td className="px-5 py-2 text-center"></td>
                         <td className="px-2 py-2"><Input className="h-8 text-sm" value={editCat} onChange={(e) => setEditCat(e.target.value)} /></td>
                         <td className="px-2 py-2"><Input className="h-8 text-sm" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} /></td>
                         <td className="px-2 py-2"><Input className="h-8 text-sm text-right" type="number" step="0.01" value={editAmt} onChange={(e) => setEditAmt(e.target.value)} /></td>
@@ -158,9 +171,12 @@ function AllocationTable({
                       </>
                     ) : (
                       <>
-                        <td className="px-5 py-3 font-medium">{item.category}</td>
-                        <td className="px-5 py-3 text-muted-foreground truncate max-w-[200px]">{item.description ?? "—"}</td>
-                        <td className="px-5 py-3 text-right">{formatMoney(item.amount, currency)}</td>
+                        <td className="px-5 py-3 text-center">
+                          <Checkbox checked={item.is_completed} onCheckedChange={() => toggleDoneMutation.mutate({ id: item.id, is_completed: !item.is_completed })} className="border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:text-[#030808]" />
+                        </td>
+                        <td className={`px-5 py-3 font-medium ${item.is_completed ? 'line-through text-muted-foreground' : ''}`}>{item.category}</td>
+                        <td className={`px-5 py-3 text-muted-foreground truncate max-w-[200px] ${item.is_completed ? 'line-through' : ''}`}>{item.description ?? "—"}</td>
+                        <td className={`px-5 py-3 text-right ${item.is_completed ? 'line-through text-muted-foreground' : ''}`}>{formatMoney(item.amount, currency)}</td>
                         <td className="px-2 py-3 text-center flex justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-1">
                           {onAssign && item.amount > 0 && (
                             <button onClick={() => onAssign(item.amount, item.category, type)} className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/20 rounded-md transition-colors" title="Assign to Account"><Wallet className="h-4 w-4" /></button>
@@ -177,6 +193,7 @@ function AllocationTable({
               {/* Inline Add Row Desktop */}
               {isAdding && (
                 <tr className="bg-white/5">
+                  <td className="px-5 py-2 text-center"></td>
                   <td className="px-2 py-2"><Input placeholder="Category" autoFocus className="h-8 text-sm" value={addCat} onChange={(e) => setAddCat(e.target.value)} /></td>
                   <td className="px-2 py-2"><Input placeholder="Description (optional)" className="h-8 text-sm" value={addDesc} onChange={(e) => setAddDesc(e.target.value)} /></td>
                   <td className="px-2 py-2"><Input placeholder="0.00" className="h-8 text-sm text-right" type="number" step="0.01" value={addAmt} onChange={(e) => setAddAmt(e.target.value)} /></td>
@@ -209,12 +226,15 @@ function AllocationTable({
                   </div>
                 ) : (
                   <>
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="min-w-0 flex-1">
-                        <div className="font-medium text-sm text-foreground">{item.category}</div>
-                        {item.description && <div className="text-xs text-muted-foreground mt-0.5">{item.description}</div>}
+                    <div className={`flex justify-between items-start gap-4 transition-all ${item.is_completed ? 'opacity-50 grayscale line-through' : ''}`}>
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <Checkbox checked={item.is_completed} onCheckedChange={() => toggleDoneMutation.mutate({ id: item.id, is_completed: !item.is_completed })} className="mt-1 border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:text-[#030808]" />
+                        <div className="min-w-0 flex-1">
+                          <div className={`font-medium text-sm ${item.is_completed ? 'text-muted-foreground' : 'text-foreground'}`}>{item.category}</div>
+                          {item.description && <div className="text-xs text-muted-foreground mt-0.5">{item.description}</div>}
+                        </div>
                       </div>
-                      <div className="text-sm font-medium whitespace-nowrap">{formatMoney(item.amount, currency)}</div>
+                      <div className={`text-sm font-medium whitespace-nowrap ${item.is_completed ? 'text-muted-foreground' : ''}`}>{formatMoney(item.amount, currency)}</div>
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                       {onAssign && item.amount > 0 && (
