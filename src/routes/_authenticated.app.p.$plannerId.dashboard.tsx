@@ -22,22 +22,20 @@ export const Route = createFileRoute("/_authenticated/app/p/$plannerId/dashboard
 
 function KpiCard({ icon: Icon, label, value, compactValue, sub, accent }: { icon: React.ElementType; label: string; value: string; compactValue?: string; sub?: string; accent?: boolean }) {
   return (
-    <div className={`group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${accent ? "border-primary/40 bg-[#08120f] hover:bg-[#0a1814] hover:border-primary/60 shadow-[0_0_40px_-10px_rgba(61,220,151,0.25)]" : "border-white/5 bg-card/40 backdrop-blur-xl hover:bg-card/60 hover:border-white/10"}`}>
-      {accent && (
-        <>
-          <div className="absolute top-0 left-0 w-[180px] h-[180px] bg-primary/30 blur-[60px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-          <div className="absolute bottom-0 right-0 w-[120px] h-[120px] bg-primary/10 blur-[50px] rounded-full translate-x-1/3 translate-y-1/3 pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-50 pointer-events-none" />
-        </>
-      )}
-      <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground relative z-10 uppercase tracking-wider">
-        <span className={accent ? "text-primary/80" : ""}>{label}</span>
-        <div className={`p-2 rounded-xl ${accent ? "bg-primary/20 text-primary border border-primary/20 shadow-[0_0_15px_rgba(61,220,151,0.3)]" : "bg-white/5 text-muted-foreground group-hover:bg-white/10 group-hover:text-foreground"} transition-colors relative`}>
-          <Icon className="h-4 w-4 relative z-10" />
+    <div className={`group relative rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${accent ? "p-[1px] bg-gradient-to-br from-primary/50 via-white/5 to-white/5" : "border border-white/5 bg-card/40 hover:bg-card/60 hover:border-white/10"}`}>
+      <div className={`relative h-full w-full rounded-[15px] overflow-hidden p-5 ${accent ? "bg-[#050a0a]" : ""}`}>
+        {accent && (
+          <div className="absolute -top-24 -left-24 w-56 h-56 bg-primary/40 blur-[50px] rounded-full pointer-events-none" />
+        )}
+        <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground relative z-10 uppercase tracking-wider">
+          <span className={accent ? "text-primary/80 font-semibold" : ""}>{label}</span>
+          <div className={`p-2 rounded-xl ${accent ? "bg-primary/10 text-primary border border-primary/20" : "bg-white/5 text-muted-foreground group-hover:bg-white/10 group-hover:text-foreground"} transition-colors relative`}>
+            <Icon className="h-4 w-4 relative z-10" />
+          </div>
         </div>
+        <div className={`mt-4 text-3xl font-display font-medium tracking-tight truncate relative z-10 ${accent ? "text-white" : "text-foreground"}`} title={value}>{compactValue || value}</div>
+        {sub && <div className="mt-2 text-xs text-muted-foreground relative z-10 flex items-center gap-1.5"><Activity className="h-3 w-3" /> {sub}</div>}
       </div>
-      <div className={`mt-4 text-3xl font-display font-medium tracking-tight truncate relative z-10 ${accent ? "text-white drop-shadow-[0_0_8px_rgba(61,220,151,0.5)]" : "text-foreground"}`} title={value}>{compactValue || value}</div>
-      {sub && <div className="mt-2 text-xs text-muted-foreground relative z-10 flex items-center gap-1.5"><Activity className="h-3 w-3" /> {sub}</div>}
     </div>
   );
 }

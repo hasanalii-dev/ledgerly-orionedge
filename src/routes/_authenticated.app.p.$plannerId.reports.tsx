@@ -65,18 +65,31 @@ function KpiCard({
   sub?: string;
   tone?: "positive" | "negative" | "neutral";
 }) {
-  const toneClass =
-    tone === "positive" ? "border-primary/30 bg-card glow-emerald text-primary" :
-    tone === "negative" ? "border-destructive/30 bg-destructive/5 text-destructive" :
-    "border-hairline bg-card";
+  const isColored = tone === "positive" || tone === "negative";
+  const wrapperClass = tone === "positive" 
+    ? "p-[1px] bg-gradient-to-br from-primary/50 via-white/5 to-white/5" 
+    : tone === "negative" 
+    ? "p-[1px] bg-gradient-to-br from-destructive/50 via-white/5 to-white/5" 
+    : "border border-white/5 bg-card/40 hover:bg-card/60 hover:border-white/10";
+
   return (
-    <div className={`rounded-2xl border p-5 ${toneClass}`}>
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>{label}</span>
-        <Icon className="h-4 w-4 opacity-80" />
+    <div className={`group relative rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${wrapperClass}`}>
+      <div className={`relative h-full w-full rounded-[15px] overflow-hidden p-5 ${isColored ? "bg-[#050a0a]" : ""}`}>
+        {tone === "positive" && (
+          <div className="absolute -top-24 -left-24 w-56 h-56 bg-primary/40 blur-[50px] rounded-full pointer-events-none" />
+        )}
+        {tone === "negative" && (
+          <div className="absolute -top-24 -left-24 w-56 h-56 bg-destructive/40 blur-[50px] rounded-full pointer-events-none" />
+        )}
+        <div className="flex items-center justify-between text-xs text-muted-foreground relative z-10">
+          <span className={tone === "positive" ? "text-primary/80 font-medium" : tone === "negative" ? "text-destructive/80 font-medium" : "text-muted-foreground"}>{label}</span>
+          <div className={`p-1.5 rounded-lg ${tone === "positive" ? "bg-primary/10 text-primary border border-primary/20" : tone === "negative" ? "bg-destructive/10 text-destructive border border-destructive/20" : "bg-white/5"} relative`}>
+            <Icon className="h-3.5 w-3.5 relative z-10" />
+          </div>
+        </div>
+        <div className={`mt-3 text-2xl font-display truncate relative z-10 ${isColored ? "text-white" : ""}`} title={value}>{compactValue || value}</div>
+        {sub && <div className="mt-1.5 text-xs text-muted-foreground relative z-10">{sub}</div>}
       </div>
-      <div className="mt-3 text-3xl font-display tracking-tight truncate" title={value}>{compactValue || value}</div>
-      {sub && <div className="mt-1 text-xs text-muted-foreground">{sub}</div>}
     </div>
   );
 }
