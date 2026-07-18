@@ -66,30 +66,29 @@ function KpiCard({
   tone?: "positive" | "negative" | "neutral";
 }) {
   const isColored = tone === "positive" || tone === "negative";
-  const wrapperClass = tone === "positive" 
-    ? "p-[1px] bg-gradient-to-br from-primary/50 via-white/5 to-white/5" 
-    : tone === "negative" 
-    ? "p-[1px] bg-gradient-to-br from-destructive/50 via-white/5 to-white/5" 
-    : "border border-white/5 bg-card/40 hover:bg-card/60 hover:border-white/10";
 
   return (
-    <div className={`group relative rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${wrapperClass}`}>
-      <div className={`relative h-full w-full rounded-[15px] overflow-hidden p-5 ${isColored ? "bg-card" : ""}`}>
-        {tone === "positive" && (
+    <div className={`group relative overflow-hidden rounded-2xl border border-white/5 ${isColored ? "bg-card" : "bg-card/40"} p-5 transition-all duration-300 hover:-translate-y-1 hover:bg-card/60 hover:border-white/10 hover:shadow-xl`}>
+      {tone === "positive" && (
+        <>
+          <div className="absolute inset-0 rounded-2xl border border-primary/50 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
           <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/40 blur-[40px] rounded-full pointer-events-none" />
-        )}
-        {tone === "negative" && (
+        </>
+      )}
+      {tone === "negative" && (
+        <>
+          <div className="absolute inset-0 rounded-2xl border border-destructive/50 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
           <div className="absolute -top-12 -left-12 w-32 h-32 bg-destructive/40 blur-[40px] rounded-full pointer-events-none" />
-        )}
-        <div className="flex items-center justify-between text-xs text-muted-foreground relative z-10">
-          <span className={tone === "positive" ? "text-primary/80 font-medium" : tone === "negative" ? "text-destructive/80 font-medium" : "text-muted-foreground"}>{label}</span>
-          <div className={`p-1.5 rounded-lg ${tone === "positive" ? "bg-primary/10 text-primary border border-primary/20" : tone === "negative" ? "bg-destructive/10 text-destructive border border-destructive/20" : "bg-white/5"} relative`}>
-            <Icon className="h-3.5 w-3.5 relative z-10" />
-          </div>
+        </>
+      )}
+      <div className="flex items-center justify-between text-xs text-muted-foreground relative z-10">
+        <span className={tone === "positive" ? "text-primary/80 font-medium" : tone === "negative" ? "text-destructive/80 font-medium" : "text-muted-foreground"}>{label}</span>
+        <div className={`p-1.5 rounded-lg ${tone === "positive" ? "bg-primary/10 text-primary border border-primary/20" : tone === "negative" ? "bg-destructive/10 text-destructive border border-destructive/20" : "bg-white/5"} relative`}>
+          <Icon className="h-3.5 w-3.5 relative z-10" />
         </div>
-        <div className={`mt-3 text-2xl font-display truncate relative z-10 ${isColored ? "text-white" : ""}`} title={value}>{compactValue || value}</div>
-        {sub && <div className="mt-1.5 text-xs text-muted-foreground relative z-10">{sub}</div>}
       </div>
+      <div className={`mt-3 text-2xl font-display truncate relative z-10 ${isColored ? "text-white" : ""}`} title={value}>{compactValue || value}</div>
+      {sub && <div className="mt-1.5 text-xs text-muted-foreground relative z-10">{sub}</div>}
     </div>
   );
 }

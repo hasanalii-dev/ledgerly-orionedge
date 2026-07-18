@@ -22,20 +22,21 @@ export const Route = createFileRoute("/_authenticated/app/p/$plannerId/dashboard
 
 function KpiCard({ icon: Icon, label, value, compactValue, sub, accent }: { icon: React.ElementType; label: string; value: string; compactValue?: string; sub?: string; accent?: boolean }) {
   return (
-    <div className={`group relative rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${accent ? "p-[1px] bg-gradient-to-br from-primary/50 via-white/5 to-white/5" : "border border-white/5 bg-card/40 hover:bg-card/60 hover:border-white/10"}`}>
-      <div className={`relative h-full w-full rounded-[15px] overflow-hidden p-5 ${accent ? "bg-card" : ""}`}>
-        {accent && (
+    <div className={`group relative overflow-hidden rounded-2xl border border-white/5 ${accent ? "bg-card" : "bg-card/40"} p-5 transition-all duration-300 hover:-translate-y-1 hover:bg-card/60 hover:border-white/10 hover:shadow-xl`}>
+      {accent && (
+        <>
+          <div className="absolute inset-0 rounded-2xl border border-primary/50 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
           <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/40 blur-[40px] rounded-full pointer-events-none" />
-        )}
-        <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground relative z-10 uppercase tracking-wider">
-          <span className={accent ? "text-primary/80 font-semibold" : ""}>{label}</span>
-          <div className={`p-2 rounded-xl ${accent ? "bg-primary/10 text-primary border border-primary/20" : "bg-white/5 text-muted-foreground group-hover:bg-white/10 group-hover:text-foreground"} transition-colors relative`}>
-            <Icon className="h-4 w-4 relative z-10" />
-          </div>
+        </>
+      )}
+      <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground relative z-10 uppercase tracking-wider">
+        <span className={accent ? "text-primary/80 font-semibold" : ""}>{label}</span>
+        <div className={`p-2 rounded-xl ${accent ? "bg-primary/10 text-primary border border-primary/20" : "bg-white/5 text-muted-foreground group-hover:bg-white/10 group-hover:text-foreground"} transition-colors relative`}>
+          <Icon className="h-4 w-4 relative z-10" />
         </div>
-        <div className={`mt-4 text-3xl font-display font-medium tracking-tight truncate relative z-10 ${accent ? "text-white" : "text-foreground"}`} title={value}>{compactValue || value}</div>
-        {sub && <div className="mt-2 text-xs text-muted-foreground relative z-10 flex items-center gap-1.5"><Activity className="h-3 w-3" /> {sub}</div>}
       </div>
+      <div className={`mt-4 text-3xl font-display font-medium tracking-tight truncate relative z-10 ${accent ? "text-white" : "text-foreground"}`} title={value}>{compactValue || value}</div>
+      {sub && <div className="mt-2 text-xs text-muted-foreground relative z-10 flex items-center gap-1.5"><Activity className="h-3 w-3" /> {sub}</div>}
     </div>
   );
 }

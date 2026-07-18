@@ -86,14 +86,15 @@ function CashflowPage() {
 
 function StatCard({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className={`group relative rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${accent ? "p-[1px] bg-gradient-to-br from-primary/50 via-white/5 to-white/5" : "border border-white/5 bg-card/40 hover:bg-card/60 hover:border-white/10"}`}>
-      <div className={`relative h-full w-full rounded-[15px] overflow-hidden p-5 ${accent ? "bg-card" : ""}`}>
-        {accent && (
+    <div className={`group relative overflow-hidden rounded-2xl border border-white/5 ${accent ? "bg-card" : "bg-card/40"} p-5 transition-all duration-300 hover:-translate-y-1 hover:bg-card/60 hover:border-white/10 hover:shadow-xl`}>
+      {accent && (
+        <>
+          <div className="absolute inset-0 rounded-2xl border border-primary/50 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
           <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/40 blur-[40px] rounded-full pointer-events-none" />
-        )}
-        <div className={`text-xs uppercase tracking-wider relative z-10 ${accent ? "text-primary/80 font-medium" : "text-muted-foreground"}`}>{label}</div>
-        <div className={`mt-2 font-display text-3xl truncate relative z-10 ${accent ? "text-white" : ""}`} title={value}>{value}</div>
-      </div>
+        </>
+      )}
+      <div className={`text-xs uppercase tracking-wider relative z-10 ${accent ? "text-primary/80 font-medium" : "text-muted-foreground"}`}>{label}</div>
+      <div className={`mt-2 font-display text-3xl truncate relative z-10 ${accent ? "text-white" : ""}`} title={value}>{value}</div>
     </div>
   );
 }
