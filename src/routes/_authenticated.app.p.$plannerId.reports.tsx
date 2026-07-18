@@ -74,12 +74,12 @@ function KpiCard({
 
   return (
     <div className={`group relative rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${wrapperClass}`}>
-      <div className={`relative h-full w-full rounded-[15px] overflow-hidden p-5 ${isColored ? "bg-[#050a0a]" : ""}`}>
+      <div className={`relative h-full w-full rounded-[15px] overflow-hidden p-5 ${isColored ? "bg-card" : ""}`}>
         {tone === "positive" && (
-          <div className="absolute -top-24 -left-24 w-56 h-56 bg-primary/40 blur-[50px] rounded-full pointer-events-none" />
+          <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/40 blur-[40px] rounded-full pointer-events-none" />
         )}
         {tone === "negative" && (
-          <div className="absolute -top-24 -left-24 w-56 h-56 bg-destructive/40 blur-[50px] rounded-full pointer-events-none" />
+          <div className="absolute -top-12 -left-12 w-32 h-32 bg-destructive/40 blur-[40px] rounded-full pointer-events-none" />
         )}
         <div className="flex items-center justify-between text-xs text-muted-foreground relative z-10">
           <span className={tone === "positive" ? "text-primary/80 font-medium" : tone === "negative" ? "text-destructive/80 font-medium" : "text-muted-foreground"}>{label}</span>
