@@ -86,9 +86,16 @@ function CashflowPage() {
 
 function StatCard({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="rounded-2xl border border-hairline bg-card p-5">
-      <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className={`mt-2 font-display text-3xl truncate ${accent ? "text-primary" : ""}`} title={value}>{value}</div>
+    <div className={`group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${accent ? "border-primary/40 bg-[#08120f] hover:bg-[#0a1814] hover:border-primary/60 shadow-[0_0_40px_-10px_rgba(61,220,151,0.25)]" : "border-white/5 bg-card/40 backdrop-blur-xl hover:bg-card/60 hover:border-white/10"}`}>
+      {accent && (
+        <>
+          <div className="absolute top-0 left-0 w-[180px] h-[180px] bg-primary/30 blur-[60px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-[120px] h-[120px] bg-primary/10 blur-[50px] rounded-full translate-x-1/3 translate-y-1/3 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-50 pointer-events-none" />
+        </>
+      )}
+      <div className={`text-xs uppercase tracking-wider relative z-10 ${accent ? "text-primary/80 font-medium" : "text-muted-foreground"}`}>{label}</div>
+      <div className={`mt-2 font-display text-3xl truncate relative z-10 ${accent ? "text-white drop-shadow-[0_0_8px_rgba(61,220,151,0.5)]" : ""}`} title={value}>{value}</div>
     </div>
   );
 }
