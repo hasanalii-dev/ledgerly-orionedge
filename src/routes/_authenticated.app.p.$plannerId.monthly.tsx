@@ -478,9 +478,15 @@ function MonthlyTracking() {
                         <feGaussianBlur stdDeviation="3" result="blur" />
                         <feComposite in="SourceGraphic" in2="blur" operator="over" />
                       </filter>
+                      {pieData.map((e, i) => (
+                        <linearGradient key={`gradient-monthly-${i}`} id={`pieGradientMonthly-${i}`} x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor={e.color} stopOpacity={1} />
+                          <stop offset="100%" stopColor={e.color} stopOpacity={0.3} />
+                        </linearGradient>
+                      ))}
                     </defs>
                     <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4} stroke="rgba(0,0,0,0.2)" strokeWidth={2} filter="url(#pieGlowMonthly)">
-                      {pieData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                      {pieData.map((e, i) => <Cell key={i} fill={`url(#pieGradientMonthly-${i})`} />)}
                     </Pie>
                     <Tooltip 
                       formatter={(val: number, name: string) => {

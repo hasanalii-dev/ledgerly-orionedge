@@ -14,12 +14,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Plus, Settings, LogOut, ChevronDown, LayoutDashboard, TrendingUp, TrendingDown, LineChart, 
   Wallet, Users, FolderKanban, FileText, CandlestickChart, Target, ArrowLeftRight, FileBarChart, 
-  PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon
+  PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles
 } from "lucide-react";
 import { InviteDialog } from "./invite-dialog";
 import { toast } from "sonner";
@@ -29,8 +30,8 @@ type Planner = { id: string; name: string; emoji: string | null; is_default: boo
 export function AppSidebar() {
   const { plannerId } = useParams({ strict: false }) as { plannerId?: string };
   const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const { state } = useSidebar();
-  const collapsed = state === "collapsed";
+  const { state, isMobile } = useSidebar();
+  const collapsed = state === "collapsed" && !isMobile;
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -56,9 +57,21 @@ export function AppSidebar() {
   const active = planners.find((p) => p.id === plannerId) ?? planners[0];
   const [dialogOpen, setDialogOpen] = useState<null | "new" | "rename">(null);
   const [signOutOpen, setSignOutOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [name, setName] = useState("");
 
   useEffect(() => { if (dialogOpen === "rename" && active) setName(active.name); if (dialogOpen === "new") setName(""); }, [dialogOpen, active]);
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setSearchOpen((open) => !open);
+      }
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
   async function createPlanner() {
     if (!name.trim()) return;
@@ -138,11 +151,9 @@ export function AppSidebar() {
     : [];
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-white/5 bg-[#030606] overflow-hidden">
-      {/* Absolute ambient glow behind the sidebar */}
-      <div className="absolute top-0 left-0 w-full h-64 bg-primary/5 blur-[80px] pointer-events-none" />
-      
-      <SidebarHeader className="px-4 py-4 z-10 relative">
+    <Sidebar collapsible="icon" className="border-none bg-[#0b0e0c] overflow-hidden">
+      <div className="absolute bottom-0 left-0 w-full h-64 bg-primary/10 blur-[100px] pointer-events-none z-0" />
+      <SidebarHeader className={`py-4 z-10 relative ${collapsed ? 'px-0' : 'px-4'}`}>
         {/* macOS window controls */}
         {!collapsed && (
           <div className="flex items-center gap-2 mb-8 pl-1">
@@ -157,7 +168,7 @@ export function AppSidebar() {
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-3 w-full text-left group hover:opacity-80 transition-opacity">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] relative overflow-hidden">
-                  <Hexagon className="h-5 w-5 text-primary relative z-10" />
+                  <img src="/favicon.png" alt="Capient Logo" className="h-5 w-auto object-contain relative z-10" />
                   <div className="absolute inset-0 bg-primary/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="flex flex-col flex-1 overflow-hidden">
@@ -167,32 +178,37 @@ export function AppSidebar() {
                 <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64" align="start">
-              <DropdownMenuLabel>Planners</DropdownMenuLabel>
-              {planners.map((p) => (
-                <DropdownMenuItem key={p.id} onClick={() => navigate({ to: `/app/p/${p.id}/dashboard`, params: { plannerId: p.id } })}>
-                  <Book className="h-4 w-4 mr-2 text-muted-foreground" />
-                  {p.name}
-                  {p.id === active?.id && <span className="ml-auto text-xs text-primary">Active</span>}
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
+            <DropdownMenuContent className="w-64 rounded-2xl bg-[#0a1010]/80 backdrop-blur-3xl border-white/10 p-1.5 shadow-2xl font-['Questrial',_sans-serif] relative overflow-hidden" align="start">
+              <div className="absolute inset-0 rounded-2xl border border-primary/20 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
+              <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/20 blur-[40px] rounded-full pointer-events-none" />
+              <DropdownMenuLabel className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold px-2 py-1.5">Planners</DropdownMenuLabel>
+              {planners.map((p) => {
+                const isActive = p.id === active?.id;
+                return (
+                  <DropdownMenuItem key={p.id} className={`rounded-lg cursor-pointer my-0.5 ${isActive ? "bg-white/5" : ""}`} onClick={() => navigate({ to: `/app/p/${p.id}/dashboard`, params: { plannerId: p.id } })}>
+                    <Book className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <span className={`text-[13px] ${isActive ? "text-foreground font-medium" : "text-muted-foreground"}`}>{p.name}</span>
+                    {isActive && <span className="ml-auto text-xs text-primary font-medium">Active</span>}
+                  </DropdownMenuItem>
+                );
+              })}
+              <DropdownMenuSeparator className="bg-white/5 my-1" />
               {active && (
                 <InviteDialog 
                   plannerId={active.id} 
-                  trigger={<DropdownMenuItem onSelect={(e) => e.preventDefault()}><UserPlus className="h-4 w-4 mr-2" />Invite to planner</DropdownMenuItem>} 
+                  trigger={<DropdownMenuItem className="rounded-lg cursor-pointer my-0.5 text-muted-foreground focus:text-foreground" onSelect={(e) => e.preventDefault()}><UserPlus className="h-4 w-4 mr-2" />Invite to planner</DropdownMenuItem>} 
                 />
               )}
-              <DropdownMenuItem onClick={() => setDialogOpen("new")}><Plus className="h-4 w-4 mr-2" />New planner</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setDialogOpen("rename")}><Pencil className="h-4 w-4 mr-2" />Rename</DropdownMenuItem>
-              <DropdownMenuItem onClick={duplicatePlanner}><Copy className="h-4 w-4 mr-2" />Duplicate</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={deletePlanner} className="text-destructive"><Trash2 className="h-4 w-4 mr-2" />Delete</DropdownMenuItem>
+              <DropdownMenuItem className="rounded-lg cursor-pointer my-0.5 text-muted-foreground focus:text-foreground" onClick={() => setDialogOpen("new")}><Plus className="h-4 w-4 mr-2" />New planner</DropdownMenuItem>
+              <DropdownMenuItem className="rounded-lg cursor-pointer my-0.5 text-muted-foreground focus:text-foreground" onClick={() => setDialogOpen("rename")}><Pencil className="h-4 w-4 mr-2" />Rename</DropdownMenuItem>
+              <DropdownMenuItem className="rounded-lg cursor-pointer my-0.5 text-muted-foreground focus:text-foreground" onClick={duplicatePlanner}><Copy className="h-4 w-4 mr-2" />Duplicate</DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-white/5 my-1" />
+              <DropdownMenuItem onClick={deletePlanner} className="text-[#FF5F56] focus:bg-[#FF5F56]/10 focus:text-[#FF5F56] rounded-lg cursor-pointer my-0.5"><Trash2 className="h-4 w-4 mr-2" />Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
           <div className="flex flex-col items-center gap-6 mt-2">
-            <div className="flex items-center gap-1.5 flex-col">
+            <div className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56]" />
               <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
               <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F]" />
@@ -200,17 +216,22 @@ export function AppSidebar() {
             <DropdownMenu>
                <DropdownMenuTrigger asChild>
                   <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 hover:opacity-80 transition-opacity">
-                    <Hexagon className="h-5 w-5 text-primary" />
+                    <img src="/favicon.png" alt="Capient" className="h-5 w-auto object-contain" />
                   </button>
                </DropdownMenuTrigger>
-               <DropdownMenuContent className="w-64" align="start">
-                  {planners.map((p) => (
-                    <DropdownMenuItem key={p.id} onClick={() => navigate({ to: `/app/p/${p.id}/dashboard`, params: { plannerId: p.id } })}>
-                      <Book className="h-4 w-4 mr-2 text-muted-foreground" />
-                      {p.name}
-                      {p.id === active?.id && <span className="ml-auto text-xs text-primary">Active</span>}
-                    </DropdownMenuItem>
-                  ))}
+               <DropdownMenuContent className="w-64 rounded-2xl bg-[#0a1010]/80 backdrop-blur-3xl border-white/10 p-1.5 shadow-2xl font-['Questrial',_sans-serif] relative overflow-hidden" align="start">
+                 <div className="absolute inset-0 rounded-2xl border border-primary/20 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
+                 <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/20 blur-[40px] rounded-full pointer-events-none" />
+                  {planners.map((p) => {
+                    const isActive = p.id === active?.id;
+                    return (
+                      <DropdownMenuItem key={p.id} className={`rounded-lg cursor-pointer my-0.5 ${isActive ? "bg-white/5" : ""}`} onClick={() => navigate({ to: `/app/p/${p.id}/dashboard`, params: { plannerId: p.id } })}>
+                        <Book className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <span className={`text-[13px] ${isActive ? "text-foreground font-medium" : "text-muted-foreground"}`}>{p.name}</span>
+                        {isActive && <span className="ml-auto text-xs text-primary font-medium">Active</span>}
+                      </DropdownMenuItem>
+                    );
+                  })}
                </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -218,7 +239,7 @@ export function AppSidebar() {
 
         {/* Faux Search Input */}
         {!collapsed && (
-          <div className="mt-6 relative group cursor-pointer">
+          <div className="mt-6 relative group cursor-pointer" onClick={() => setSearchOpen(true)}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
             <div className="w-full h-9 bg-white/[0.03] border border-white/5 rounded-[10px] flex items-center pl-9 pr-3 text-xs text-muted-foreground group-hover:bg-white/[0.05] group-hover:border-white/10 transition-all shadow-sm">
               Search...
@@ -230,16 +251,16 @@ export function AppSidebar() {
           </div>
         )}
         {collapsed && (
-           <div className="mt-6 flex justify-center cursor-pointer group">
-             <div className="h-10 w-10 flex items-center justify-center rounded-[10px] bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 transition-colors">
+           <div className="mt-6 flex justify-center cursor-pointer group" onClick={() => setSearchOpen(true)}>
+             <div className="h-10 w-10 shrink-0 flex items-center justify-center rounded-[10px] bg-white/[0.03] border border-white/5 group-hover:bg-white/[0.05] group-hover:border-white/10 transition-colors">
                 <Search className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
              </div>
            </div>
         )}
       </SidebarHeader>
 
-      <SidebarContent className="px-3 pb-4 z-10 relative">
-        <SidebarGroup>
+      <SidebarContent className={`pb-4 z-10 relative ${collapsed ? 'px-0' : 'px-3'}`}>
+        <SidebarGroup className="group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-2">
           {!collapsed && <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-2 mt-2 px-3">Workspace</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu className="gap-0.5">
@@ -247,17 +268,17 @@ export function AppSidebar() {
                 const isActive = pathname.startsWith(item.to);
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title} className="p-0 h-auto w-full">
+                    <SidebarMenuButton asChild tooltip={item.title} className="p-0 h-auto w-full group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:mt-1">
                       <Link 
                         to={item.to} 
-                        className={`flex items-center gap-3 px-3 py-2 w-full rounded-xl transition-all duration-300 group ${
+                        className={`flex items-center gap-3 px-3 py-2 w-full rounded-xl transition-all duration-300 group group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:!size-10 ${
                           isActive 
                             ? "bg-primary/10 border border-primary/20 text-primary font-medium shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_0_15px_rgba(61,220,151,0.05)]" 
                             : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground border border-transparent"
                         }`}
                       >
                         <item.icon className={`h-[16px] w-[16px] transition-colors ${isActive ? "text-primary drop-shadow-[0_0_8px_rgba(61,220,151,0.5)]" : "text-muted-foreground group-hover:text-foreground"}`} />
-                        <span className="text-[13px]">{item.title}</span>
+                        <span className="text-[13px] group-data-[collapsible=icon]:hidden">{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -267,7 +288,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-4">
+        <SidebarGroup className="mt-4 group-data-[collapsible=icon]:px-0">
           {!collapsed && <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-2 px-3">Insights</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu className="gap-0.5">
@@ -275,17 +296,17 @@ export function AppSidebar() {
                 const isActive = pathname.startsWith(item.to);
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title} className="p-0 h-auto w-full">
+                    <SidebarMenuButton asChild tooltip={item.title} className="p-0 h-auto w-full group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:mt-1">
                       <Link 
                         to={item.to} 
-                        className={`flex items-center gap-3 px-3 py-2 w-full rounded-xl transition-all duration-300 group ${
+                        className={`flex items-center gap-3 px-3 py-2 w-full rounded-xl transition-all duration-300 group group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:!size-10 ${
                           isActive 
                             ? "bg-primary/10 border border-primary/20 text-primary font-medium shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_0_15px_rgba(61,220,151,0.05)]" 
                             : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground border border-transparent"
                         }`}
                       >
                         <item.icon className={`h-[16px] w-[16px] transition-colors ${isActive ? "text-primary drop-shadow-[0_0_8px_rgba(61,220,151,0.5)]" : "text-muted-foreground group-hover:text-foreground"}`} />
-                        <span className="text-[13px]">{item.title}</span>
+                        <span className="text-[13px] group-data-[collapsible=icon]:hidden">{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -294,32 +315,102 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {!collapsed && (
+          <div className="mt-auto px-3 mb-4">
+            <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-card/40 p-4 shadow-lg group transition-all hover:bg-card/60">
+              <div className="absolute inset-0 rounded-2xl border border-primary/50 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
+              <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/40 blur-[40px] rounded-full pointer-events-none" />
+              
+              <div className="relative z-10 flex items-center justify-between">
+                <div>
+                  <h4 className="text-[13px] font-semibold text-white tracking-wide">Beta Access</h4>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">Early preview features</p>
+                </div>
+                <div className="flex shrink-0 items-center justify-center h-8 w-8 rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                  <Sparkles className="h-4 w-4" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </SidebarContent>
 
-      <SidebarFooter className="p-4 z-10 relative">
+      <SidebarFooter className={`py-4 z-10 relative ${collapsed ? 'px-0' : 'px-4'}`}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className={`w-full justify-start h-auto p-2.5 bg-white/[0.02] border border-white/5 hover:border-white/10 hover:bg-white/[0.04] transition-all rounded-[14px] ${collapsed ? 'px-0 justify-center' : ''}`}>
-              <Avatar className="h-8 w-8 rounded-[10px] border border-white/10 shadow-sm">
+            <Button variant="ghost" className={`w-full justify-start h-auto bg-white/[0.02] border border-white/5 hover:border-white/10 hover:bg-white/[0.04] transition-all rounded-[14px] ${collapsed ? 'p-0 h-10 w-10 shrink-0 flex items-center justify-center mx-auto' : 'p-2.5'}`}>
+              <Avatar className={`${collapsed ? 'h-7 w-7 rounded-lg' : 'h-8 w-8 rounded-[10px]'} border border-white/10 shadow-sm`}>
                 <AvatarImage src={profile?.avatar_url} />
-                <AvatarFallback className="bg-primary/15 text-primary rounded-[10px] text-xs font-semibold">{(profile?.display_name ?? profile?.email ?? "U").toString().charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarFallback className={`bg-primary/15 text-primary text-xs font-semibold ${collapsed ? 'rounded-lg' : 'rounded-[10px]'}`}>{(profile?.display_name ?? profile?.email ?? "U").toString().charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
               {!collapsed && (
                 <div className="ml-3 text-left overflow-hidden flex-1">
                   <div className="text-[13px] font-medium text-foreground truncate">{profile?.display_name ?? "You"}</div>
-                  <div className="text-[10px] text-muted-foreground truncate">{profile?.email}</div>
+                  <div className="text-[11px] text-muted-foreground truncate">{profile?.email}</div>
                 </div>
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 rounded-xl bg-[#0a1010] border-white/10 shadow-2xl">
-            <DropdownMenuItem asChild className="rounded-lg cursor-pointer"><Link to="/app/profile"><User className="h-4 w-4 mr-2" />Profile & Account</Link></DropdownMenuItem>
-            <DropdownMenuItem asChild className="rounded-lg cursor-pointer"><Link to="/app/preferences"><Settings className="h-4 w-4 mr-2" />Preferences</Link></DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-white/5" />
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setSignOutOpen(true); }} className="text-destructive rounded-lg cursor-pointer hover:bg-destructive/10"><LogOut className="h-4 w-4 mr-2" />Sign out</DropdownMenuItem>
+          <DropdownMenuContent align="end" className="w-56 rounded-2xl bg-[#0a1010]/80 backdrop-blur-3xl border-white/10 p-1.5 shadow-2xl font-['Questrial',_sans-serif] relative overflow-hidden">
+            <div className="absolute inset-0 rounded-2xl border border-primary/20 pointer-events-none [mask-image:linear-gradient(to_top_right,black_0%,transparent_60%)]" />
+            <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-primary/20 blur-[40px] rounded-full pointer-events-none" />
+            <DropdownMenuLabel className="font-normal p-2 flex items-center gap-2.5">
+              <Avatar className="h-8 w-8 rounded-full border border-white/10 shadow-sm">
+                <AvatarImage src={profile?.avatar_url} />
+                <AvatarFallback className="bg-primary/15 text-primary text-xs font-semibold">{(profile?.display_name ?? profile?.email ?? "U").toString().charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col overflow-hidden">
+                <span className="text-[13px] font-medium text-foreground truncate">{profile?.display_name ?? "You"}</span>
+                <span className="text-[11px] text-muted-foreground truncate">{profile?.email}</span>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-white/5 my-1" />
+            <DropdownMenuItem asChild className="rounded-lg cursor-pointer my-0.5 text-muted-foreground focus:text-foreground"><Link to="/app/accounts"><Wallet className="h-4 w-4 mr-2" />Accounts</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild className="rounded-lg cursor-pointer my-0.5 text-muted-foreground focus:text-foreground"><Link to="/app/profile"><User className="h-4 w-4 mr-2" />Profile & Account</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild className="rounded-lg cursor-pointer my-0.5 text-muted-foreground focus:text-foreground"><Link to="/app/preferences"><Settings className="h-4 w-4 mr-2" />Preferences</Link></DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-white/5 my-1" />
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setSignOutOpen(true); }} className="text-[#FF5F56] rounded-lg cursor-pointer focus:bg-[#FF5F56]/10 focus:text-[#FF5F56] my-0.5"><LogOut className="h-4 w-4 mr-2" />Sign out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarFooter>
+
+      <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
+        <CommandInput placeholder="Type a command or search..." />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup heading="Workspace">
+            {items.map((item) => (
+              <CommandItem 
+                key={item.to} 
+                onSelect={() => { 
+                  navigate({ to: item.to, params: { plannerId } }); 
+                  setSearchOpen(false); 
+                }}
+                className="cursor-pointer"
+              >
+                <item.icon className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span>{item.title}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          <CommandGroup heading="Insights">
+            {items2.map((item) => (
+              <CommandItem 
+                key={item.to} 
+                onSelect={() => { 
+                  navigate({ to: item.to, params: { plannerId } }); 
+                  setSearchOpen(false); 
+                }}
+                className="cursor-pointer"
+              >
+                <item.icon className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span>{item.title}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
 
       <Dialog open={dialogOpen !== null} onOpenChange={(o) => !o && setDialogOpen(null)}>
         <DialogContent className="bg-[#050a0a] border-white/10">

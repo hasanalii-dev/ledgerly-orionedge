@@ -55,7 +55,8 @@ function DashboardPage() {
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
-      return (await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle()).data;
+      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+      return { ...data, email: user.email };
     },
   });
 
@@ -244,19 +245,19 @@ function DashboardPage() {
                         <feComposite in="SourceGraphic" in2="blur" operator="over" />
                       </filter>
                     </defs>
-                    <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} strokeDasharray="4 4" />
-                    <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dy={10} />
-                    <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dx={-10} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                    <CartesianGrid stroke="rgba(255,255,255,0.03)" vertical={false} />
+                    <XAxis dataKey="month" stroke="rgba(255,255,255,0.2)" fontSize={10} axisLine={false} tickLine={false} dy={10} />
+                    <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} axisLine={false} tickLine={false} dx={-10} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                     <Tooltip 
                       formatter={(val: number) => formatMoney(val, currency)}
-                      contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
+                      contentStyle={{ backgroundColor: "rgba(10, 16, 16, 0.9)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
                       itemStyle={{ color: "white", fontWeight: 500, padding: "2px 0" }}
-                      labelStyle={{ color: "rgba(255,255,255,0.6)", marginBottom: "4px", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}
-                      cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1, strokeDasharray: "4 4" }}
+                      labelStyle={{ color: "rgba(255,255,255,0.4)", marginBottom: "4px", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}
+                      cursor={{ stroke: 'rgba(255,255,255,0.15)', strokeWidth: 1 }}
                     />
-                    <Area type="natural" dataKey="income" stroke="#3DDC97" fill="url(#colorIncome)" strokeWidth={3} filter="url(#glow)" activeDot={{ r: 6, strokeWidth: 0, fill: "#3DDC97" }} />
-                    <Area type="natural" dataKey="expense" stroke="#F56565" fill="url(#colorExpense)" strokeWidth={3} filter="url(#glow)" activeDot={{ r: 6, strokeWidth: 0, fill: "#F56565" }} />
-                    <Area type="natural" dataKey="net" stroke="#7CC4FF" fill="url(#colorNet)" strokeWidth={2} strokeDasharray="4 4" activeDot={{ r: 5, strokeWidth: 0, fill: "#7CC4FF" }} />
+                    <Area type="natural" dataKey="income" stroke="#3DDC97" fill="url(#colorIncome)" strokeWidth={3} filter="url(#glow)" activeDot={{ r: 5, strokeWidth: 2, fill: "#0a1010", stroke: "#3DDC97" }} />
+                    <Area type="natural" dataKey="expense" stroke="#F56565" fill="url(#colorExpense)" strokeWidth={3} filter="url(#glow)" activeDot={{ r: 5, strokeWidth: 2, fill: "#0a1010", stroke: "#F56565" }} />
+                    <Area type="natural" dataKey="net" stroke="#7CC4FF" fill="url(#colorNet)" strokeWidth={2} strokeDasharray="4 4" activeDot={{ r: 5, strokeWidth: 2, fill: "#0a1010", stroke: "#7CC4FF" }} />
                   </RAreaChart>
                 </ResponsiveContainer>
               </div>
@@ -276,9 +277,15 @@ function DashboardPage() {
                           <feGaussianBlur stdDeviation="3" result="blur" />
                           <feComposite in="SourceGraphic" in2="blur" operator="over" />
                         </filter>
+                        {pieColors.map((color, i) => (
+                          <linearGradient key={`gradient-${i}`} id={`pieGradient-${i}`} x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor={color} stopOpacity={1} />
+                            <stop offset="100%" stopColor={color} stopOpacity={0.3} />
+                          </linearGradient>
+                        ))}
                       </defs>
-                      <Pie data={expensePie} dataKey="value" nameKey="name" innerRadius={60} outerRadius={90} paddingAngle={4} stroke="rgba(0,0,0,0.2)" strokeWidth={2} filter="url(#pieGlow)">
-                        {expensePie.map((_, i) => <Cell key={i} fill={pieColors[i % pieColors.length]} />)}
+                      <Pie data={expensePie} dataKey="value" nameKey="name" innerRadius={65} outerRadius={90} paddingAngle={6} stroke="none" filter="url(#pieGlow)">
+                        {expensePie.map((_, i) => <Cell key={i} fill={`url(#pieGradient-${i % pieColors.length})`} stroke="transparent" />)}
                       </Pie>
                       <Tooltip 
                         formatter={(val: number, name: string) => {

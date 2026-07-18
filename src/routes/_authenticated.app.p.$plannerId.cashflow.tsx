@@ -66,17 +66,17 @@ function CashflowPage() {
                   <feComposite in="SourceGraphic" in2="blur" operator="over" />
                 </filter>
               </defs>
-              <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} strokeDasharray="4 4" />
-              <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dy={10} />
-              <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dx={-10} tickFormatter={(val) => formatMoney(val, currency)} />
+              <CartesianGrid stroke="rgba(255,255,255,0.03)" vertical={false} />
+              <XAxis dataKey="month" stroke="rgba(255,255,255,0.2)" fontSize={11} axisLine={false} tickLine={false} dy={10} />
+              <YAxis stroke="rgba(255,255,255,0.2)" fontSize={11} axisLine={false} tickLine={false} dx={-10} tickFormatter={(val) => formatMoney(val, currency)} />
               <Tooltip 
                 formatter={(val: number) => formatMoney(val, currency)}
-                contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
+                contentStyle={{ backgroundColor: "rgba(10, 16, 16, 0.9)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
                 itemStyle={{ color: "white", fontWeight: 500, padding: "2px 0" }}
-                labelStyle={{ color: "rgba(255,255,255,0.6)", marginBottom: "4px", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}
-                cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1, strokeDasharray: "4 4" }}
+                labelStyle={{ color: "rgba(255,255,255,0.4)", marginBottom: "4px", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}
+                cursor={{ stroke: 'rgba(255,255,255,0.15)', strokeWidth: 1 }}
               />
-              <Area type="natural" dataKey="running" stroke="#3DDC97" fill="url(#g1)" strokeWidth={3} filter="url(#glowCashflow)" activeDot={{ r: 6, strokeWidth: 0, fill: "#3DDC97" }} />
+              <Area type="natural" dataKey="running" stroke="#3DDC97" fill="url(#g1)" strokeWidth={3} filter="url(#glowCashflow)" activeDot={{ r: 5, strokeWidth: 2, fill: "#0a1010", stroke: "#3DDC97" }} />
             </AreaChart>
           </ResponsiveContainer>
       </div>

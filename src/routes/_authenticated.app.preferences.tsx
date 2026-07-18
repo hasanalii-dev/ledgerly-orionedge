@@ -34,7 +34,7 @@ function PreferencesPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
       const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
-      return data;
+      return { ...data, email: user.email };
     },
   });
 

@@ -80,9 +80,18 @@ function ChartsPage() {
                     <feGaussianBlur stdDeviation="3" result="blur" />
                     <feComposite in="SourceGraphic" in2="blur" operator="over" />
                   </filter>
+                  {byCat.map((c, i) => {
+                    const color = c.color || COLORS[i % COLORS.length];
+                    return (
+                      <linearGradient key={`gradient-charts-${i}`} id={`pieGradientCharts-${i}`} x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor={color} stopOpacity={1} />
+                        <stop offset="100%" stopColor={color} stopOpacity={0.3} />
+                      </linearGradient>
+                    );
+                  })}
                 </defs>
                 <Pie data={byCat} dataKey="value" nameKey="name" outerRadius={110} innerRadius={70} paddingAngle={4} stroke="rgba(0,0,0,0.2)" strokeWidth={2} filter="url(#pieGlowCharts)">
-                  {byCat.map((c, i) => <Cell key={c.name} fill={c.color || COLORS[i % COLORS.length]} />)}
+                  {byCat.map((c, i) => <Cell key={c.name} fill={`url(#pieGradientCharts-${i})`} />)}
                 </Pie>
                 <Tooltip 
                   formatter={(val: number, name: string) => {

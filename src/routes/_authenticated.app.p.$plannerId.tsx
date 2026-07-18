@@ -113,19 +113,20 @@ function PlannerLayout() {
 
   return (
     <SidebarProvider defaultOpen>
-      <div className="min-h-screen flex w-full bg-background pb-[80px] md:pb-0 relative">
+      <div className="min-h-screen flex w-full bg-transparent pb-[80px] md:pb-0 relative">
 
         <div className="hidden md:flex relative z-10">
           <AppSidebar />
         </div>
         <SidebarInset className="flex-1 overflow-hidden relative z-10">
-          <header className="hidden md:flex sticky top-0 z-20 h-14 items-center gap-3 px-4 border-b border-hairline bg-background/80 backdrop-blur-xl">
-            <SidebarTrigger />
-            <div className="text-sm text-muted-foreground truncate flex-1">
+          <header className="hidden md:flex sticky top-0 z-20 h-14 items-center gap-4 px-4 bg-[#0b0e0c] border-b border-white/5 transition-all duration-300 relative">
+            <div className="absolute right-0 top-0 h-full w-96 bg-gradient-to-l from-primary/10 via-primary/5 to-transparent pointer-events-none" />
+            <SidebarTrigger className="text-muted-foreground hover:text-foreground transition-colors -ml-2 h-8 w-8 relative z-10" />
+            <div className="text-[15px] font-medium text-foreground truncate flex-1 tracking-wide ml-2 relative z-10">
               {planner?.name ?? ""}
             </div>
             {planner && (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 relative z-10">
                 <TooltipProvider delayDuration={200}>
                   <div className="flex -space-x-2">
                     {collaborators.slice(0, 5).map((collab: any, i: number) => {
@@ -209,8 +210,8 @@ function PlannerLayout() {
                     </Tooltip>
                   </div>
                 </TooltipProvider>
-                <div className="flex items-center gap-2 border-l border-white/5 pl-4">
-                  <span className="text-xs text-muted-foreground uppercase tracking-wider hidden sm:inline-block">Currency</span>
+                <div className="flex items-center gap-3 border-l border-white/10 pl-4">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold hidden sm:inline-block">Currency</span>
                   <Select
                     value={planner.currency ?? "USD"}
                     onValueChange={async (v) => {
@@ -221,8 +222,16 @@ function PlannerLayout() {
                       toast.success(`Currency set to ${v}`);
                     }}
                   >
-                    <SelectTrigger className="h-8 w-[92px] bg-card border-hairline"><SelectValue /></SelectTrigger>
-                    <SelectContent>{CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                    <SelectTrigger className="h-8 w-[90px] bg-[#111313] hover:bg-[#151818] border-transparent rounded-lg text-xs transition-colors">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#0a1010]/80 backdrop-blur-3xl border-white/10 rounded-2xl shadow-2xl p-1.5 relative overflow-hidden">
+                      <div className="absolute inset-0 rounded-2xl border border-primary/20 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
+                      <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/20 blur-[40px] rounded-full pointer-events-none" />
+                      {CURRENCIES.map((c) => (
+                        <SelectItem key={c} value={c} className="text-xs cursor-pointer rounded-lg my-0.5 focus:bg-white/5 focus:text-foreground relative z-10">{c}</SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
               </div>
@@ -230,8 +239,8 @@ function PlannerLayout() {
           </header>
 
           {/* Mobile Top Bar */}
-          <header className="md:hidden sticky top-0 z-20 h-14 flex items-center justify-center px-4 border-b border-white/5 bg-background/90 backdrop-blur-xl">
-            <div className="font-display font-medium text-base truncate">
+          <header className="md:hidden sticky top-0 z-20 h-14 flex items-center justify-center px-4 bg-[#0b0e0c] border-b border-white/5 transition-all duration-300">
+            <div className="font-display font-medium text-base truncate text-white">
               {planner?.name ?? "Planner"}
             </div>
           </header>
