@@ -52,7 +52,7 @@ function KpiCard({ icon: Icon, label, value, compactValue, sub, accent }: { icon
           <Icon className="h-3 w-3 md:h-3.5 md:w-3.5" />
         </div>
       </div>
-      <div className="text-[22px] md:text-[28px] font-display font-bold tracking-tight truncate relative z-10 text-white" title={value}>
+      <div className="text-[22px] md:text-[28px] font-display font-medium tracking-tight truncate relative z-10 text-white" title={value}>
         {compactValue || value}
       </div>
       {sub && (
