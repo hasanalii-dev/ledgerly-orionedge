@@ -264,12 +264,9 @@ function AuthBetaPage() {
             )}
 
             <div className="mb-8 text-center mt-2 flex flex-col items-center">
-              {/* Plain Logo without glow */}
-              <Link to="/" className="inline-flex items-center gap-2 mb-6 group cursor-pointer">
-                 <div className="h-9 w-9 bg-[#0b1414] rounded-[10px] flex items-center justify-center border border-white/5">
-                   <img src="/favicon.png" alt="Capient" className="h-4 w-4 object-contain" />
-                 </div>
-                 <span className="font-display font-semibold text-xl text-white tracking-tight">Capient</span>
+              {/* Full Logo */}
+              <Link to="/" className="inline-flex items-center justify-center mb-6 group cursor-pointer">
+                 <img src="/logo.png" alt="Capient" className="h-10 w-auto object-contain" />
               </Link>
               <h1 className="text-3xl font-display font-medium text-white tracking-tight">
                 {mode === "login" ? "Welcome back" : "Join the Beta"}
@@ -331,7 +328,7 @@ function AuthBetaPage() {
                     <div className="space-y-3">
                       <Input type="email" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} className="h-14 bg-[#030606] border-white/5 text-white placeholder:text-muted-foreground/40 focus-visible:ring-emerald-500/30 rounded-2xl px-4 text-sm transition-all" onKeyDown={e => e.key === 'Enter' && handleNextLogin()} autoFocus />
                     </div>
-                    <Button className="w-full h-14 bg-emerald-400 hover:bg-emerald-300 text-[#030808] font-semibold text-base rounded-2xl mt-4 group" onClick={handleNextLogin}>
+                    <Button className="w-full h-14 bg-gradient-to-b from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 text-[#030808] font-semibold text-base rounded-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_0_20px_rgba(52,211,153,0.3)] border border-emerald-300/50 mt-4 group" onClick={handleNextLogin}>
                       Continue <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </motion.div>
@@ -351,7 +348,7 @@ function AuthBetaPage() {
                         </button>
                       </div>
                     </div>
-                    <Button className="w-full h-14 bg-emerald-400 hover:bg-emerald-300 text-[#030808] font-semibold text-base rounded-2xl mt-4" onClick={handleLoginSubmit} disabled={loading}>
+                    <Button className="w-full h-14 bg-gradient-to-b from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 text-[#030808] font-semibold text-base rounded-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_0_20px_rgba(52,211,153,0.3)] border border-emerald-300/50 mt-4" onClick={handleLoginSubmit} disabled={loading}>
                       {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Sign In"}
                     </Button>
                     <div className="text-center mt-4">
@@ -392,7 +389,7 @@ function AuthBetaPage() {
                       <label className="text-sm font-medium text-white/80 pl-1">Choose your Name</label>
                       <Input type="text" placeholder="e.g. Alex Stone" value={username} onChange={e => setUsername(e.target.value)} className="h-14 bg-[#030606] border-white/5 text-white placeholder:text-muted-foreground/40 focus-visible:ring-emerald-500/30 rounded-2xl px-4 text-sm transition-all" onKeyDown={e => e.key === 'Enter' && handleNextSignupUsername()} autoFocus />
                     </div>
-                    <Button className="w-full h-14 bg-emerald-400 hover:bg-emerald-300 text-[#030808] font-semibold text-base rounded-2xl mt-4 group" onClick={handleNextSignupUsername}>
+                    <Button className="w-full h-14 bg-gradient-to-b from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 text-[#030808] font-semibold text-base rounded-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_0_20px_rgba(52,211,153,0.3)] border border-emerald-300/50 mt-4 group" onClick={handleNextSignupUsername}>
                       Next <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </motion.div>
@@ -404,7 +401,7 @@ function AuthBetaPage() {
                       <label className="text-sm font-medium text-white/80 pl-1">What's your email?</label>
                       <Input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} className="h-14 bg-[#030606] border-white/5 text-white placeholder:text-muted-foreground/40 focus-visible:ring-emerald-500/30 rounded-2xl px-4 text-sm transition-all" onKeyDown={e => e.key === 'Enter' && handleNextSignupEmail()} autoFocus />
                     </div>
-                    <Button className="w-full h-14 bg-emerald-400 hover:bg-emerald-300 text-[#030808] font-semibold text-base rounded-2xl mt-4 group" onClick={handleNextSignupEmail}>
+                    <Button className="w-full h-14 bg-gradient-to-b from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 text-[#030808] font-semibold text-base rounded-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_0_20px_rgba(52,211,153,0.3)] border border-emerald-300/50 mt-4 group" onClick={handleNextSignupEmail}>
                       Next <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </motion.div>
@@ -438,7 +435,7 @@ function AuthBetaPage() {
                         </div>
                       </div>
                     </div>
-                    <Button className="w-full h-14 bg-emerald-400 hover:bg-emerald-300 text-[#030808] font-semibold text-base rounded-2xl mt-4 group" onClick={handleSignupSubmit} disabled={loading || !password || !confirmPassword}>
+                    <Button className="w-full h-14 bg-gradient-to-b from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 text-[#030808] font-semibold text-base rounded-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_0_20px_rgba(52,211,153,0.3)] border border-emerald-300/50 mt-4 group" onClick={handleSignupSubmit} disabled={loading || !password || !confirmPassword}>
                       {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Create Account"}
                     </Button>
                   </motion.div>
@@ -452,7 +449,7 @@ function AuthBetaPage() {
                     </div>
                     <p className="text-sm text-white/80 mb-6 leading-relaxed">We sent an 8-digit verification code to <br/><strong className="text-emerald-400">{email}</strong>.</p>
                     <Input type="text" placeholder="• • • • • • • •" value={otp} onChange={e => setOtp(e.target.value)} className="h-16 text-center text-2xl tracking-[0.5em] font-mono bg-[#030606] border-white/5 text-white placeholder:text-muted-foreground/30 focus-visible:ring-emerald-500/30 rounded-2xl transition-all" maxLength={8} onKeyDown={e => e.key === 'Enter' && handleOtpSubmit()} autoFocus />
-                    <Button className="w-full h-14 bg-emerald-400 hover:bg-emerald-300 text-[#030808] font-semibold text-base rounded-2xl mt-6 group" onClick={handleOtpSubmit} disabled={loading || otp.length < 6}>
+                    <Button className="w-full h-14 bg-gradient-to-b from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 text-[#030808] font-semibold text-base rounded-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_0_20px_rgba(52,211,153,0.3)] border border-emerald-300/50 mt-6 group" onClick={handleOtpSubmit} disabled={loading || otp.length < 6}>
                       {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify Code"}
                     </Button>
                     <div className="mt-4 flex justify-center">

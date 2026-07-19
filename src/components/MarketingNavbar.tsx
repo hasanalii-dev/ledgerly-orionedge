@@ -55,9 +55,8 @@ export function MarketingNavbar() {
               : "bg-transparent border border-transparent rounded-full px-2 py-2"
           )}
         >
-          <Link to="/" className="flex items-center gap-2 font-display font-semibold text-lg hover:opacity-80 transition-opacity">
-            <img src="/favicon.png" alt="Capient" className="h-6 w-6 object-contain" />
-            Capient
+          <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
+            <img src="/side-bar-logo.png" alt="Capient" className="h-8 w-auto object-contain" />
           </Link>
           
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">

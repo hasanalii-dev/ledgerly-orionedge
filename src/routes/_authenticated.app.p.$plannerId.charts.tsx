@@ -1,14 +1,37 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
+import { 
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, 
+  PieChart, Pie, Cell, Legend,
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  FunnelChart, Funnel, AreaChart, Area
+} from "recharts";
 import { formatMoney } from "@/lib/format";
 import { usePlannerCurrency } from "@/hooks/use-planner-currency";
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/charts")({
   component: ChartsPage,
 });
 
-const COLORS = ["#3DDC97", "#7CC4FF", "#FFB86B", "#B794F4", "#F687B3", "#68D391", "#F6AD55", "#4FD1C5"];
+const COLORS = ["#3DDC97", "#00E5FF", "#00F0B5", "#FFD166", "#14B8A6", "#10B981", "#06B6D4", "#FBBF24"];
+
+const renderCustomizedLabel = (props: any) => {
+  const { cx, cy, midAngle, innerRadius, outerRadius, fill, name } = props;
+  const radius = innerRadius + (outerRadius - innerRadius) / 2;
+  const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
+  const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
+  
+  const initial = name ? name.charAt(0).toUpperCase() : "O";
+
+  return (
+    <g transform={`translate(${x}, ${y})`} style={{ pointerEvents: 'none' }}>
+      <circle cx="0" cy="0" r="14" fill="#030808" stroke={fill} strokeWidth="3" />
+      <text x="0" y="0" dy="4" textAnchor="middle" fill={fill} fontSize="12" fontWeight="900" fontFamily="sans-serif">
+        {initial}
+      </text>
+    </g>
+  );
+};
 
 function ChartsPage() {
   const { plannerId } = Route.useParams();
@@ -39,73 +62,156 @@ function ChartsPage() {
     },
   });
 
+  const totalExpenses = byCat.reduce((acc, curr) => acc + curr.value, 0);
+
+  const radarData = monthly.slice(-6).map(m => ({
+    subject: m.month,
+    Income: m.income,
+    Expenses: m.expenses,
+    fullMark: Math.max(m.income, m.expenses) * 1.2 || 1000
+  }));
+
+  const candlestickData = monthly.map(m => {
+    const min = Math.min(m.income, m.expenses);
+    const max = Math.max(m.income, m.expenses);
+    return {
+      month: m.month,
+      range: [min, max],
+      isIncomeHigher: m.income >= m.expenses
+    };
+  });
+
+  const funnelData = [...byCat].sort((a, b) => b.value - a.value).slice(0, 6);
+
   return (
     <div className="space-y-6">
+      <svg width="0" height="0" className="absolute">
+        <defs>
+          <filter id="neonGlowGreen" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter id="neonGlowYellow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter id="universalGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+          <linearGradient id="areaGradientGreen" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#3DDC97" stopOpacity={0.5}/>
+            <stop offset="95%" stopColor="#3DDC97" stopOpacity={0}/>
+          </linearGradient>
+        </defs>
+      </svg>
+
       <div>
-        <h1 className="font-display text-3xl">Charts</h1>
-        <p className="text-sm text-muted-foreground">See the shape of your finances.</p>
+        <h1 className="font-display text-3xl">Advanced Reports</h1>
+        <p className="text-sm text-muted-foreground">Deep analytical views of your financial data.</p>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="rounded-2xl border border-hairline bg-card p-6 h-[380px]">
-          <div className="text-sm font-medium mb-4">Income vs Expenses</div>
-            <ResponsiveContainer width="100%" height="90%">
-              <BarChart data={monthly} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <defs>
-                  <filter id="glowBar" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="3" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
-                </defs>
-                <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} strokeDasharray="4 4" />
-                <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dy={10} />
-                <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dx={-10} tickFormatter={(val) => formatMoney(val, currency)} />
-                <Tooltip 
-                  formatter={(val: number) => formatMoney(val, currency)}
-                  contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
-                  itemStyle={{ color: "white", fontWeight: 500, padding: "2px 0" }}
-                  labelStyle={{ color: "rgba(255,255,255,0.6)", marginBottom: "4px", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                />
-                <Bar dataKey="income" fill="#3DDC97" radius={[6, 6, 0, 0]} filter="url(#glowBar)" />
-                <Bar dataKey="expenses" fill="#F56565" radius={[6, 6, 0, 0]} filter="url(#glowBar)" />
-              </BarChart>
-            </ResponsiveContainer>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        
+        {/* Radar Chart */}
+        <div className="rounded-2xl border border-white/5 bg-[#111312] p-6 h-[420px] relative overflow-hidden">
+          <div className="text-sm font-medium mb-1 text-white">Cashflow Velocity</div>
+          <p className="text-xs text-muted-foreground mb-4">6-Month spread of Income vs Expenses</p>
+          <ResponsiveContainer width="100%" height="90%">
+            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+              <PolarGrid stroke="rgba(255,255,255,0.05)" />
+              <PolarAngleAxis dataKey="subject" tick={{ fill: '#3DDC97', fontSize: 11, fontWeight: 'bold' }} />
+              <Radar name="Income" dataKey="Income" stroke="#3DDC97" strokeWidth={3} fill="#3DDC97" fillOpacity={0.15} filter="url(#neonGlowGreen)" />
+              <Radar name="Expenses" dataKey="Expenses" stroke="#FFD166" strokeWidth={3} fill="#FFD166" fillOpacity={0.15} filter="url(#neonGlowYellow)" />
+              <Tooltip 
+                contentStyle={{ backgroundColor: "#111312", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "white" }} 
+                itemStyle={{ fontWeight: 600 }}
+              />
+            </RadarChart>
+          </ResponsiveContainer>
         </div>
-        <div className="rounded-2xl border border-hairline bg-card p-6 h-[380px]">
-          <div className="text-sm font-medium mb-4">Expenses by category</div>
-            <ResponsiveContainer width="100%" height="90%">
-              <PieChart>
-                <defs>
-                  <filter id="pieGlowCharts" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="3" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
-                  {byCat.map((c, i) => {
-                    const color = c.color || COLORS[i % COLORS.length];
-                    return (
-                      <linearGradient key={`gradient-charts-${i}`} id={`pieGradientCharts-${i}`} x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stopColor={color} stopOpacity={1} />
-                        <stop offset="100%" stopColor={color} stopOpacity={0.3} />
-                      </linearGradient>
-                    );
-                  })}
-                </defs>
-                <Pie data={byCat} dataKey="value" nameKey="name" outerRadius={110} innerRadius={70} paddingAngle={4} stroke="rgba(0,0,0,0.2)" strokeWidth={2} filter="url(#pieGlowCharts)">
-                  {byCat.map((c, i) => <Cell key={c.name} fill={`url(#pieGradientCharts-${i})`} />)}
-                </Pie>
-                <Tooltip 
-                  formatter={(val: number, name: string) => {
-                    const total = byCat.reduce((acc, curr) => acc + curr.value, 0);
-                    const percent = total > 0 ? `(${(val / total * 100).toFixed(1)}%)` : '';
-                    return [`${formatMoney(val, currency)} ${percent}`, name];
-                  }}
-                  contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
-                  itemStyle={{ color: "white", fontWeight: 500, padding: "2px 0" }}
-                />
-                <Legend wrapperStyle={{ fontSize: 12, opacity: 0.8, paddingTop: 10 }} />
-              </PieChart>
-            </ResponsiveContainer>
+
+        {/* Candlestick / Waterfall Chart */}
+        <div className="rounded-2xl border border-white/5 bg-[#111312] p-6 h-[420px]">
+          <div className="text-sm font-medium mb-1 text-white">Cashflow Variance (Waterfall)</div>
+          <p className="text-xs text-muted-foreground mb-4">Floating range between monthly income and expenses</p>
+          <ResponsiveContainer width="100%" height="90%">
+            <BarChart data={candlestickData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} strokeDasharray="4 4" />
+              <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dy={10} />
+              <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dx={-10} tickFormatter={(val) => formatMoney(val, currency)} />
+              <Tooltip 
+                formatter={(val: [number, number]) => `${formatMoney(val[0], currency)} - ${formatMoney(val[1], currency)}`}
+                contentStyle={{ backgroundColor: "#111312", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "white" }} 
+                cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+              />
+              <Bar dataKey="range" radius={20} filter="url(#universalGlow)">
+                {candlestickData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.isIncomeHigher ? '#3DDC97' : '#FFD166'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
+
+        {/* Area Line Chart */}
+        <div className="rounded-2xl border border-white/5 bg-[#111312] p-6 h-[420px]">
+          <div className="text-sm font-medium mb-1 text-white">Income Trend</div>
+          <p className="text-xs text-muted-foreground mb-4">Area piece line chart</p>
+          <ResponsiveContainer width="100%" height="90%">
+            <AreaChart data={monthly} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} strokeDasharray="4 4" />
+              <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dy={10} />
+              <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} axisLine={false} tickLine={false} dx={-10} tickFormatter={(val) => formatMoney(val, currency)} />
+              <Tooltip 
+                formatter={(val: number) => formatMoney(val, currency)}
+                contentStyle={{ backgroundColor: "#111312", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "white" }} 
+                itemStyle={{ color: "#3DDC97", fontWeight: 600 }}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="income" 
+                stroke="#3DDC97" 
+                strokeWidth={4} 
+                fillOpacity={1} 
+                fill="url(#areaGradientGreen)" 
+                filter="url(#neonGlowGreen)" 
+                activeDot={{ r: 8, fill: '#3DDC97', stroke: '#111312', strokeWidth: 2 }} 
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Funnel Chart */}
+        <div className="rounded-2xl border border-white/5 bg-[#111312] p-6 h-[420px]">
+          <div className="text-sm font-medium mb-1 text-white">Top Expenses Funnel</div>
+          <p className="text-xs text-muted-foreground mb-4">Flow distribution of major category allocations</p>
+          <ResponsiveContainer width="100%" height="90%">
+            <FunnelChart>
+              <Tooltip 
+                formatter={(val: number) => formatMoney(val, currency)}
+                contentStyle={{ backgroundColor: "#111312", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "white" }} 
+              />
+              <Funnel 
+                dataKey="value" 
+                data={funnelData} 
+                isAnimationActive 
+                filter="url(#universalGlow)"
+              >
+                {funnelData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Funnel>
+            </FunnelChart>
+          </ResponsiveContainer>
+        </div>
+
       </div>
     </div>
   );

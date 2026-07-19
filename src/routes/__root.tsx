@@ -109,31 +109,72 @@ function ErrorComponent({ error }: { error: any }) {
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Capient — Personal & Business Finance Planner" },
-      { name: "description", content: "A premium financial operating system for entrepreneurs, freelancers, and agencies. Track income, expenses, invoices, clients, and cash flow in beautiful spreadsheet-style planners." },
-      { name: "theme-color", content: "#0B0F0D" },
-      { property: "og:title", content: "Capient — Personal & Business Finance Planner" },
-      { property: "og:description", content: "A premium financial operating system for entrepreneurs, freelancers, and agencies. Track income, expenses, invoices, clients, and cash flow in beautiful spreadsheet-style planners." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Capient — Personal & Business Finance Planner" },
-      { name: "twitter:description", content: "A premium financial operating system for entrepreneurs, freelancers, and agencies. Track income, expenses, invoices, clients, and cash flow in beautiful spreadsheet-style planners." },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Questrial&display=swap",
+  head: () => {
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Capient",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "url": "https://capientapp.com",
+      "description": "A premium financial operating system for entrepreneurs, freelancers, and agencies. Track income, expenses, invoices, clients, and cash flow in beautiful spreadsheet-style planners.",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Capient",
+        "url": "https://capientapp.com",
+        "logo": "https://capientapp.com/logo.png"
       },
-    ],
-  }),
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    };
+
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { title: "Capient — Premium Personal & Business Finance Planner App" },
+        { name: "description", content: "Capient is a premium financial operating system for entrepreneurs, freelancers, and agencies. Replace disconnected spreadsheets with the ultimate ledger app to track income, expenses, invoices, and clients." },
+        { name: "keywords", content: "finance app, personal finance app, business ledger, ledger apps, freelance invoicing software, multi-planner workspace, cash flow tracker, financial operating system, capient, CapientApp, expense tracker, budget app, agency finance tool" },
+        { name: "robots", content: "index, follow" },
+        { name: "theme-color", content: "#0B0F0D" },
+        { name: "author", content: "Capient" },
+        { property: "og:site_name", content: "Capient" },
+        { property: "og:url", content: "https://capientapp.com/" },
+        { property: "og:title", content: "Capient — Premium Personal & Business Finance Planner App" },
+        { property: "og:description", content: "Replace disconnected spreadsheets with the ultimate ledger app to track income, expenses, invoices, and clients." },
+        { property: "og:type", content: "website" },
+        { property: "og:image", content: "https://capientapp.com/og-image.png" },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:site", content: "@capientapp" },
+        { name: "twitter:title", content: "Capient — Premium Finance Planner App" },
+        { name: "twitter:description", content: "Replace disconnected spreadsheets with the ultimate ledger app to track income, expenses, invoices, and clients." },
+        { name: "twitter:image", content: "https://capientapp.com/og-image.png" },
+      ],
+      links: [
+        { rel: "canonical", href: "https://capientapp.com/" },
+        { rel: "stylesheet", href: appCss },
+        { rel: "icon", href: "/side-bar-logo.png", type: "image/png" },
+        { rel: "apple-touch-icon", href: "/logo.png" },
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Questrial&display=swap",
+        },
+      ],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(structuredData),
+        }
+      ]
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -202,7 +243,7 @@ function InitialSplash() {
                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
                  className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full"
               />
-              <img src="/favicon.png" alt="Capient" className="relative h-20 w-20 object-contain" />
+              <img src="/side-bar-logo.png" alt="Capient" className="relative h-12 w-auto object-contain" />
             </div>
             
             <div className="flex flex-col items-center w-full">

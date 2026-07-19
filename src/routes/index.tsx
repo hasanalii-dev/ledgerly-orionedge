@@ -11,6 +11,13 @@ import { cn } from "@/lib/utils";
 import { MarketingNavbar } from "@/components/MarketingNavbar";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Capient — The Ultimate Finance Planner & Ledger App" },
+      { name: "description", content: "The ultimate personal finance and business ledger software. Capient makes tracking income, expenses, and invoices effortless for modern professionals." },
+      { name: "keywords", content: "best personal finance tracker, agency ledger software, finance workspace, capient, expense tracker, freelance invoice tool, business bookkeeping" },
+    ]
+  }),
   component: Landing,
 });
 
@@ -425,9 +432,8 @@ function Landing() {
           </div>
           <div className="max-w-7xl mx-auto px-10 grid md:grid-cols-2 gap-16 relative z-10 mb-20">
             <div className="space-y-6">
-              <div className="flex items-center gap-2 text-2xl font-display font-semibold text-foreground">
-                <img src="/favicon.png" alt="Capient" className="h-8 w-8 object-contain" />
-                Capient
+              <div className="flex items-center">
+                <img src="/full-logo.png" alt="Capient" className="h-10 w-auto object-contain" />
               </div>
               <p className="max-w-md text-base leading-relaxed text-muted-foreground/80">
                 The financial operating system built for freelancers, agencies, and entrepreneurs. A calm space for your money.

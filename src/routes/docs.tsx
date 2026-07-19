@@ -6,6 +6,13 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/docs")({
+  head: () => ({
+    meta: [
+      { title: "Documentation — Capient" },
+      { name: "description", content: "Comprehensive documentation, guides, and API references for Capient's financial operating system." },
+      { name: "keywords", content: "capient docs, capient documentation, finance app tutorial, ledger app guide, api reference" },
+    ]
+  }),
   component: DocsPage,
 });
 

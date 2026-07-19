@@ -14,6 +14,13 @@ const LazySideRays = lazy(() => import("@/components/magic/SideRays"));
 import { MarketingNavbar } from "@/components/MarketingNavbar";
 
 export const Route = createFileRoute("/about")({
+  head: () => ({
+    meta: [
+      { title: "About Capient — Our Mission to Simplify Finance" },
+      { name: "description", content: "Learn about Capient's mission to build the ultimate financial operating system for modern professionals and businesses." },
+      { name: "keywords", content: "about capient, capient mission, finance app company, personal finance tracker, capient team" },
+    ]
+  }),
   component: AboutPage,
 });
 

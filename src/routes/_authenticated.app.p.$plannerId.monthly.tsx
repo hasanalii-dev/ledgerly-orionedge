@@ -21,6 +21,27 @@ export const Route = createFileRoute("/_authenticated/app/p/$plannerId/monthly")
   component: MonthlyTracking,
 });
 
+const renderCustomizedLabel = (props: any) => {
+  const { cx, cy, midAngle, innerRadius, outerRadius, fill, name } = props;
+  const radius = innerRadius + (outerRadius - innerRadius) / 2;
+  const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
+  const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
+  
+  let symbol = "S";
+  if (name === "Expenses") symbol = "E";
+  if (name === "Investments") symbol = "I";
+  if (name === "Other") symbol = "O";
+
+  return (
+    <g transform={`translate(${x}, ${y})`} style={{ pointerEvents: 'none' }}>
+      <circle cx="0" cy="0" r="14" fill="#030808" stroke={fill} strokeWidth="3" />
+      <text x="0" y="0" dy="4" textAnchor="middle" fill={fill} fontSize="12" fontWeight="900" fontFamily="sans-serif">
+        {symbol}
+      </text>
+    </g>
+  );
+};
+
 type Allocation = {
   id: string;
   planner_id: string;
@@ -129,14 +150,14 @@ function AllocationTable({
   };
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl hover:bg-card/60 transition-colors shadow-sm overflow-hidden flex flex-col">
-      <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-        <h3 className="font-display text-lg">{title}</h3>
+    <div className="rounded-[24px] border border-white/5 bg-[#111312] shadow-lg overflow-hidden flex flex-col group transition-colors">
+      <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between bg-black/10">
+        <h3 className="font-display font-semibold text-white tracking-wide">{title}</h3>
         <div className="flex items-center gap-3">
-          <div className="text-primary font-medium">{formatMoney(total, currency)}</div>
+          <div className="text-[#3DDC97] font-semibold">{formatMoney(total, currency)}</div>
           {onAssign && total > 0 && (
-            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary transition-colors" onClick={() => onAssign(total, title, type)} title="Assign to Account">
-              <Wallet className="h-3.5 w-3.5" />
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-white bg-white/5 rounded-full transition-colors" onClick={() => onAssign(total, title, type)} title="Assign to Account">
+              <Wallet className="h-3 w-3" />
             </Button>
           )}
         </div>
@@ -213,35 +234,35 @@ function AllocationTable({
             )}
             
             {items.map((item: any) => (
-              <div key={item.id} className="p-4 flex flex-col gap-3">
+              <div key={item.id} className="p-4 flex flex-col gap-3 hover:bg-white/[0.02] transition-colors">
                 {editingId === item.id ? (
                   <div className="flex flex-col gap-2">
-                    <Input placeholder="Category" className="h-9 text-sm" value={editCat} onChange={(e) => setEditCat(e.target.value)} />
-                    <Input placeholder="Description" className="h-9 text-sm" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
-                    <Input placeholder="Amount" className="h-9 text-sm" type="number" step="0.01" value={editAmt} onChange={(e) => setEditAmt(e.target.value)} />
+                    <Input placeholder="Category" className="h-9 text-sm bg-[#1A1C1B] border-white/10" value={editCat} onChange={(e) => setEditCat(e.target.value)} />
+                    <Input placeholder="Description" className="h-9 text-sm bg-[#1A1C1B] border-white/10" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
+                    <Input placeholder="Amount" className="h-9 text-sm bg-[#1A1C1B] border-white/10" type="number" step="0.01" value={editAmt} onChange={(e) => setEditAmt(e.target.value)} />
                     <div className="flex items-center gap-2 mt-2">
-                      <Button onClick={() => updateMutation.mutate()} size="sm" className="flex-1"><Check className="h-4 w-4 mr-2" /> Save</Button>
+                      <Button onClick={() => updateMutation.mutate()} size="sm" className="flex-1 bg-primary text-primary-foreground"><Check className="h-4 w-4 mr-2" /> Save</Button>
                       <Button onClick={() => setEditingId(null)} size="sm" variant="ghost" className="flex-1">Cancel</Button>
                     </div>
                   </div>
                 ) : (
                   <>
-                    <div className={`flex justify-between items-start gap-4 transition-all ${item.is_completed ? 'opacity-50 grayscale line-through' : ''}`}>
-                      <div className="flex items-start gap-3 flex-1 min-w-0">
-                        <Checkbox checked={item.is_completed} onCheckedChange={() => toggleDoneMutation.mutate({ id: item.id, is_completed: !item.is_completed })} className="mt-1 border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:text-[#030808]" />
+                    <div className={`flex justify-between items-center gap-4 transition-all ${item.is_completed ? 'opacity-50 grayscale' : ''}`}>
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <Checkbox checked={item.is_completed} onCheckedChange={() => toggleDoneMutation.mutate({ id: item.id, is_completed: !item.is_completed })} className="border-white/20 data-[state=checked]:bg-[#3DDC97] data-[state=checked]:text-[#030808] rounded-full h-5 w-5" />
                         <div className="min-w-0 flex-1">
-                          <div className={`font-medium text-sm ${item.is_completed ? 'text-muted-foreground' : 'text-foreground'}`}>{item.category}</div>
-                          {item.description && <div className="text-xs text-muted-foreground mt-0.5">{item.description}</div>}
+                          <div className={`font-medium text-sm truncate ${item.is_completed ? 'text-muted-foreground line-through' : 'text-white'}`}>{item.category}</div>
+                          {item.description && <div className="text-xs text-muted-foreground mt-0.5 truncate">{item.description}</div>}
                         </div>
                       </div>
-                      <div className={`text-sm font-medium whitespace-nowrap ${item.is_completed ? 'text-muted-foreground' : ''}`}>{formatMoney(item.amount, currency)}</div>
+                      <div className={`text-sm font-semibold whitespace-nowrap ${item.is_completed ? 'text-muted-foreground line-through' : 'text-[#3DDC97]'}`}>{formatMoney(item.amount, currency)}</div>
                     </div>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-2">
                       {onAssign && item.amount > 0 && (
-                        <Button onClick={() => onAssign(item.amount, item.category, type)} variant="secondary" size="sm" className="h-7 text-xs px-2 flex-1"><Wallet className="h-3 w-3 mr-1.5" /> Assign</Button>
+                        <Button onClick={() => onAssign(item.amount, item.category, type)} variant="secondary" size="sm" className="h-8 text-xs px-2 flex-1 bg-white/5 hover:bg-white/10 text-white rounded-xl"><Wallet className="h-3.5 w-3.5 mr-1.5" /> Assign</Button>
                       )}
-                      <Button onClick={() => startEdit(item)} variant="secondary" size="sm" className="h-7 text-xs px-2 flex-1 bg-white/5"><Pencil className="h-3 w-3 mr-1.5" /> Edit</Button>
-                      <Button onClick={() => deleteMutation.mutate(item.id)} variant="secondary" size="sm" className="h-7 text-xs px-2 flex-1 bg-destructive/10 text-destructive hover:bg-destructive/20 hover:text-destructive"><Trash2 className="h-3 w-3 mr-1.5" /> Delete</Button>
+                      <Button onClick={() => startEdit(item)} variant="secondary" size="sm" className="h-8 text-xs px-2 flex-1 bg-white/5 hover:bg-white/10 text-white rounded-xl"><Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit</Button>
+                      <Button onClick={() => deleteMutation.mutate(item.id)} variant="secondary" size="sm" className="h-8 text-xs px-2 flex-1 bg-destructive/10 text-destructive hover:bg-destructive/20 rounded-xl"><Trash2 className="h-3.5 w-3.5 mr-1.5" /> Delete</Button>
                     </div>
                   </>
                 )}
@@ -250,12 +271,12 @@ function AllocationTable({
 
             {/* Inline Add Mobile */}
             {isAdding && (
-              <div className="p-4 flex flex-col gap-2 bg-white/5">
-                <Input placeholder="Category" autoFocus className="h-9 text-sm" value={addCat} onChange={(e) => setAddCat(e.target.value)} />
-                <Input placeholder="Description (optional)" className="h-9 text-sm" value={addDesc} onChange={(e) => setAddDesc(e.target.value)} />
-                <Input placeholder="Amount" className="h-9 text-sm" type="number" step="0.01" value={addAmt} onChange={(e) => setAddAmt(e.target.value)} />
+              <div className="p-4 flex flex-col gap-2 bg-[#1A1C1B]">
+                <Input placeholder="Category" autoFocus className="h-9 text-sm bg-black/20 border-white/10" value={addCat} onChange={(e) => setAddCat(e.target.value)} />
+                <Input placeholder="Description (optional)" className="h-9 text-sm bg-black/20 border-white/10" value={addDesc} onChange={(e) => setAddDesc(e.target.value)} />
+                <Input placeholder="Amount" className="h-9 text-sm bg-black/20 border-white/10" type="number" step="0.01" value={addAmt} onChange={(e) => setAddAmt(e.target.value)} />
                 <div className="flex items-center gap-2 mt-2">
-                  <Button onClick={() => addMutation.mutate()} size="sm" className="flex-1"><Check className="h-4 w-4 mr-2" /> Save</Button>
+                  <Button onClick={() => addMutation.mutate()} size="sm" className="flex-1 bg-primary text-primary-foreground"><Check className="h-4 w-4 mr-2" /> Save</Button>
                   <Button onClick={() => { setIsAdding(false); setAddCat(""); setAddDesc(""); setAddAmt(""); }} size="sm" variant="ghost" className="flex-1">Cancel</Button>
                 </div>
               </div>
@@ -263,8 +284,8 @@ function AllocationTable({
           </div>
       </div>
         {!isAdding && (
-          <div className="border-t border-white/5 p-2 bg-black/20">
-            <Button variant="ghost" size="sm" onClick={() => setIsAdding(true)} className="w-full text-muted-foreground hover:text-foreground text-xs h-9">
+          <div className="border-t border-white/5 p-2 bg-black/10">
+            <Button variant="ghost" size="sm" onClick={() => setIsAdding(true)} className="w-full text-muted-foreground hover:text-white hover:bg-white/5 text-xs h-9 rounded-xl">
               <Plus className="h-4 w-4 mr-2" /> Add entry
             </Button>
           </div>
@@ -306,10 +327,10 @@ function MonthlyTracking() {
   const netCashflow = tEarnings - tSavings - tExpenses - tInvestments - tOther;
 
   const pieData = [
-    { name: "Savings", value: tSavings, color: "#3DDC97" },
-    { name: "Expenses", value: tExpenses, color: "#F56565" },
-    { name: "Investments", value: tInvestments, color: "#7CC4FF" },
-    { name: "Other", value: tOther, color: "#F6AD55" },
+    { name: "Savings", value: tSavings, color: "#3DDC97" }, // Emerald/Green
+    { name: "Expenses", value: tExpenses, color: "#00E5FF" }, // Cyan
+    { name: "Investments", value: tInvestments, color: "#00F0B5" }, // Teal
+    { name: "Other", value: tOther, color: "#FFD166" }, // Yellow
   ].filter(d => d.value > 0);
 
   // Top modal state (kept per user request)
@@ -421,91 +442,127 @@ function MonthlyTracking() {
   };
 
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto pb-20">
+    <div className="space-y-6 max-w-[1600px] mx-auto pb-20 pt-4 md:pt-0">
       
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 px-4 md:px-0 mt-4 md:mt-0">
         <div>
-          <h1 className="text-3xl font-display tracking-tight">Monthly Tracking</h1>
+          <h1 className="text-[28px] md:text-3xl font-display font-bold tracking-tight text-white">Monthly Tracking</h1>
           <p className="text-sm text-muted-foreground mt-1">Allocate and track your earnings month over month.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
           <Input 
             type="month" 
             value={monthYear} 
             onChange={(e) => setMonthYear(e.target.value)} 
-            className="w-48 bg-card border-white/10"
+            className="w-full sm:w-48 bg-[#111312] border-white/10 text-white rounded-xl h-11 md:h-10"
           />
-          <Button onClick={() => setAddOpen(true)} className="glow-emerald"><Plus className="h-4 w-4 mr-2" /> Quick Add</Button>
+          <Button onClick={() => setAddOpen(true)} className="glow-emerald w-full sm:w-auto rounded-xl h-11 md:h-10 text-white"><Plus className="h-4 w-4 mr-2" /> Quick Add</Button>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid lg:grid-cols-3 gap-4 md:gap-6 px-4 md:px-0">
+        
+        {/* On Mobile, Overview is First */}
+        <div className="order-1 lg:order-2 space-y-4 md:space-y-6">
+          <div className="rounded-[24px] border border-white/5 bg-[#111312] p-6 shadow-lg sticky top-6">
+            <h3 className="font-display font-bold text-white text-lg tracking-wide mb-6 flex items-center gap-2 uppercase">
+              <PieChartIcon className="h-5 w-5 text-[#3DDC97]" /> Allocation Overview
+            </h3>
+            
+            {pieData.length > 0 ? (
+              <div className="flex flex-col">
+                <div className="relative h-72">
+                  {/* Central Info Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                    <div className="absolute w-[150px] h-[150px] rounded-full border-[1.5px] border-white/10" />
+                    <div className="flex flex-col items-center justify-center relative">
+                      <span className="text-[9px] text-muted-foreground uppercase tracking-[0.2em] font-bold mb-1">Summary</span>
+                      <span className={`text-[32px] font-display font-bold tracking-tight ${netCashflow >= 0 ? "text-white" : "text-destructive"}`}>
+                        {formatMoney(netCashflow, currency, true)}
+                      </span>
+                      {tEarnings > 0 && netCashflow > 0 && (
+                        <span className="text-[13px] text-[#3DDC97] font-bold mt-1 tracking-wide">+ {((netCashflow / tEarnings) * 100).toFixed(1)}%</span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="relative z-10 w-full h-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <defs>
+                          <filter id="pieGlowMonthly" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="6" result="coloredBlur" />
+                            <feMerge>
+                              <feMergeNode in="coloredBlur" />
+                              <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                          </filter>
+                        </defs>
+                        <Pie 
+                          data={pieData} 
+                          dataKey="value" 
+                          nameKey="name" 
+                          cx="50%" 
+                          cy="50%" 
+                          innerRadius={85} 
+                          outerRadius={105} 
+                          paddingAngle={10} 
+                          cornerRadius={20}
+                          stroke="none" 
+                          filter="url(#pieGlowMonthly)"
+                          labelLine={false}
+                          label={renderCustomizedLabel}
+                        >
+                          {pieData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(val: number, name: string) => {
+                            const total = pieData.reduce((acc, curr) => acc + curr.value, 0);
+                            const percent = total > 0 ? `(${(val / total * 100).toFixed(1)}%)` : '';
+                            return [`${formatMoney(val, currency)} ${percent}`, name];
+                          }}
+                          wrapperStyle={{ zIndex: 50 }}
+                          contentStyle={{ backgroundColor: "#111312", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "white" }} 
+                          itemStyle={{ color: "white", fontWeight: 600, padding: "2px 0" }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Legend / Stats */}
+                <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-white/5">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className="w-2 h-2 rounded-full bg-[#3DDC97]" />
+                      <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Earnings</span>
+                    </div>
+                    <div className="font-display font-bold text-white text-xl">{formatMoney(tEarnings, currency, true)}</div>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className="w-2 h-2 rounded-full bg-[#00E5FF]" />
+                      <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Allocated</span>
+                    </div>
+                    <div className="font-display font-bold text-white text-xl">{formatMoney(tEarnings - netCashflow, currency, true)}</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="h-48 flex items-center justify-center text-sm text-muted-foreground border border-dashed border-white/10 rounded-2xl">
+                Add allocations to see charts
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* On Mobile, Lists are Second */}
+        <div className="order-2 lg:order-1 lg:col-span-2 space-y-4 md:space-y-6">
           <AllocationTable title="Monthly Earnings" type="earning" total={tEarnings} items={allocations.filter(a => a.allocation_type === "earning")} currency={currency} plannerId={plannerId} monthYear={monthYear} onAssign={handleAssign} netCashflow={netCashflow} />
           <AllocationTable title="Savings" type="saving" total={tSavings} items={allocations.filter(a => a.allocation_type === "saving")} currency={currency} plannerId={plannerId} monthYear={monthYear} onAssign={handleAssign} netCashflow={netCashflow} />
           <AllocationTable title="Personal Expenses" type="personal_expense" total={tExpenses} items={allocations.filter(a => a.allocation_type === "personal_expense")} currency={currency} plannerId={plannerId} monthYear={monthYear} onAssign={handleAssign} netCashflow={netCashflow} />
           <AllocationTable title="Investments" type="investment" total={tInvestments} items={allocations.filter(a => a.allocation_type === "investment")} currency={currency} plannerId={plannerId} monthYear={monthYear} onAssign={handleAssign} netCashflow={netCashflow} />
           <AllocationTable title="Other Allocations" type="other" total={tOther} items={allocations.filter(a => a.allocation_type === "other")} currency={currency} plannerId={plannerId} monthYear={monthYear} onAssign={handleAssign} netCashflow={netCashflow} />
-        </div>
-
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-white/5 bg-card/60 backdrop-blur-xl p-6 shadow-xl sticky top-6">
-            <h3 className="font-display text-xl mb-6 flex items-center gap-2"><PieChartIcon className="h-5 w-5 text-primary" /> Allocation Overview</h3>
-            
-            <div className="space-y-4 mb-8">
-              <div className="flex justify-between items-end pb-4 border-b border-white/5">
-                <span className="text-sm text-muted-foreground">Total Earnings</span>
-                <span className="font-medium text-lg">{formatMoney(tEarnings, currency)}</span>
-              </div>
-              <div className="flex justify-between items-end pb-4 border-b border-white/5">
-                <span className="text-sm text-muted-foreground">Allocated</span>
-                <span className="font-medium text-lg text-muted-foreground">{formatMoney(tEarnings - netCashflow, currency)}</span>
-              </div>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 justify-between items-end pt-2">
-                <span className="text-sm font-medium">Net Cash Flow</span>
-                <span className={`font-display text-2xl ${netCashflow >= 0 ? "text-primary" : "text-destructive"}`}>
-                  {formatMoney(netCashflow, currency)}
-                </span>
-              </div>
-            </div>
-
-            {pieData.length > 0 ? (
-              <div className="h-64 mt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <defs>
-                      <filter id="pieGlowMonthly" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="3" result="blur" />
-                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                      </filter>
-                      {pieData.map((e, i) => (
-                        <linearGradient key={`gradient-monthly-${i}`} id={`pieGradientMonthly-${i}`} x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stopColor={e.color} stopOpacity={1} />
-                          <stop offset="100%" stopColor={e.color} stopOpacity={0.3} />
-                        </linearGradient>
-                      ))}
-                    </defs>
-                    <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4} stroke="rgba(0,0,0,0.2)" strokeWidth={2} filter="url(#pieGlowMonthly)">
-                      {pieData.map((e, i) => <Cell key={i} fill={`url(#pieGradientMonthly-${i})`} />)}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(val: number, name: string) => {
-                        const total = pieData.reduce((acc, curr) => acc + curr.value, 0);
-                        const percent = total > 0 ? `(${(val / total * 100).toFixed(1)}%)` : '';
-                        return [`${formatMoney(val, currency)} ${percent}`, name];
-                      }}
-                      contentStyle={{ backgroundColor: "rgba(3, 8, 8, 0.8)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "white" }} 
-                      itemStyle={{ color: "white", fontWeight: 500, padding: "2px 0" }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="h-48 flex items-center justify-center text-sm text-muted-foreground border border-dashed border-white/10 rounded-xl">
-                Add allocations to see charts
-              </div>
-            )}
-          </div>
         </div>
       </div>
 

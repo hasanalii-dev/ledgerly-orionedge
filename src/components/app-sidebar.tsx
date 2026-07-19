@@ -168,7 +168,7 @@ export function AppSidebar() {
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-3 w-full text-left group hover:opacity-80 transition-opacity">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] relative overflow-hidden">
-                  <img src="/favicon.png" alt="Capient Logo" className="h-5 w-auto object-contain relative z-10" />
+                  <img src="/side-bar-logo.png" alt="Capient Logo" className="h-5 w-auto object-contain relative z-10" />
                   <div className="absolute inset-0 bg-primary/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="flex flex-col flex-1 overflow-hidden">
@@ -216,7 +216,7 @@ export function AppSidebar() {
             <DropdownMenu>
                <DropdownMenuTrigger asChild>
                   <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 hover:opacity-80 transition-opacity">
-                    <img src="/favicon.png" alt="Capient" className="h-5 w-auto object-contain" />
+                    <img src="/side-bar-logo.png" alt="Capient" className="h-5 w-auto object-contain" />
                   </button>
                </DropdownMenuTrigger>
                <DropdownMenuContent className="w-64 rounded-2xl bg-[#0a1010]/80 backdrop-blur-3xl border-white/10 p-1.5 shadow-2xl font-['Questrial',_sans-serif] relative overflow-hidden" align="start">
