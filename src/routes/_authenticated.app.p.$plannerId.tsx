@@ -240,7 +240,7 @@ function PlannerLayout() {
 
           {/* Mobile Top Bar */}
           <header className="md:hidden sticky top-0 z-20 h-16 flex items-center justify-between px-4 bg-[#0b0e0c] border-b border-white/5 transition-all duration-300">
-            <img src="/full-logo.png" alt="Ledgerly" className="h-7 object-contain" />
+            <img src="/full-logo-1.png" alt="Ledgerly" className="h-7 object-contain" />
             
             <div className="flex items-center gap-3">
               <div className="flex -space-x-2 items-center">

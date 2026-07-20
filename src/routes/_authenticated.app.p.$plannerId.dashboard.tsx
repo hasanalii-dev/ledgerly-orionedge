@@ -40,7 +40,7 @@ const renderCustomizedLabel = (props: any) => {
 
 function KpiCard({ icon: Icon, label, value, compactValue, sub, accent }: { icon: React.ElementType; label: string; value: string; compactValue?: string; sub?: string; accent?: boolean }) {
   return (
-    <div className="relative overflow-hidden rounded-[20px] p-4 md:p-5 shadow-lg flex flex-col justify-between min-h-[120px] transition-all duration-300 bg-[#111312] border border-white/5 hover:bg-[#151716] hover:border-white/10 hover:-translate-y-0.5 hover:shadow-xl group">
+    <div className="relative overflow-hidden rounded-[24px] md:rounded-[20px] p-6 md:p-5 shadow-lg flex flex-col justify-between min-h-[160px] md:min-h-[120px] transition-all duration-300 bg-[#111312] border border-white/5 hover:bg-[#151716] hover:border-white/10 hover:-translate-y-0.5 hover:shadow-xl group">
       {/* Glow & Gradients */}
       {accent && (
         <>
@@ -49,21 +49,21 @@ function KpiCard({ icon: Icon, label, value, compactValue, sub, accent }: { icon
         </>
       )}
       
-      <div className="flex items-start justify-between mb-4 relative z-10">
-        <span className={`text-[10px] md:text-[11px] font-bold uppercase tracking-widest leading-tight w-2/3 ${accent ? 'bg-gradient-to-b from-[#3DDC97] to-white/40 bg-clip-text text-transparent' : 'text-muted-foreground'}`}>
+      <div className="flex items-start justify-between mb-4 md:mb-4 relative z-10">
+        <span className={`text-[12px] md:text-[11px] font-bold uppercase tracking-widest leading-tight w-2/3 ${accent ? 'bg-gradient-to-b from-[#3DDC97] to-white/40 bg-clip-text text-transparent' : 'text-muted-foreground'}`}>
           {label}
         </span>
-        <div className={`p-1.5 md:p-2 rounded-full shadow-inner ml-2 shrink-0 ${accent ? 'bg-gradient-to-b from-[#3DDC97]/20 to-white/5 text-[#3DDC97]' : 'bg-[#1C201E] text-muted-foreground border border-white/5'}`}>
-          <Icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
+        <div className={`p-2.5 md:p-2 rounded-full shadow-inner ml-2 shrink-0 ${accent ? 'bg-gradient-to-b from-[#3DDC97]/20 to-white/5 text-[#3DDC97]' : 'bg-[#1C201E] text-muted-foreground border border-white/5'}`}>
+          <Icon className="h-5 w-5 md:h-4 md:w-4" />
         </div>
       </div>
       <div className="mt-auto">
         {sub && (
-          <div className="mb-1 md:mb-1.5 text-[10px] md:text-xs text-muted-foreground/80 flex items-center gap-1.5 relative z-10">
-            <Activity className="h-3 w-3 md:h-3.5 md:w-3.5" /> {sub}
+          <div className="mb-2 md:mb-1.5 text-[12px] md:text-xs text-muted-foreground/80 flex items-center gap-1.5 relative z-10">
+            <Activity className="h-4 w-4 md:h-3.5 md:w-3.5" /> {sub}
           </div>
         )}
-        <div className={`text-[22px] md:text-[28px] font-display font-medium tracking-tight truncate relative z-10 ${accent ? 'bg-gradient-to-b from-[#3DDC97] to-white bg-clip-text text-transparent' : 'text-white'}`} title={value}>
+        <div className={`text-[24px] md:text-[28px] font-display font-medium tracking-tight truncate relative z-10 ${accent ? 'bg-gradient-to-b from-[#3DDC97] to-white bg-clip-text text-transparent' : 'text-white'}`} title={value}>
           {compactValue || value}
         </div>
       </div>
@@ -380,20 +380,32 @@ function DashboardPage() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-4">
-          <div className="rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-5 hover:bg-card/60 transition-colors duration-300 group">
-            <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2"><div className="p-1.5 rounded-lg bg-white/5 group-hover:bg-primary/20 group-hover:text-primary transition-colors"><Crown className="h-3.5 w-3.5" /></div> Biggest client</div>
-            <div className="mt-4 text-xl font-display font-medium truncate">{biggestClient?.[0] ?? "—"}</div>
-            <div className="mt-1 text-sm text-primary">{biggestClient ? formatMoney(biggestClient[1], currency) : "—"}</div>
+          <div className="rounded-[24px] md:rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 md:p-5 min-h-[160px] md:min-h-0 flex flex-col md:block justify-between hover:bg-card/60 transition-colors duration-300 group shadow-lg md:shadow-none">
+            <div>
+              <div className="text-[13px] md:text-[11px] font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2"><div className="p-2 md:p-1.5 rounded-xl md:rounded-lg bg-white/5 group-hover:bg-primary/20 group-hover:text-primary transition-colors"><Crown className="h-5 w-5 md:h-3.5 md:w-3.5" /></div> Biggest client</div>
+            </div>
+            <div>
+              <div className="mt-4 text-[22px] md:text-xl font-display font-medium truncate">{biggestClient?.[0] ?? "—"}</div>
+              <div className="mt-1 text-sm md:text-sm text-primary truncate">{biggestClient ? formatMoney(biggestClient[1], currency) : "—"}</div>
+            </div>
           </div>
-          <div className="rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-5 hover:bg-card/60 transition-colors duration-300 group">
-            <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2"><div className="p-1.5 rounded-lg bg-white/5 group-hover:bg-primary/20 group-hover:text-primary transition-colors"><Flame className="h-3.5 w-3.5" /></div> Highest expense</div>
-            <div className="mt-4 text-xl font-display font-medium truncate">{topCat?.[0] ?? "—"}</div>
-            <div className="mt-1 text-sm text-primary">{topCat ? formatMoney(topCat[1], currency) : "—"}</div>
+          <div className="rounded-[24px] md:rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 md:p-5 min-h-[160px] md:min-h-0 flex flex-col md:block justify-between hover:bg-card/60 transition-colors duration-300 group shadow-lg md:shadow-none">
+            <div>
+              <div className="text-[13px] md:text-[11px] font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2"><div className="p-2 md:p-1.5 rounded-xl md:rounded-lg bg-white/5 group-hover:bg-primary/20 group-hover:text-primary transition-colors"><Flame className="h-5 w-5 md:h-3.5 md:w-3.5" /></div> Highest expense</div>
+            </div>
+            <div>
+              <div className="mt-4 text-[22px] md:text-xl font-display font-medium truncate">{topCat?.[0] ?? "—"}</div>
+              <div className="mt-1 text-sm md:text-sm text-primary truncate">{topCat ? formatMoney(topCat[1], currency) : "—"}</div>
+            </div>
           </div>
-          <div className="rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-5 hover:bg-card/60 transition-colors duration-300 group">
-            <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2"><div className="p-1.5 rounded-lg bg-white/5 group-hover:bg-primary/20 group-hover:text-primary transition-colors"><Wallet className="h-3.5 w-3.5" /></div> Accounts</div>
-            <div className="mt-3 text-xl font-display">{accounts.length}</div>
-            <div className="mt-1 text-sm text-muted-foreground">{formatMoney(balance, currency)} across all</div>
+          <div className="rounded-[24px] md:rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 md:p-5 min-h-[160px] md:min-h-0 flex flex-col md:block justify-between hover:bg-card/60 transition-colors duration-300 group shadow-lg md:shadow-none">
+            <div>
+              <div className="text-[13px] md:text-[11px] font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2"><div className="p-2 md:p-1.5 rounded-xl md:rounded-lg bg-white/5 group-hover:bg-primary/20 group-hover:text-primary transition-colors"><Wallet className="h-5 w-5 md:h-3.5 md:w-3.5" /></div> Accounts</div>
+            </div>
+            <div>
+              <div className="mt-4 text-[22px] md:text-xl font-display font-medium truncate">{accounts.length}</div>
+              <div className="mt-1 text-sm md:text-sm text-muted-foreground truncate">{formatMoney(balance, currency)} across all</div>
+            </div>
           </div>
         </div>
 
