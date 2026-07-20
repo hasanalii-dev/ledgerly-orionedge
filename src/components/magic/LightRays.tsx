@@ -1,17 +1,16 @@
+// @ts-nocheck
 import { useRef, useEffect, useState } from 'react';
 import { Renderer, Program, Triangle, Mesh } from 'ogl';
 import './LightRays.css';
 
 const DEFAULT_COLOR = '#ffffff';
 
-const hexToRgb = (hex: string) => {
+const hexToRgb = hex => {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return m ? [parseInt(m[1], 16) / 255, parseInt(m[2], 16) / 255, parseInt(m[3], 16) / 255] : [1, 1, 1];
 };
 
-type RaysOrigin = 'top-center' | 'top-left' | 'top-right' | 'left' | 'right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
-
-const getAnchorAndDir = (origin: RaysOrigin, w: number, h: number) => {
+const getAnchorAndDir = (origin, w, h) => {
   const outside = 0.2;
   switch (origin) {
     case 'top-left':
@@ -33,22 +32,6 @@ const getAnchorAndDir = (origin: RaysOrigin, w: number, h: number) => {
   }
 };
 
-interface LightRaysProps {
-  raysOrigin?: RaysOrigin;
-  raysColor?: string;
-  raysSpeed?: number;
-  lightSpread?: number;
-  rayLength?: number;
-  pulsating?: boolean;
-  fadeDistance?: number;
-  saturation?: number;
-  followMouse?: boolean;
-  mouseInfluence?: number;
-  noiseAmount?: number;
-  distortion?: number;
-  className?: string;
-}
-
 const LightRays = ({
   raysOrigin = 'top-center',
   raysColor = DEFAULT_COLOR,
@@ -63,17 +46,17 @@ const LightRays = ({
   noiseAmount = 0.0,
   distortion = 0.0,
   className = ''
-}: LightRaysProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const uniformsRef = useRef<any>(null);
-  const rendererRef = useRef<Renderer | null>(null);
+}) => {
+  const containerRef = useRef(null);
+  const uniformsRef = useRef(null);
+  const rendererRef = useRef(null);
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
   const smoothMouseRef = useRef({ x: 0.5, y: 0.5 });
-  const animationIdRef = useRef<number | null>(null);
-  const meshRef = useRef<Mesh | null>(null);
-  const cleanupFunctionRef = useRef<(() => void) | null>(null);
+  const animationIdRef = useRef(null);
+  const meshRef = useRef(null);
+  const cleanupFunctionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  const observerRef = useRef(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -118,7 +101,6 @@ const LightRays = ({
       rendererRef.current = renderer;
 
       const gl = renderer.gl;
-      gl.clearColor(0, 0, 0, 0);
       gl.canvas.style.width = '100%';
       gl.canvas.style.height = '100%';
 
@@ -278,7 +260,7 @@ void main() {
         uniforms.rayDir.value = dir;
       };
 
-      const loop = (t: number) => {
+      const loop = t => {
         if (!rendererRef.current || !uniformsRef.current || !meshRef.current) {
           return;
         }
@@ -303,9 +285,7 @@ void main() {
         }
       };
 
-      if (typeof window !== 'undefined') {
-        (window as any).addEventListener('resize', updatePlacement);
-      }
+      window.addEventListener('resize', updatePlacement);
       updatePlacement();
       animationIdRef.current = requestAnimationFrame(loop);
 
@@ -315,9 +295,7 @@ void main() {
           animationIdRef.current = null;
         }
 
-        if (typeof window !== 'undefined') {
-          (window as any).removeEventListener('resize', updatePlacement);
-        }
+        window.removeEventListener('resize', updatePlacement);
 
         if (renderer) {
           try {
@@ -402,7 +380,7 @@ void main() {
   ]);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = e => {
       if (!containerRef.current || !rendererRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;
@@ -410,7 +388,7 @@ void main() {
       mouseRef.current = { x, y };
     };
 
-    if (followMouse && typeof window !== 'undefined') {
+    if (followMouse) {
       window.addEventListener('mousemove', handleMouseMove);
       return () => window.removeEventListener('mousemove', handleMouseMove);
     }

@@ -82,7 +82,7 @@ export function AppSidebar() {
     toast.success("Planner created");
     qc.invalidateQueries({ queryKey: ["planners"] });
     setDialogOpen(null);
-    if (data) navigate({ to: `/app/p/${data.id}/dashboard`, params: { plannerId: data.id } });
+    if (data) navigate({ to: `/app/p/${data.id}/dashboard` as any });
   }
 
   async function renamePlanner() {
@@ -102,7 +102,7 @@ export function AppSidebar() {
     if (error) return toast.error(error.message);
     toast.success("Planner duplicated");
     qc.invalidateQueries({ queryKey: ["planners"] });
-    if (data) navigate({ to: `/app/p/${data.id}/dashboard`, params: { plannerId: data.id } });
+    if (data) navigate({ to: `/app/p/${data.id}/dashboard` as any });
   }
 
   async function deletePlanner() {

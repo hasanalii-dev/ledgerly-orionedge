@@ -219,3 +219,4 @@ input[type="number"] {
   scrollbar-width: thin;
   scrollbar-color: oklch(0.82 0.17 160 / 0.3) transparent;
 }
+@keyframes shimmer { 0% { transform: translateX(-150%); } 100% { transform: translateX(150%); } }

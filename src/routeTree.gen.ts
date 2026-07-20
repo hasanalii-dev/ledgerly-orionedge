@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ComingSoonRouteImport } from './routes/coming-soon'
@@ -44,6 +45,11 @@ import { Route as AuthenticatedAppPPlannerIdAccountsRouteImport } from './routes
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsRoute = DocsRouteImport.update({
@@ -223,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/coming-soon': typeof ComingSoonRoute
   '/contact': typeof ContactRoute
   '/docs': typeof DocsRoute
+  '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/app/admin': typeof AuthenticatedAppAdminRoute
@@ -255,6 +262,7 @@ export interface FileRoutesByTo {
   '/coming-soon': typeof ComingSoonRoute
   '/contact': typeof ContactRoute
   '/docs': typeof DocsRoute
+  '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/app/admin': typeof AuthenticatedAppAdminRoute
@@ -289,6 +297,7 @@ export interface FileRoutesById {
   '/coming-soon': typeof ComingSoonRoute
   '/contact': typeof ContactRoute
   '/docs': typeof DocsRoute
+  '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/app/admin': typeof AuthenticatedAppAdminRoute
@@ -323,6 +332,7 @@ export interface FileRouteTypes {
     | '/coming-soon'
     | '/contact'
     | '/docs'
+    | '/pricing'
     | '/reset-password'
     | '/app'
     | '/app/admin'
@@ -355,6 +365,7 @@ export interface FileRouteTypes {
     | '/coming-soon'
     | '/contact'
     | '/docs'
+    | '/pricing'
     | '/reset-password'
     | '/app'
     | '/app/admin'
@@ -388,6 +399,7 @@ export interface FileRouteTypes {
     | '/coming-soon'
     | '/contact'
     | '/docs'
+    | '/pricing'
     | '/reset-password'
     | '/_authenticated/app'
     | '/_authenticated/app/admin'
@@ -422,6 +434,7 @@ export interface RootRouteChildren {
   ComingSoonRoute: typeof ComingSoonRoute
   ContactRoute: typeof ContactRoute
   DocsRoute: typeof DocsRoute
+  PricingRoute: typeof PricingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
@@ -432,6 +445,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs': {
@@ -747,6 +767,7 @@ const rootRouteChildren: RootRouteChildren = {
   ComingSoonRoute: ComingSoonRoute,
   ContactRoute: ContactRoute,
   DocsRoute: DocsRoute,
+  PricingRoute: PricingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport

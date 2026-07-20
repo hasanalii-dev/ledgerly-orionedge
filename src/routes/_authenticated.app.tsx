@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/app")({
 
       const first = planners?.[0];
       if (first) {
-        throw redirect({ to: "/app/p/$plannerId/dashboard", params: { plannerId: first.id } });
+        throw redirect({ to: `/app/p/${first.id}/dashboard` as any });
       }
     }
     return null;
@@ -87,7 +87,7 @@ function OnboardingWizard() {
 
   useEffect(() => {
     if (existingPlanners && existingPlanners.length > 0) {
-      router.navigate({ to: "/app/p/$plannerId/dashboard", params: { plannerId: existingPlanners[0].id }, replace: true });
+      router.navigate({ to: `/app/p/${existingPlanners[0].id}/dashboard` as any, replace: true });
     }
   }, [existingPlanners, router]);
 
