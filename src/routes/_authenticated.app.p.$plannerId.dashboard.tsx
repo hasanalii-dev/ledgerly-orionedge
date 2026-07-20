@@ -40,23 +40,33 @@ const renderCustomizedLabel = (props: any) => {
 
 function KpiCard({ icon: Icon, label, value, compactValue, sub, accent }: { icon: React.ElementType; label: string; value: string; compactValue?: string; sub?: string; accent?: boolean }) {
   return (
-    <div className="rounded-2xl border border-hairline bg-card p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-xs font-medium text-muted-foreground">
+    <div className="relative overflow-hidden rounded-[20px] p-4 md:p-5 shadow-lg flex flex-col justify-between min-h-[120px] transition-all duration-300 bg-[#111312] border border-white/5 hover:bg-[#151716] hover:border-white/10 hover:-translate-y-0.5 hover:shadow-xl group">
+      {/* Glow & Gradients */}
+      {accent && (
+        <>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[1px] bg-gradient-to-r from-transparent via-[#3DDC97]/50 to-transparent z-0" />
+          <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-32 bg-[#3DDC97]/40 blur-[50px] rounded-full pointer-events-none z-0" />
+        </>
+      )}
+      
+      <div className="flex items-start justify-between mb-4 relative z-10">
+        <span className={`text-[10px] md:text-[11px] font-bold uppercase tracking-widest leading-tight w-2/3 ${accent ? 'bg-gradient-to-b from-[#3DDC97] to-white/40 bg-clip-text text-transparent' : 'text-muted-foreground'}`}>
           {label}
         </span>
-        <div className="p-2 bg-muted/50 rounded-full">
-          <Icon className="h-4 w-4 text-muted-foreground" />
+        <div className={`p-1.5 md:p-2 rounded-full shadow-inner ml-2 shrink-0 ${accent ? 'bg-gradient-to-b from-[#3DDC97]/20 to-white/5 text-[#3DDC97]' : 'bg-[#1C201E] text-muted-foreground border border-white/5'}`}>
+          <Icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
         </div>
       </div>
-      <div className="text-3xl font-display font-medium tracking-tight truncate text-foreground" title={value}>
-        {compactValue || value}
-      </div>
-      {sub && (
-        <div className="mt-2 text-sm text-muted-foreground flex items-center gap-1.5">
-          <Activity className="h-3.5 w-3.5" /> {sub}
+      <div className="mt-auto">
+        {sub && (
+          <div className="mb-1 md:mb-1.5 text-[10px] md:text-xs text-muted-foreground/80 flex items-center gap-1.5 relative z-10">
+            <Activity className="h-3 w-3 md:h-3.5 md:w-3.5" /> {sub}
+          </div>
+        )}
+        <div className={`text-[22px] md:text-[28px] font-display font-medium tracking-tight truncate relative z-10 ${accent ? 'bg-gradient-to-b from-[#3DDC97] to-white bg-clip-text text-transparent' : 'text-white'}`} title={value}>
+          {compactValue || value}
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -208,7 +218,7 @@ function DashboardPage() {
               </Link>
             </Button>
           </div>
-          <h1 className="text-[28px] font-display font-bold tracking-tight text-white mb-1">
+          <h1 className="text-2xl sm:text-[28px] font-display font-bold tracking-tight text-white mb-1 truncate px-2 w-full max-w-[90vw]">
             Welcome back, {profile?.display_name?.split(' ')[0] || "there"}
           </h1>
           <p className="text-sm text-muted-foreground">Snapshot of {planner?.name ?? "your planner"}</p>
@@ -252,8 +262,8 @@ function DashboardPage() {
             </Button>
           </div>
         </div>
-        {/* KPI Grids */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-4 md:px-0 mt-6 md:mt-0">
+        {/* KPI Grids (Universal 2-col Mobile / 4-col Desktop) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-2 md:mt-0">
           <KpiCard icon={TrendingUp} label="Total Income" value={formatMoney(totalIncome, currency)} compactValue={formatMoney(totalIncome, currency, true)} accent />
           <KpiCard icon={TrendingDown} label="Total Expenses" value={formatMoney(totalExpenses, currency)} compactValue={formatMoney(totalExpenses, currency, true)} />
           <KpiCard icon={Sparkles} label="Net Cash Flow" value={formatMoney(net, currency)} compactValue={formatMoney(net, currency, true)} sub={net >= 0 ? "In the green" : "In the red"} />

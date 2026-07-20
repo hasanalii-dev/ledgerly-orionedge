@@ -11,7 +11,7 @@ import { PageTransition, LoadingSpinner } from "@/components/ui/loading-spinner"
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { InviteDialog } from "@/components/invite-dialog";
-import { Plus, UserMinus, ShieldAlert, Key } from "lucide-react";
+import { Plus, UserMinus, ShieldAlert, Key, Bug } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -239,9 +239,28 @@ function PlannerLayout() {
           </header>
 
           {/* Mobile Top Bar */}
-          <header className="md:hidden sticky top-0 z-20 h-14 flex items-center justify-center px-4 bg-[#0b0e0c] border-b border-white/5 transition-all duration-300">
-            <div className="font-display font-medium text-base truncate text-white">
-              {planner?.name ?? "Planner"}
+          <header className="md:hidden sticky top-0 z-20 h-16 flex items-center justify-between px-4 bg-[#0b0e0c] border-b border-white/5 transition-all duration-300">
+            <img src="/full-logo.png" alt="Ledgerly" className="h-7 object-contain" />
+            
+            <div className="flex items-center gap-3">
+              <div className="flex -space-x-2 items-center">
+                {collaborators.slice(0, 3).map((collab: any, i: number) => (
+                  <Avatar key={collab.id || i} className="h-8 w-8 border border-[#3DDC97]/60 bg-[#0b0e0c] relative z-10 shadow-sm">
+                    <AvatarImage src={collab.avatar_url} />
+                    <AvatarFallback className="bg-transparent text-white font-medium text-[10px]">
+                      {(collab.display_name || "U").charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+                <InviteDialog 
+                  plannerId={planner?.id || ""} 
+                  trigger={
+                    <button className="h-8 w-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white/60 z-20 backdrop-blur-sm relative transition-colors hover:bg-white/10 shadow-sm">
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  } 
+                />
+              </div>
             </div>
           </header>
 

@@ -152,7 +152,6 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-none bg-[#0b0e0c] overflow-hidden">
-      <div className="absolute bottom-0 left-0 w-full h-64 bg-primary/10 blur-[100px] pointer-events-none z-0" />
       <SidebarHeader className={`py-4 z-10 relative ${collapsed ? 'px-0' : 'px-4'}`}>
         {/* macOS window controls */}
         {!collapsed && (

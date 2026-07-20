@@ -38,10 +38,10 @@ export function MobileBottomNav() {
 
   return (
     <div className={cn(
-      "fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] md:hidden w-[95%] max-w-md transition-all duration-300 ease-in-out",
+      "fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] md:hidden w-[92%] max-w-[400px] transition-all duration-300 ease-in-out",
       openMobile ? "translate-y-[150%] opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
     )}>
-      <div className="flex items-center justify-between p-2 rounded-[2rem] bg-card/90 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.5)]">
+      <div className="flex items-center justify-between px-2 py-2.5 rounded-[2rem] bg-[#111312]/95 backdrop-blur-xl border border-white/10 shadow-2xl">
         {links.map((link) => {
           // Strict matching for active state
           const isActive = pathname === link.href || (pathname.startsWith(link.href) && link.name !== "Settings");
@@ -52,13 +52,17 @@ export function MobileBottomNav() {
               key={link.name}
               to={link.href as any}
               className={cn(
-                "flex flex-col items-center justify-center min-w-[3.5rem] flex-1 h-14 rounded-full transition-all duration-300 relative group",
-                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                "flex flex-col items-center justify-center flex-1 h-12 rounded-full transition-all duration-300 relative group",
+                isActive ? "text-[#3DDC97]" : "text-muted-foreground hover:text-white"
               )}
             >
-              {isActive && <div className="absolute inset-0 rounded-full bg-primary/10 shadow-[inset_0_0_12px_rgba(16,185,129,0.2)]" />}
-              <Icon className={cn("w-5 h-5 mb-1 relative z-10 transition-transform duration-300 group-hover:-translate-y-0.5", isActive && "drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]")} />
-              <span className={cn("text-[10px] tracking-wide relative z-10 transition-all duration-300", isActive ? "font-semibold" : "font-medium opacity-80 group-hover:opacity-100")}>{link.name}</span>
+              {isActive && (
+                <>
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-[#3DDC97]/50 bg-gradient-to-tr from-[#3DDC97]/20 to-cyan-500/10" />
+                  <div className="absolute bottom-0 w-1 h-1 rounded-full bg-[#3DDC97] shadow-[0_0_8px_#3DDC97]" />
+                </>
+              )}
+              <Icon className={cn("w-5 h-5 relative z-10 transition-transform duration-300", isActive && "drop-shadow-[0_0_8px_rgba(61,220,151,0.5)]")} />
             </Link>
           );
         })}
@@ -66,10 +70,9 @@ export function MobileBottomNav() {
         {/* Menu Button to trigger sidebar */}
         <button
           onClick={() => setOpenMobile(true)}
-          className="flex flex-col items-center justify-center min-w-[3.5rem] flex-1 h-14 rounded-full transition-all duration-300 relative group text-muted-foreground hover:text-foreground hover:bg-white/5"
+          className="flex flex-col items-center justify-center flex-1 h-12 rounded-full transition-all duration-300 relative group text-muted-foreground hover:text-white"
         >
-          <Menu className="w-5 h-5 mb-1 relative z-10 transition-transform duration-300 group-hover:-translate-y-0.5" />
-          <span className="text-[10px] tracking-wide relative z-10 transition-all duration-300 font-medium opacity-80 group-hover:opacity-100">Menu</span>
+          <Menu className="w-5 h-5 relative z-10 transition-transform duration-300" />
         </button>
       </div>
     </div>
