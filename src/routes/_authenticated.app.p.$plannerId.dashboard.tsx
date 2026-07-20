@@ -40,24 +40,21 @@ const renderCustomizedLabel = (props: any) => {
 
 function KpiCard({ icon: Icon, label, value, compactValue, sub, accent }: { icon: React.ElementType; label: string; value: string; compactValue?: string; sub?: string; accent?: boolean }) {
   return (
-    <div className="relative overflow-hidden rounded-[20px] bg-[#111312] border border-white/5 p-4 md:p-5 shadow-lg group transition-colors">
-      {/* Top Left Glow */}
-      <div className={`absolute -top-12 -left-12 w-32 h-32 blur-[40px] rounded-full pointer-events-none transition-opacity ${accent ? 'bg-[#3DDC97]/25' : 'bg-[#3DDC97]/5'}`} />
-      
-      <div className="flex items-start justify-between relative z-10 mb-4 md:mb-5">
-        <span className={`text-[10px] md:text-[11px] font-bold uppercase tracking-widest ${accent ? 'text-[#3DDC97]' : 'text-muted-foreground'}`}>
+    <div className="rounded-2xl border border-hairline bg-card p-6 shadow-sm">
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs font-medium text-muted-foreground">
           {label}
         </span>
-        <div className="p-1.5 md:p-2 rounded-full bg-[#1C201E] text-muted-foreground transition-colors border border-white/5 shadow-inner">
-          <Icon className="h-3 w-3 md:h-3.5 md:w-3.5" />
+        <div className="p-2 bg-muted/50 rounded-full">
+          <Icon className="h-4 w-4 text-muted-foreground" />
         </div>
       </div>
-      <div className="text-[22px] md:text-[28px] font-display font-medium tracking-tight truncate relative z-10 text-white" title={value}>
+      <div className="text-3xl font-display font-medium tracking-tight truncate text-foreground" title={value}>
         {compactValue || value}
       </div>
       {sub && (
-        <div className="mt-1.5 md:mt-2 text-[10px] md:text-xs text-muted-foreground/80 relative z-10 flex items-center gap-1.5">
-          <Activity className="h-3 w-3" /> {sub}
+        <div className="mt-2 text-sm text-muted-foreground flex items-center gap-1.5">
+          <Activity className="h-3.5 w-3.5" /> {sub}
         </div>
       )}
     </div>
@@ -255,8 +252,8 @@ function DashboardPage() {
             </Button>
           </div>
         </div>
-        {/* KPI Grids (Universal 2-col Mobile / 4-col Desktop) */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 px-4 md:px-0 mt-2 md:mt-0">
+        {/* KPI Grids */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-4 md:px-0 mt-6 md:mt-0">
           <KpiCard icon={TrendingUp} label="Total Income" value={formatMoney(totalIncome, currency)} compactValue={formatMoney(totalIncome, currency, true)} accent />
           <KpiCard icon={TrendingDown} label="Total Expenses" value={formatMoney(totalExpenses, currency)} compactValue={formatMoney(totalExpenses, currency, true)} />
           <KpiCard icon={Sparkles} label="Net Cash Flow" value={formatMoney(net, currency)} compactValue={formatMoney(net, currency, true)} sub={net >= 0 ? "In the green" : "In the red"} />
