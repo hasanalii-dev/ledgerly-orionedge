@@ -413,20 +413,42 @@ function AdminPanel() {
                   ) : (
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
+                        <div className="text-muted-foreground text-xs">Workspace Type</div>
+                        <div className="font-medium text-[#3DDC97] capitalize">{selectedUserOnboarding?.workspace_type || selectedUserOnboarding?.purpose || "Not provided"}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground text-xs">Industry</div>
+                        <div className="font-medium">{selectedUserOnboarding?.industry || "Not provided"}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground text-xs">Business / Company</div>
+                        <div className="font-medium">{selectedUserOnboarding?.business_name || selectedUserOnboarding?.company_name || "Not provided"}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground text-xs">Company Size</div>
+                        <div className="font-medium">{selectedUserOnboarding?.company_size || "Not provided"}</div>
+                      </div>
+                      <div>
                         <div className="text-muted-foreground text-xs">Country</div>
                         <div className="font-medium">{selectedUserOnboarding?.country || "Not provided"}</div>
                       </div>
                       <div>
-                        <div className="text-muted-foreground text-xs">Purpose</div>
-                        <div className="font-medium capitalize">{selectedUserOnboarding?.purpose || "Not provided"}</div>
+                        <div className="text-muted-foreground text-xs">Current Workflow</div>
+                        <div className="font-medium uppercase">{selectedUserOnboarding?.current_workflow || "Not provided"}</div>
                       </div>
-                      <div>
-                        <div className="text-muted-foreground text-xs">Company</div>
-                        <div className="font-medium">{selectedUserOnboarding?.company_name || "Not provided"}</div>
-                      </div>
-                      <div>
-                        <div className="text-muted-foreground text-xs">Role</div>
-                        <div className="font-medium">{selectedUserOnboarding?.role || "Not provided"}</div>
+                      <div className="col-span-2">
+                        <div className="text-muted-foreground text-xs mb-1">Primary Goals</div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {Array.isArray(selectedUserOnboarding?.primary_goals) && selectedUserOnboarding.primary_goals.length > 0 ? (
+                            selectedUserOnboarding.primary_goals.map((g: string) => (
+                              <span key={g} className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-medium text-white">
+                                {g.replace(/_/g, ' ')}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-muted-foreground">None specified</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}

@@ -29,6 +29,29 @@ export function formatDate(d: string | Date | null | undefined, fmt = "medium") 
 }
 
 export const CURRENCIES = ["USD", "EUR", "GBP", "PKR", "AED", "INR", "CAD", "AUD", "JPY"] as const;
+
+export const COUNTRIES = [
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "Germany",
+  "France",
+  "Pakistan",
+  "United Arab Emirates",
+  "India",
+  "Japan",
+  "Singapore",
+  "Brazil",
+  "Mexico",
+  "Spain",
+  "Italy",
+  "Netherlands",
+  "Sweden",
+  "Switzerland",
+  "South Africa",
+  "Other Country",
+] as const;
 export const ACCOUNT_KINDS = ["bank", "wallet", "cash", "other"] as const;
 export const INCOME_STATUSES = ["pending", "advance", "partial", "paid", "refunded"] as const;
 export const INVOICE_STATUSES = ["pending", "sent", "paid", "overdue", "cancelled"] as const;

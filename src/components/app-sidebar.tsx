@@ -23,6 +23,7 @@ import {
   PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles, Calculator
 } from "lucide-react";
 import { InviteDialog } from "./invite-dialog";
+import { WORKSPACE_TYPES, WorkspaceType, getWorkspaceDefaults, getCategoryPresets } from "@/lib/workspace-presets";
 import { toast } from "sonner";
 
 type Planner = { id: string; name: string; emoji: string | null; is_default: boolean };
@@ -59,8 +60,9 @@ export function AppSidebar() {
   const [signOutOpen, setSignOutOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [name, setName] = useState("");
+  const [newWorkspaceType, setNewWorkspaceType] = useState<WorkspaceType>("personal");
 
-  useEffect(() => { if (dialogOpen === "rename" && active) setName(active.name); if (dialogOpen === "new") setName(""); }, [dialogOpen, active]);
+  useEffect(() => { if (dialogOpen === "rename" && active) setName(active.name); if (dialogOpen === "new") { setName(""); setNewWorkspaceType("personal"); } }, [dialogOpen, active]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -77,8 +79,34 @@ export function AppSidebar() {
     if (!name.trim()) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const { data, error } = await supabase.from("planners").insert({ user_id: user.id, name: name.trim() }).select("id").single();
+
+    const defaults = getWorkspaceDefaults(newWorkspaceType);
+    const categoryPresets = getCategoryPresets(newWorkspaceType);
+
+    const { data, error } = await supabase.from("planners").insert({ 
+      user_id: user.id, 
+      name: name.trim(),
+      workspace_type: newWorkspaceType,
+      custom_config: {
+        hideModules: defaults.hideModules,
+        primaryMetrics: defaults.primaryMetrics,
+        clientTerm: defaults.clientTerm,
+      }
+    }).select("id").single();
+
     if (error) return toast.error(error.message);
+
+    // Seed default categories
+    if (data?.id && categoryPresets.length > 0) {
+      const categoriesToInsert = categoryPresets.map(cat => ({
+        planner_id: data.id,
+        name: cat.name,
+        color: cat.color,
+        category_type: cat.type,
+      }));
+      await supabase.from("expense_categories").insert(categoriesToInsert as any);
+    }
+
     toast.success("Planner created");
     qc.invalidateQueries({ queryKey: ["planners"] });
     setDialogOpen(null);
@@ -413,12 +441,53 @@ export function AppSidebar() {
       </CommandDialog>
 
       <Dialog open={dialogOpen !== null} onOpenChange={(o) => !o && setDialogOpen(null)}>
-        <DialogContent className="bg-[#050a0a] border-white/10">
-          <DialogHeader><DialogTitle>{dialogOpen === "new" ? "New planner" : "Rename planner"}</DialogTitle></DialogHeader>
-          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Planner name" autoFocus className="bg-background border-white/10" />
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setDialogOpen(null)}>Cancel</Button>
-            <Button onClick={dialogOpen === "new" ? createPlanner : renamePlanner} className="bg-primary hover:bg-primary/90 text-primary-foreground">{dialogOpen === "new" ? "Create" : "Save"}</Button>
+        <DialogContent className="bg-[#0c100e] border-white/10 text-white rounded-3xl font-['Questrial',_sans-serif]">
+          <DialogHeader>
+            <DialogTitle className="font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-lg text-white">
+              {dialogOpen === "new" ? "Create New Workspace Planner" : "Rename Planner"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-white/80 block mb-1.5">Planner Name</label>
+              <Input 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                placeholder="e.g. Marketing Agency 2026" 
+                autoFocus 
+                className="bg-black/60 border-white/10 text-white rounded-xl focus:border-[#3DDC97]" 
+              />
+            </div>
+
+            {dialogOpen === "new" && (
+              <div>
+                <label className="text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-white/80 block mb-1.5">Planner Use Case / Preset</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
+                  {WORKSPACE_TYPES.map(wt => (
+                    <button
+                      key={wt.id}
+                      type="button"
+                      onClick={() => setNewWorkspaceType(wt.id)}
+                      className={`p-2.5 rounded-xl border text-left text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all ${
+                        newWorkspaceType === wt.id
+                          ? "bg-[#3DDC97]/20 border-[#3DDC97] text-[#3DDC97]"
+                          : "bg-black/40 border-white/10 text-white/70 hover:bg-white/5"
+                      }`}
+                    >
+                      {wt.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" onClick={() => setDialogOpen(null)} className="rounded-xl text-xs font-bold text-muted-foreground hover:text-white">Cancel</Button>
+            <Button onClick={dialogOpen === "new" ? createPlanner : renamePlanner} className="bg-[#3DDC97] hover:bg-[#3DDC97]/90 text-black rounded-xl text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold">
+              {dialogOpen === "new" ? "Initialize Planner" : "Save Name"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
