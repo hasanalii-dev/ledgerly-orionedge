@@ -75,16 +75,18 @@ function AccountsPage() {
       {rows.length > 0 && (
         <div className="relative w-full flex flex-col items-center">
           <div 
-            className="flex overflow-x-auto snap-x snap-mandatory w-full pt-4 pb-6 gap-4 px-4 sm:px-0 sm:justify-center [&::-webkit-scrollbar]:hidden"
+            className="flex overflow-x-auto snap-x snap-mandatory w-full pt-4 pb-6 gap-4 px-4 sm:px-6 justify-start [&::-webkit-scrollbar]:hidden scroll-smooth"
             style={{ scrollbarWidth: 'none' }}
             onScroll={(e) => {
               const el = e.currentTarget;
-              const itemWidth = el.scrollWidth / rows.length;
-              const index = Math.round(el.scrollLeft / itemWidth);
-              setActiveIndex(Math.min(index, rows.length - 1));
+              const firstChild = el.children[0] as HTMLElement;
+              if (!firstChild) return;
+              const cardWidth = firstChild.offsetWidth + 16; // card width + gap-4 (16px)
+              const index = Math.round(el.scrollLeft / cardWidth);
+              setActiveIndex(Math.max(0, Math.min(index, rows.length - 1)));
             }}
           >
-            {rows.map((a) => {
+            {rows.map((a, i) => {
               const live = Number(a.opening_balance ?? 0) + (balMap.get(a.id) ?? 0);
               
               const getCardStyles = (kind: string) => {
@@ -99,7 +101,7 @@ function AccountsPage() {
               const cardStyle = getCardStyles(a.kind || 'bank');
 
               return (
-                <div key={a.id} className={`snap-center shrink-0 rounded-[28px] relative overflow-hidden group w-[85vw] max-w-[360px] aspect-[1.586] flex flex-col justify-between shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] ${cardStyle.base}`}>
+                <div key={a.id} className={`snap-start shrink-0 rounded-[28px] relative overflow-hidden group w-[85vw] sm:w-[340px] max-w-[360px] aspect-[1.586] flex flex-col justify-between shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] ${cardStyle.base}`}>
                   {/* Abstract geometric shapes */}
                   <div className="absolute inset-0 opacity-100 z-0 mix-blend-screen pointer-events-none">
                     <div className={`absolute -top-[30%] -right-[10%] w-[80%] h-[120%] bg-gradient-to-bl ${cardStyle.g1} to-transparent rotate-12 blur-2xl`} />
@@ -110,7 +112,7 @@ function AccountsPage() {
                   {/* Shimmer Hover Animation */}
                   <div className="absolute inset-0 z-20 pointer-events-none w-[200%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[150%] -skew-x-[20deg] group-hover:translate-x-[50%] transition-transform duration-1000 ease-in-out" />
 
-                  {/* Overlay texture on the right half (like the image pattern) */}
+                  {/* Overlay texture on the right half */}
                   <div className="absolute top-0 bottom-0 right-0 w-[45%] opacity-[0.07] z-0 pointer-events-none mix-blend-overlay [mask-image:linear-gradient(to_left,white,transparent)]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'40\' viewBox=\'0 0 20 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 20 L20 0 L20 40 Z\' fill=\'%23ffffff\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")', backgroundSize: '12px 24px' }} />
                   
                   {/* Frosted Bottom section */}
@@ -158,9 +160,16 @@ function AccountsPage() {
           {/* Dots Indicator */}
           <div className="flex items-center gap-2 mt-2">
             {rows.map((_, i) => (
-              <div 
+              <button 
                 key={i} 
-                className={`h-1.5 rounded-full transition-all duration-300 ${activeIndex === i ? 'w-6 bg-white/80' : 'w-1.5 bg-white/20'}`}
+                onClick={(e) => {
+                  const container = e.currentTarget.parentElement?.previousElementSibling as HTMLElement;
+                  if (!container) return;
+                  const targetCard = container.children[i] as HTMLElement;
+                  targetCard?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+                }}
+                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer hover:bg-white/90 ${activeIndex === i ? 'w-6 bg-white/80' : 'w-1.5 bg-white/20'}`}
+                title={`Go to account ${i + 1}`}
               />
             ))}
           </div>

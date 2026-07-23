@@ -264,7 +264,7 @@ function PlannerLayout() {
             </div>
           </header>
 
-          <main className="p-4 md:p-6 overflow-y-auto">
+          <main className="p-4 md:p-6 overflow-y-auto min-w-0 max-w-full overflow-x-hidden">
             <PageTransition>
               <Outlet />
             </PageTransition>
