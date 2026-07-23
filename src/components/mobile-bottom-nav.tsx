@@ -43,7 +43,7 @@ export function MobileBottomNav() {
       openMobile ? "translate-y-[150%] opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
     )}>
       {/* Outer Prism Glow Container */}
-      <div className="relative rounded-[2.5rem] p-[1px] bg-gradient-to-r from-white/15 via-[#3DDC97]/35 via-cyan-400/25 to-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.95)]">
+      <div className="relative rounded-[2.5rem] p-[1px] bg-gradient-to-r from-white/15 via-[#3DDC97]/40 to-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.95)]">
         
         {/* Prismatic Top Highlight Line */}
         <div className="absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-white/60 to-transparent z-20 pointer-events-none" />
@@ -53,7 +53,7 @@ export function MobileBottomNav() {
 
           {/* Liquid Glass Background Reflection */}
           <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none z-0" />
-          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-48 h-12 bg-[#3DDC97]/15 blur-2xl rounded-full pointer-events-none z-0" />
+          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-48 h-12 bg-[#3DDC97]/20 blur-2xl rounded-full pointer-events-none z-0" />
 
           {links.map((link) => {
             const isActive = pathname === link.href || (pathname.startsWith(link.href) && link.name !== "Settings");
@@ -70,8 +70,8 @@ export function MobileBottomNav() {
               >
                 {isActive && (
                   <>
-                    {/* Glowing Refractive Glass Pill behind active icon */}
-                    <div className="absolute inset-x-1 inset-y-1 rounded-2xl bg-gradient-to-tr from-[#3DDC97]/30 via-[#3DDC97]/10 to-cyan-400/20 border border-[#3DDC97]/60 shadow-[0_0_20px_rgba(61,220,151,0.4),inset_0_1px_1px_rgba(255,255,255,0.6)] backdrop-blur-md" />
+                    {/* Glowing Refractive Emerald Glass Pill behind active icon */}
+                    <div className="absolute inset-x-1 inset-y-1 rounded-2xl bg-gradient-to-tr from-[#3DDC97]/30 via-[#3DDC97]/15 to-[#3DDC97]/25 border border-[#3DDC97]/60 shadow-[0_0_20px_rgba(61,220,151,0.45),inset_0_1px_1px_rgba(255,255,255,0.6)] backdrop-blur-md" />
                     {/* Active Bottom Glow Dot */}
                     <div className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-[#3DDC97] shadow-[0_0_8px_#3DDC97,0_0_16px_#3DDC97]" />
                   </>
