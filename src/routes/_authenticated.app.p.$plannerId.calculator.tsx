@@ -262,6 +262,52 @@ function CalculatorPage() {
     }
   };
 
+  // Keyboard Numpad & Numkeys Input Listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in form inputs (e.g. preset fields, search)
+      const activeTag = document.activeElement?.tagName;
+      if (activeTag === "INPUT" || activeTag === "TEXTAREA" || activeTag === "SELECT") {
+        return;
+      }
+
+      if (e.key >= "0" && e.key <= "9") {
+        e.preventDefault();
+        handleDigit(e.key);
+      } else if (e.key === "." || e.key === ",") {
+        e.preventDefault();
+        handleDecimal();
+      } else if (e.key === "+") {
+        e.preventDefault();
+        handleOperator("+");
+      } else if (e.key === "-") {
+        e.preventDefault();
+        handleOperator("-");
+      } else if (e.key === "*" || e.key === "x" || e.key === "X") {
+        e.preventDefault();
+        handleOperator("×");
+      } else if (e.key === "/") {
+        e.preventDefault();
+        handleOperator("÷");
+      } else if (e.key === "=" || e.key === "Enter") {
+        e.preventDefault();
+        handleEquals();
+      } else if (e.key === "Backspace") {
+        e.preventDefault();
+        handleBackspace();
+      } else if (e.key === "Escape" || e.key === "c" || e.key === "C") {
+        e.preventDefault();
+        handleClear();
+      } else if (e.key === "%") {
+        e.preventDefault();
+        handlePercentage();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [display, expression, activeTab]);
+
   // Memory Functions
   const handleMemoryStore = () => {
     const val = parseFloat(display);

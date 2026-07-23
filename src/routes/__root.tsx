@@ -158,8 +158,8 @@ export const Route = createRootRouteWithContext<{
       links: [
         { rel: "canonical", href: "https://capientapp.com/" },
         { rel: "stylesheet", href: appCss },
-        { rel: "icon", href: "/side-bar-logo.png", type: "image/png" },
-        { rel: "apple-touch-icon", href: "/logo.png" },
+        { rel: "icon", href: "/favicon.png", type: "image/png" },
+        { rel: "apple-touch-icon", href: "/favicon.png" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
         {
@@ -243,7 +243,7 @@ function InitialSplash() {
                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
                  className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full"
               />
-              <img src="/side-bar-logo.png" alt="Capient" className="relative h-12 w-auto object-contain" />
+              <img src="/logowg.png" alt="Capient" className="relative h-14 w-auto object-contain" />
             </div>
             
             <div className="flex flex-col items-center w-full">

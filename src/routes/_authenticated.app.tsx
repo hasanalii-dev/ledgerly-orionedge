@@ -13,20 +13,27 @@ import { CURRENCIES } from "@/lib/format";
 export const Route = createFileRoute("/_authenticated/app")({
   loader: async ({ location }) => {
     if (location.pathname === "/app" || location.pathname === "/app/") {
-      const { data: planners, error } = await supabase
-        .from("planners")
-        .select("id, is_default, created_at")
-        .order("is_default", { ascending: false })
-        .order("created_at", { ascending: true })
-        .limit(1);
+      try {
+        const { data: planners, error } = await supabase
+          .from("planners")
+          .select("id, is_default, created_at")
+          .order("is_default", { ascending: false })
+          .order("created_at", { ascending: true })
+          .limit(1);
 
-      if (error) {
-        console.error("Error fetching planners:", error);
-      }
+        if (error) {
+          console.error("Error fetching planners:", error);
+        }
 
-      const first = planners?.[0];
-      if (first) {
-        throw redirect({ to: `/app/p/${first.id}/dashboard` as any });
+        const first = planners?.[0];
+        if (first) {
+          throw redirect({ to: `/app/p/${first.id}/dashboard` as any });
+        }
+      } catch (err: any) {
+        if (err && typeof err === "object" && err.isRedirect) {
+          throw err;
+        }
+        console.error("Loader error in _authenticated/app:", err);
       }
     }
     return null;
@@ -152,17 +159,21 @@ function OnboardingWizard() {
         console.error("Failed to save onboarding details:", onboardingError);
       }
       
-      const { error } = await supabase.from("planners").insert({ 
+      const { data: newPlanner, error } = await supabase.from("planners").insert({ 
         user_id: user.user.id, 
         name: plannerName.trim(),
         currency,
         is_default: true 
-      });
+      }).select("id").single();
       
       if (error) throw error;
       
       toast.success("Planner created successfully!");
-      await router.invalidate();
+      if (newPlanner?.id) {
+        router.navigate({ to: `/app/p/${newPlanner.id}/dashboard` as any, replace: true });
+      } else {
+        await router.invalidate();
+      }
     } catch (err: any) {
       toast.error(err.message);
       setLoading(false);

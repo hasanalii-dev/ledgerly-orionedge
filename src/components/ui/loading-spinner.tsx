@@ -12,7 +12,7 @@ export function LoadingSpinner() {
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
             className="relative h-20 w-20 bg-[#050a0a] border border-white/10 rounded-[20px] flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.05),0_0_40px_rgba(16,185,129,0.1)]"
           >
-            <img src="/favicon.png" alt="Loading" className="h-10 w-10 object-contain" />
+            <img src="/logowg.png" alt="Loading" className="h-10 w-10 object-contain" />
           </motion.div>
         </div>
       </div>

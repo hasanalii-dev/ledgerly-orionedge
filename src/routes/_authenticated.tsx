@@ -5,25 +5,29 @@ export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
     try {
-      const { data, error } = await supabase.auth.getUser();
-      if (error || !data.user) {
-        // If the server rejects the session (e.g., user deleted), clear local storage
-        // to prevent an infinite redirect loop between /app and /auth.
-        await supabase.auth.signOut().catch(() => {}); // catch signOut errors
+      // 1. Try fast session check first
+      const { data: sessionData } = await supabase.auth.getSession();
+      let user = sessionData?.session?.user ?? null;
+
+      // 2. Fallback to server validation if session not in local memory yet
+      if (!user) {
+        const { data, error } = await supabase.auth.getUser();
+        if (!error && data?.user) {
+          user = data.user;
+        }
+      }
+
+      if (!user) {
         throw redirect({ to: "/auth" });
       }
-      return { user: data.user };
+
+      return { user };
     } catch (err: any) {
       // Re-throw if it's a TanStack Router redirect
-      if (err && typeof err === 'object' && err.isRedirect) {
+      if (err && typeof err === "object" && err.isRedirect) {
         throw err;
       }
-      // If gotrue-js throws a corrupted session error (like Uncaught undefined),
-      // wipe the storage manually and redirect to /auth safely.
-      try {
-        localStorage.clear();
-        sessionStorage.clear();
-      } catch (e) {}
+      console.error("Auth beforeLoad error:", err);
       throw redirect({ to: "/auth" });
     }
   },
