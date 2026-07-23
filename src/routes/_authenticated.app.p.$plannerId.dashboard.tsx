@@ -208,12 +208,17 @@ function DashboardPage() {
               variant="outline" 
               size="icon" 
               asChild 
-              className="absolute top-0 -right-2 rounded-full h-8 w-8 z-10 bg-[#1A1A1A] backdrop-blur-md shadow-xl border border-white/10"
+              className="absolute top-0 -right-2 rounded-full h-8 w-8 z-10 bg-[#1A1A1A] backdrop-blur-md shadow-xl border border-[#3DDC97]/30"
             >
               <Link to="/app/p/$plannerId/notifications" params={{ plannerId }}>
-                <Bell className="h-3.5 w-3.5 text-white/80" />
+                <motion.div
+                  animate={{ rotate: [0, -18, 18, -18, 18, 0], scale: [1, 1.1, 1] }}
+                  transition={{ repeat: Infinity, repeatDelay: 2.5, duration: 0.7 }}
+                >
+                  <Bell className="h-3.5 w-3.5 text-[#3DDC97]" />
+                </motion.div>
                 {pendingInvites.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-[#3DDC97] rounded-full border border-background" />
+                  <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-[#3DDC97] rounded-full border border-background animate-pulse shadow-[0_0_8px_#3DDC97]" />
                 )}
               </Link>
             </Button>

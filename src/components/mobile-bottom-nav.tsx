@@ -43,19 +43,18 @@ export function MobileBottomNav() {
       openMobile ? "translate-y-[150%] opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
     )}>
       {/* Outer Glow Wrapper */}
-      <div className="relative rounded-[2.5rem] p-[1px] bg-gradient-to-r from-white/20 via-[#3DDC97]/50 to-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_30px_rgba(61,220,151,0.25)]">
+      <div className="relative rounded-[2.5rem] p-[1px] bg-[#111] shadow-[0_20px_50px_rgba(0,0,0,0.95)] border border-white/10">
         
-        {/* Top Emerald Specular Highlight Line */}
-        <div className="absolute top-0 left-8 right-8 h-[1px] bg-gradient-to-r from-transparent via-[#3DDC97]/80 to-transparent z-20 pointer-events-none" />
+        {/* Top Highlight Line */}
+        <div className="absolute top-0 left-8 right-8 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent z-20 pointer-events-none" />
 
-        {/* Real Glassmorphic Translucent Dark Emerald Container */}
+        {/* Pure Black Glassmorphic Translucent Container */}
         <div 
-          className="relative flex items-center justify-between px-3 py-2 rounded-[2.4rem] bg-[#070c09]/60 backdrop-blur-2xl backdrop-saturate-[190%] border border-[#3DDC97]/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),inset_0_-1px_2px_rgba(0,0,0,0.8)] overflow-hidden"
-          style={{ WebkitBackdropFilter: "blur(24px) saturate(190%)", backdropFilter: "blur(24px) saturate(190%)" }}
+          className="relative flex items-center justify-between px-3 py-2 rounded-[2.4rem] bg-black/80 backdrop-blur-2xl backdrop-saturate-[180%] overflow-hidden"
+          style={{ WebkitBackdropFilter: "blur(24px) saturate(180%)", backdropFilter: "blur(24px) saturate(180%)" }}
         >
-          {/* Ambient Inner Emerald Glow */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#3DDC97]/10 via-transparent to-[#3DDC97]/15 pointer-events-none z-0" />
-          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-44 h-10 bg-[#3DDC97]/25 blur-xl rounded-full pointer-events-none z-0" />
+          {/* Subtle Ambient Emerald Glow */}
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-44 h-8 bg-[#3DDC97]/10 blur-xl rounded-full pointer-events-none z-0" />
 
           {links.map((link) => {
             const isActive = pathname === link.href || (pathname.startsWith(link.href) && link.name !== "Settings");
