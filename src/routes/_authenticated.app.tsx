@@ -418,7 +418,7 @@ function OnboardingWizard() {
                   <p className="text-xs text-muted-foreground">Select your primary use case to optimize your workspace layout.</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[340px] overflow-y-auto pr-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[340px] overflow-y-auto pr-2.5 pl-0.5 py-1">
                   {WORKSPACE_TYPES.map(type => {
                     const IconComp = getIconComponent(type.iconName);
                     const isSelected = workspaceType === type.id;
