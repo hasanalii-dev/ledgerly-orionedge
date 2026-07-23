@@ -9,7 +9,7 @@ const navLinks = [
   { name: "About", to: "/about" },
   { name: "Features", href: "/#features" },
   { name: "Modules", href: "/#modules" },
-  { name: "Pricing", href: "/#pricing" },
+  { name: "Pricing", to: "/pricing" },
   { name: "Docs", to: "/docs" },
 ];
 
@@ -59,13 +59,13 @@ export function MarketingNavbar() {
             <img src="/side-bar-logo.png" alt="Capient" className="h-8 w-auto object-contain" />
           </Link>
           
-          <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
+          <nav className="hidden md:flex items-center gap-8 text-sm font-['Questrial',_sans-serif] text-muted-foreground">
             {navLinks.map((link) => (
               link.to ? (
                 <Link 
                   key={link.name} 
                   to={link.to} 
-                  className={cn("transition-colors hover:text-white", location.pathname === link.to && "text-white font-medium")}
+                  className={cn("transition-colors hover:text-white", location.pathname === link.to && "text-[#3DDC97] font-medium")}
                 >
                   {link.name}
                 </Link>
@@ -82,63 +82,52 @@ export function MarketingNavbar() {
           </nav>
           
           <div className="flex items-center gap-2">
-            <Link to="/auth"><Button variant="ghost" size="sm" className="hidden md:inline-flex text-muted-foreground hover:text-white">Sign in</Button></Link>
-            <Link to="/auth"><Button size="sm" className="hidden md:inline-flex rounded-full glow-emerald">Join Beta</Button></Link>
+            <Link to="/auth"><Button variant="ghost" size="sm" className="hidden md:inline-flex text-muted-foreground hover:text-white font-['Samsung_Sharp_Sans',_sans-serif] font-bold">Sign in</Button></Link>
+            <Link to="/auth"><Button size="sm" className="hidden md:inline-flex rounded-full bg-[#3DDC97] text-black font-['Samsung_Sharp_Sans',_sans-serif] font-bold hover:bg-[#3DDC97]/90 shadow-[0_0_15px_rgba(61,220,151,0.25)]">Join Beta</Button></Link>
+            
+            {/* Mobile Hamburger Button */}
             <Button 
               variant="ghost" 
               size="icon" 
-              className="md:hidden relative z-[101]" 
+              className="md:hidden relative z-[101] text-white hover:bg-white/10 rounded-full h-10 w-10" 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle menu"
             >
-              <motion.div
-                animate={isMobileMenuOpen ? "open" : "closed"}
-                variants={{
-                  open: { rotate: 90, opacity: 0 },
-                  closed: { rotate: 0, opacity: 1 }
-                }}
-                className="absolute"
-              >
-                <Menu className="h-5 w-5" />
-              </motion.div>
-              <motion.div
-                animate={isMobileMenuOpen ? "open" : "closed"}
-                variants={{
-                  open: { rotate: 0, opacity: 1 },
-                  closed: { rotate: -90, opacity: 0 }
-                }}
-                className="absolute"
-              >
-                <X className="h-5 w-5" />
-              </motion.div>
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6 text-[#3DDC97]" />
+              ) : (
+                <Menu className="h-6 w-6 text-white" />
+              )}
             </Button>
           </div>
         </div>
       </header>
 
+      {/* Smooth, Glitch-Free Mobile Sidebar Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ clipPath: "circle(0% at calc(100% - 3rem) 3rem)" }}
-            animate={{ clipPath: "circle(150% at calc(100% - 3rem) 3rem)" }}
-            exit={{ clipPath: "circle(0% at calc(100% - 3rem) 3rem)" }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-[90] bg-[#020505]/95 backdrop-blur-md md:hidden flex flex-col justify-center px-8"
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="fixed inset-0 z-[90] bg-[#040807]/95 backdrop-blur-2xl md:hidden flex flex-col justify-center px-8 font-['Questrial',_sans-serif]"
           >
-            <div className="flex flex-col gap-8 text-3xl font-display font-semibold">
+            <div className="flex flex-col gap-5 text-2xl font-['Samsung_Sharp_Sans',_sans-serif] font-bold">
               {navLinks.map((link, i) => (
                 <motion.div
                   key={link.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + i * 0.1, duration: 0.4 }}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.04 * i, duration: 0.2 }}
                 >
                   {link.to ? (
                     <Link 
                       to={link.to} 
                       onClick={() => setIsMobileMenuOpen(false)}
                       className={cn(
-                        "text-white/70 hover:text-white transition-colors block",
-                        location.pathname === link.to && "text-white"
+                        "text-white/70 hover:text-[#3DDC97] transition-colors block py-2.5 border-b border-white/5",
+                        location.pathname === link.to && "text-[#3DDC97]"
                       )}
                     >
                       {link.name}
@@ -147,28 +136,27 @@ export function MarketingNavbar() {
                     <a 
                       href={link.href} 
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="text-white/70 hover:text-white transition-colors block"
+                      className="text-white/70 hover:text-[#3DDC97] transition-colors block py-2.5 border-b border-white/5"
                     >
                       {link.name}
                     </a>
                   )}
                 </motion.div>
               ))}
-            </div>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.4 }}
-              className="mt-12 flex flex-col gap-4"
-            >
-              <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="outline" size="lg" className="w-full border-white/10 bg-transparent h-14 text-lg">Sign in</Button>
-              </Link>
-              <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button size="lg" className="w-full rounded-full glow-emerald h-14 text-lg">Join Beta</Button>
-              </Link>
-            </motion.div>
+              <div className="pt-6 flex flex-col gap-3 font-['Samsung_Sharp_Sans',_sans-serif]">
+                <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full h-12 rounded-2xl text-sm font-bold border-white/10 text-white hover:bg-white/10">
+                    Sign in
+                  </Button>
+                </Link>
+                <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full h-12 rounded-2xl text-sm font-bold bg-[#3DDC97] text-black hover:bg-[#3DDC97]/90 shadow-[0_0_20px_rgba(61,220,151,0.3)]">
+                    Join Beta
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

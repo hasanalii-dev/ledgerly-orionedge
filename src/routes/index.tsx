@@ -451,7 +451,7 @@ function Landing() {
                 <h4 className="font-display font-medium text-foreground mb-4 text-base">Product</h4>
                 <ul className="space-y-3">
                   <li><a href="/#features" className="hover:text-primary transition-colors">Features</a></li>
-                  <li><a href="/#pricing" className="hover:text-primary transition-colors">Pricing</a></li>
+                  <li><Link to="/pricing" className="hover:text-primary transition-colors">Pricing</Link></li>
                   <li><a href="/#modules" className="hover:text-primary transition-colors">Modules</a></li>
                   <li><Link to="/coming-soon" className="hover:text-primary transition-colors">Changelog</Link></li>
                 </ul>
