@@ -244,15 +244,6 @@ function PlannerLayout() {
             <img src="/full-logo-1.png" alt="Ledgerly" className="h-7 object-contain" />
             
             <div className="flex items-center gap-3">
-              <Link to="/app/p/$plannerId/notifications" params={{ plannerId }} className="relative p-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-white/80 transition-colors">
-                <motion.div
-                  animate={{ rotate: [0, -18, 18, -18, 18, 0], scale: [1, 1.1, 1] }}
-                  transition={{ repeat: Infinity, repeatDelay: 3, duration: 0.6 }}
-                >
-                  <Bell className="h-4 w-4 text-[#3DDC97]" />
-                </motion.div>
-              </Link>
-
               <div className="flex -space-x-2 items-center">
                 {collaborators.slice(0, 3).map((collab: any, i: number) => (
                   <Avatar key={collab.id || i} className="h-8 w-8 border border-[#3DDC97]/60 bg-[#0b0e0c] relative z-10 shadow-sm">
