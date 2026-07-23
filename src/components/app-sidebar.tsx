@@ -20,7 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Plus, Settings, LogOut, ChevronDown, LayoutDashboard, TrendingUp, TrendingDown, LineChart, 
   Wallet, Users, FolderKanban, FileText, CandlestickChart, Target, ArrowLeftRight, FileBarChart, 
-  PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles
+  PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles, Calculator
 } from "lucide-react";
 import { InviteDialog } from "./invite-dialog";
 import { toast } from "sonner";
@@ -145,6 +145,7 @@ export function AppSidebar() {
         { title: "Reports", to: `/app/p/${plannerId}/reports`, icon: FileBarChart },
         { title: "Charts", to: `/app/p/${plannerId}/charts`, icon: PieChart },
         { title: "Monthly Tracking", to: `/app/p/${plannerId}/monthly`, icon: Calendar },
+        { title: "Calculator", to: `/app/p/${plannerId}/calculator`, icon: Calculator },
         { title: "Timeline", to: `/app/p/${plannerId}/timeline`, icon: Activity },
         { title: "Notes", to: `/app/p/${plannerId}/notes`, icon: StickyNote },
       ]
