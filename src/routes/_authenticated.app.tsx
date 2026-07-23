@@ -201,11 +201,11 @@ function OnboardingWizard() {
       if (!displayName.trim()) return toast.error("Please enter your name");
       setStep(1);
     } else if (step === 1) {
-      // If business/agency/startup/freelancer, go to step 2 (Business info). Otherwise skip to step 3.
+      // Skip Business Info (Step 2) AND Industry (Step 3) for personal, student, creator, etc.
       if (isBusinessOrAgency) {
         setStep(2);
       } else {
-        setStep(3);
+        setStep(4);
       }
     } else if (step === 2) {
       if (isBusinessOrAgency && !businessName.trim()) return toast.error("Please enter your business or project name");
@@ -219,7 +219,7 @@ function OnboardingWizard() {
   };
 
   const prevStep = () => {
-    if (step === 3 && !isBusinessOrAgency) {
+    if (step === 4 && !isBusinessOrAgency) {
       setStep(1);
     } else {
       setStep(step - 1);
@@ -246,8 +246,7 @@ function OnboardingWizard() {
     exit: { opacity: 0, x: -20, transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] } },
   };
 
-  const totalSteps = isBusinessOrAgency ? 6 : 5;
-  const currentStepProgress = isBusinessOrAgency ? step : (step >= 2 ? step - 1 : step);
+  const activeStepsList = isBusinessOrAgency ? [0, 1, 2, 3, 4, 5] : [0, 1, 4, 5];
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-[#020505] relative overflow-hidden text-white p-4 font-['Questrial',_sans-serif]">
@@ -274,9 +273,7 @@ function OnboardingWizard() {
 
           {/* Logo & Header */}
           <div className="mb-6 text-center mt-2">
-            <div className="inline-flex h-12 w-12 bg-[#0b1414]/90 rounded-2xl items-center justify-center border border-white/10 mb-4 shadow-xl">
-              <img src="/favicon.png" alt="Capient" className="h-6 w-6 object-contain" />
-            </div>
+            <img src="/favicon.png" alt="Capient" className="h-10 w-10 object-contain mx-auto mb-3" />
             <h1 className="text-2xl font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-white tracking-tight">
               Welcome to Capient
             </h1>
@@ -287,7 +284,7 @@ function OnboardingWizard() {
 
           {/* Classic Numbered Step Indicator Timeline */}
           <div className="flex justify-between items-center mb-8 w-full max-w-sm mx-auto px-2">
-            {(isBusinessOrAgency ? [0, 1, 2, 3, 4, 5] : [0, 1, 3, 4, 5]).map((s, i, arr) => (
+            {activeStepsList.map((s, i, arr) => (
               <div key={s} className="flex items-center flex-1 last:flex-none">
                 <div 
                   className={`h-8 w-8 shrink-0 rounded-full flex items-center justify-center text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all duration-300 ${
@@ -398,9 +395,9 @@ function OnboardingWizard() {
                       <div
                         key={type.id}
                         onClick={() => setWorkspaceType(type.id)}
-                        className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
+                        className={`p-3.5 rounded-[22px] border transition-all cursor-pointer flex flex-col justify-between overflow-hidden relative ${
                           isSelected
-                            ? "bg-[#3DDC97]/15 border-[#3DDC97] text-white shadow-[0_0_15px_rgba(61,220,151,0.2)]"
+                            ? "bg-[#3DDC97]/15 border-[#3DDC97] text-white shadow-[inset_0_0_0_1px_#3DDC97,0_0_15px_rgba(61,220,151,0.2)]"
                             : "bg-black/40 border-white/10 hover:border-white/20 text-white/80"
                         }`}
                       >
