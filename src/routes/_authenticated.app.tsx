@@ -251,43 +251,66 @@ function OnboardingWizard() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-[#020505] relative overflow-hidden text-white p-4 font-['Questrial',_sans-serif]">
-      {/* Glow aura */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#3DDC97]/10 blur-[140px] rounded-full pointer-events-none" />
+      {/* Background Radial Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[#3DDC97]/10 blur-[130px] rounded-full pointer-events-none" />
+      <div className="absolute inset-0 bg-[url('/bg-gradient.png')] bg-cover opacity-10 mix-blend-screen pointer-events-none" />
       
-      <div className="relative w-full max-w-[540px] rounded-[32px] p-[1px] shadow-2xl">
+      <div className="relative w-full max-w-[500px] rounded-[32px] p-[1px] shadow-2xl">
         <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-white/5 to-[#3DDC97]/40 rounded-[32px]" />
         
-        <div className="relative w-full bg-[#070c0a]/95 backdrop-blur-2xl rounded-[31px] p-6 sm:p-10 flex flex-col shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)]">
+        <div className="relative w-full bg-[#050a0a]/80 backdrop-blur-2xl rounded-[31px] p-6 sm:p-10 flex flex-col shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)]">
           
-          {/* Header Bar */}
-          <div className="flex items-center justify-between mb-6">
-            {step > 0 ? (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 rounded-full text-muted-foreground hover:bg-white/10 hover:text-white"
-                onClick={prevStep}
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            ) : <div className="h-8 w-8" />}
+          {/* Back Button */}
+          {step > 0 && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute top-6 left-6 h-8 w-8 rounded-full text-muted-foreground hover:bg-white/10 hover:text-white transition-colors"
+              onClick={prevStep}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          )}
 
-            <div className="flex items-center gap-2">
+          {/* Logo & Header */}
+          <div className="mb-6 text-center mt-2">
+            <div className="inline-flex h-12 w-12 bg-[#0b1414]/90 rounded-2xl items-center justify-center border border-white/10 mb-4 shadow-xl">
               <img src="/favicon.png" alt="Capient" className="h-6 w-6 object-contain" />
-              <span className="font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-sm text-white">Capient Setup</span>
             </div>
-
-            <div className="text-xs text-[#3DDC97] font-['Samsung_Sharp_Sans',_sans-serif] font-bold">
-              Step {currentStepProgress + 1} of {totalSteps}
-            </div>
+            <h1 className="text-2xl font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-white tracking-tight">
+              Welcome to Capient
+            </h1>
+            <p className="text-muted-foreground text-xs mt-1.5 font-['Questrial',_sans-serif]">
+              Personalize your financial workspace
+            </p>
           </div>
 
-          {/* Progress Bar */}
-          <div className="w-full bg-white/5 h-1.5 rounded-full mb-8 overflow-hidden">
-            <div 
-              className="bg-[#3DDC97] h-full transition-all duration-500 rounded-full shadow-[0_0_10px_#3DDC97]"
-              style={{ width: `${((currentStepProgress + 1) / totalSteps) * 100}%` }}
-            />
+          {/* Classic Numbered Step Indicator Timeline */}
+          <div className="flex justify-between items-center mb-8 w-full max-w-sm mx-auto px-2">
+            {(isBusinessOrAgency ? [0, 1, 2, 3, 4, 5] : [0, 1, 3, 4, 5]).map((s, i, arr) => (
+              <div key={s} className="flex items-center flex-1 last:flex-none">
+                <div 
+                  className={`h-8 w-8 shrink-0 rounded-full flex items-center justify-center text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all duration-300 ${
+                    step === s 
+                      ? 'bg-[#3DDC97] text-black shadow-[0_0_15px_rgba(61,220,151,0.5)] scale-110' 
+                      : step > s 
+                        ? 'bg-[#3DDC97]/20 text-[#3DDC97] border border-[#3DDC97]/40' 
+                        : 'bg-white/5 text-white/30 border border-white/5'
+                  }`}
+                >
+                  {step > s ? (
+                    <Check className="w-4 h-4 text-[#3DDC97]" />
+                  ) : (
+                    i + 1
+                  )}
+                </div>
+                {i < arr.length - 1 && (
+                  <div className={`flex-1 h-[2px] transition-all duration-300 mx-1 rounded-full ${
+                    step > s ? 'bg-[#3DDC97]/50' : 'bg-white/5'
+                  }`} />
+                )}
+              </div>
+            ))}
           </div>
 
           <AnimatePresence mode="wait">
