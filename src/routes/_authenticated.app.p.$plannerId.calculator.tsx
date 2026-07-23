@@ -135,7 +135,7 @@ function CalculatorPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("goals")
-        .select("id, title, target_amount, current_amount")
+        .select("id, name, target_amount, saved_amount")
         .eq("planner_id", plannerId);
       if (error) throw error;
       return data || [];
@@ -398,22 +398,22 @@ function CalculatorPage() {
   return (
     <div className="space-y-6 md:space-y-8 pb-20 md:pb-8 font-['Questrial',_sans-serif]">
       {/* ── Page Header & Controls ────────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="font-['Samsung_Sharp_Sans',_sans-serif] text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full overflow-hidden">
+        <div className="min-w-0 flex-1">
+          <h1 className="font-['Samsung_Sharp_Sans',_sans-serif] text-xl sm:text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent break-words">
             Financial Command & Calculator Suite
           </h1>
-          <p className="text-xs md:text-sm text-muted-foreground mt-1.5 font-['Questrial',_sans-serif]">
+          <p className="text-xs md:text-sm text-muted-foreground mt-1 font-['Questrial',_sans-serif]">
             Precision financial modeling & live data import from Monthly Tracking and Accounts.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full md:w-auto shrink-0">
           {/* Mobile Drawer Trigger for Importer */}
-          <div className="md:hidden">
+          <div className="md:hidden w-full sm:w-auto">
             <Sheet open={isImportOpen} onOpenChange={setIsImportOpen}>
               <SheetTrigger asChild>
-                <Button className="bg-[#3DDC97]/15 text-[#3DDC97] border border-[#3DDC97]/30 hover:bg-[#3DDC97]/25 rounded-xl h-10 gap-2 text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold whitespace-nowrap">
+                <Button className="w-full sm:w-auto bg-[#3DDC97]/15 text-[#3DDC97] border border-[#3DDC97]/30 hover:bg-[#3DDC97]/25 rounded-xl h-10 gap-2 text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold whitespace-nowrap">
                   <Download className="h-4 w-4" /> Import Data
                 </Button>
               </SheetTrigger>
@@ -440,10 +440,10 @@ function CalculatorPage() {
           </div>
 
           {/* Mode Switcher Tabs */}
-          <div className="bg-[#0f1412] p-1.5 rounded-2xl border border-white/10 flex items-center shrink-0 shadow-lg">
+          <div className="bg-[#0f1412] p-1.5 rounded-2xl border border-white/10 flex items-center shrink-0 shadow-lg w-full sm:w-auto justify-between sm:justify-start">
             <button
               onClick={() => setActiveTab("standard")}
-              className={`px-4 py-2 rounded-xl text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all flex items-center gap-2 whitespace-nowrap shrink-0 ${
+              className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0 ${
                 activeTab === "standard"
                   ? "bg-[#3DDC97] text-black shadow-lg shadow-[#3DDC97]/25"
                   : "text-muted-foreground hover:text-white"
@@ -453,7 +453,7 @@ function CalculatorPage() {
             </button>
             <button
               onClick={() => setActiveTab("presets")}
-              className={`px-4 py-2 rounded-xl text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all flex items-center gap-2 whitespace-nowrap shrink-0 ${
+              className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0 ${
                 activeTab === "presets"
                   ? "bg-[#3DDC97] text-black shadow-lg shadow-[#3DDC97]/25"
                   : "text-muted-foreground hover:text-white"
@@ -1236,10 +1236,10 @@ function ImporterPanel({
                 {goals.map((g) => (
                   <button
                     key={g.id}
-                    onClick={() => onImport(Number(g.target_amount || 0), `Goal: ${g.title}`)}
+                    onClick={() => onImport(Number(g.target_amount || 0), `Goal: ${g.name}`)}
                     className="w-full flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] hover:bg-white/10 border border-white/5 transition-all text-left"
                   >
-                    <span className="font-medium text-white truncate mr-2">{g.title}</span>
+                    <span className="font-medium text-white truncate mr-2">{g.name}</span>
                     <span className="font-['Samsung_Sharp_Sans',_sans-serif] font-semibold text-white text-xs shrink-0">
                       {formatMoney(Number(g.target_amount || 0), currency)}
                     </span>
