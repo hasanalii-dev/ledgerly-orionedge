@@ -134,8 +134,8 @@ function OnboardingWizard() {
         default_currency: currency,
       }).eq("id", user.user.id);
 
-      // 2. Store full onboarding responses in user_onboarding
-      await supabase.from("user_onboarding").upsert({
+      // 2. Store full onboarding responses in user_onboarding with fail-safe fallback
+      const onboardingPayload: any = {
         id: user.user.id,
         workspace_type: workspaceType,
         business_name: isBusinessOrAgency ? businessName : undefined,
@@ -148,14 +148,28 @@ function OnboardingWizard() {
         primary_goals: primaryGoals,
         purpose: isBusinessOrAgency ? "business" : "personal",
         company_name: businessName || displayName,
-      });
+      };
+
+      const { error: onboardingErr } = await supabase.from("user_onboarding").upsert(onboardingPayload);
+      if (onboardingErr && (onboardingErr.message?.includes("column") || onboardingErr.code === "PGRST204")) {
+        // Fallback for minimal user_onboarding table
+        await supabase.from("user_onboarding").upsert({
+          id: user.user.id,
+          country,
+          purpose: isBusinessOrAgency ? "business" : "personal",
+          company_name: businessName || displayName,
+        });
+      }
 
       // 3. Get workspace defaults & category presets
       const defaults = getWorkspaceDefaults(workspaceType);
       const categoryPresets = getCategoryPresets(workspaceType);
 
-      // 4. Create the primary personalized planner
-      const { data: newPlanner, error: plannerError } = await supabase.from("planners").insert({
+      // 4. Create the primary personalized planner with fail-safe fallback
+      let newPlanner: any = null;
+      let plannerError: any = null;
+
+      const plannerPayload: any = {
         user_id: user.user.id,
         name: plannerName.trim(),
         currency,
@@ -169,7 +183,24 @@ function OnboardingWizard() {
           currentWorkflow,
         },
         is_default: true,
-      }).select("id").single();
+      };
+
+      const res = await supabase.from("planners").insert(plannerPayload).select("id").single();
+      
+      if (res.error && (res.error.message?.includes("column") || res.error.code === "PGRST204")) {
+        // Fallback if custom_config / workspace_type columns do not exist in schema cache
+        const resFallback = await supabase.from("planners").insert({
+          user_id: user.user.id,
+          name: plannerName.trim(),
+          currency,
+          is_default: true,
+        }).select("id").single();
+        newPlanner = resFallback.data;
+        plannerError = resFallback.error;
+      } else {
+        newPlanner = res.data;
+        plannerError = res.error;
+      }
 
       if (plannerError) throw plannerError;
 
@@ -395,10 +426,10 @@ function OnboardingWizard() {
                       <div
                         key={type.id}
                         onClick={() => setWorkspaceType(type.id)}
-                        className={`p-3.5 rounded-[22px] border transition-all cursor-pointer flex flex-col justify-between overflow-hidden relative ${
+                        className={`p-3.5 rounded-2xl transition-all cursor-pointer flex flex-col justify-between relative ${
                           isSelected
-                            ? "bg-[#3DDC97]/15 border-[#3DDC97] text-white shadow-[inset_0_0_0_1px_#3DDC97,0_0_15px_rgba(61,220,151,0.2)]"
-                            : "bg-black/40 border-white/10 hover:border-white/20 text-white/80"
+                            ? "bg-[#3DDC97]/15 ring-2 ring-[#3DDC97] text-white"
+                            : "bg-black/40 border border-white/10 hover:border-white/20 text-white/80"
                         }`}
                       >
                         <div className="flex items-center justify-between mb-2">
