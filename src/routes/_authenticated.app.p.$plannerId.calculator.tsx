@@ -400,14 +400,9 @@ function CalculatorPage() {
       {/* ── Page Header & Controls ────────────────────────────── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="font-['Samsung_Sharp_Sans',_sans-serif] text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
-              Financial Command & Calculator Suite
-            </h1>
-            <span className="bg-[#3DDC97]/10 text-[#3DDC97] font-['Samsung_Sharp_Sans',_sans-serif] text-[10px] font-bold px-2.5 py-1 rounded-full border border-[#3DDC97]/20 uppercase tracking-widest">
-              Live Sync
-            </span>
-          </div>
+          <h1 className="font-['Samsung_Sharp_Sans',_sans-serif] text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+            Financial Command & Calculator Suite
+          </h1>
           <p className="text-xs md:text-sm text-muted-foreground mt-1.5 font-['Questrial',_sans-serif]">
             Precision financial modeling & live data import from Monthly Tracking and Accounts.
           </p>
@@ -418,7 +413,7 @@ function CalculatorPage() {
           <div className="md:hidden">
             <Sheet open={isImportOpen} onOpenChange={setIsImportOpen}>
               <SheetTrigger asChild>
-                <Button className="bg-[#3DDC97]/15 text-[#3DDC97] border border-[#3DDC97]/30 hover:bg-[#3DDC97]/25 rounded-xl h-10 gap-2 text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold">
+                <Button className="bg-[#3DDC97]/15 text-[#3DDC97] border border-[#3DDC97]/30 hover:bg-[#3DDC97]/25 rounded-xl h-10 gap-2 text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold whitespace-nowrap">
                   <Download className="h-4 w-4" /> Import Data
                 </Button>
               </SheetTrigger>
@@ -445,26 +440,26 @@ function CalculatorPage() {
           </div>
 
           {/* Mode Switcher Tabs */}
-          <div className="bg-[#0f1412] p-1.5 rounded-2xl border border-white/10 flex items-center shadow-lg">
+          <div className="bg-[#0f1412] p-1.5 rounded-2xl border border-white/10 flex items-center shrink-0 shadow-lg">
             <button
               onClick={() => setActiveTab("standard")}
-              className={`px-4 py-2 rounded-xl text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all flex items-center gap-2 whitespace-nowrap shrink-0 ${
                 activeTab === "standard"
                   ? "bg-[#3DDC97] text-black shadow-lg shadow-[#3DDC97]/25"
                   : "text-muted-foreground hover:text-white"
               }`}
             >
-              <CalcIcon className="h-3.5 w-3.5" /> Interactive Calculator
+              <CalcIcon className="h-3.5 w-3.5 shrink-0" /> Interactive Calculator
             </button>
             <button
               onClick={() => setActiveTab("presets")}
-              className={`px-4 py-2 rounded-xl text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all flex items-center gap-2 whitespace-nowrap shrink-0 ${
                 activeTab === "presets"
                   ? "bg-[#3DDC97] text-black shadow-lg shadow-[#3DDC97]/25"
                   : "text-muted-foreground hover:text-white"
               }`}
             >
-              <SlidersHorizontal className="h-3.5 w-3.5" /> Financial Models
+              <SlidersHorizontal className="h-3.5 w-3.5 shrink-0" /> Financial Models
             </button>
           </div>
         </div>
