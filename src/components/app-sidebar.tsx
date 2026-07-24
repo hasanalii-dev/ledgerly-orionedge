@@ -35,9 +35,19 @@ type Planner = {
   custom_config: any;
 };
 
-export function AppSidebar() {
-  const { plannerId } = useParams({ strict: false }) as { plannerId?: string };
+interface AppSidebarProps {
+  currentPlannerId?: string;
+}
+
+export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
+  const routeParams = useParams({ strict: false }) as { plannerId?: string };
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  
+  // Extract plannerId from URL path (/app/p/{plannerId}/...) as bulletproof fallback
+  const pathMatch = pathname.match(/\/app\/p\/([^\/]+)/);
+  const pathPlannerId = pathMatch ? pathMatch[1] : undefined;
+
+  const plannerId = currentPlannerId || routeParams?.plannerId || pathPlannerId;
   const { state, isMobile } = useSidebar();
   const collapsed = state === "collapsed" && !isMobile;
   const navigate = useNavigate();
@@ -46,45 +56,34 @@ export function AppSidebar() {
   const { data: planners = [] } = useQuery({
     queryKey: ["planners"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-
-      // 1. Fetch planners owned by current user
-      const { data: owned, error: ownedErr } = await supabase
+      const { data, error } = await supabase
         .from("planners")
-        .select("id, name, emoji, is_default, workspace_type, custom_config, created_at")
-        .eq("user_id", user.id)
+        .select("id, name, emoji, is_default, workspace_type, custom_config")
         .order("created_at", { ascending: true });
 
-      if (ownedErr) console.error("Owned planners query error:", ownedErr);
-
-      // 2. Fetch shared planners via planner_collaborators
-      const { data: collab } = await supabase
-        .from("planner_collaborators")
-        .select("planner_id, planners(id, name, emoji, is_default, workspace_type, custom_config, created_at)")
-        .eq("user_id", user.id);
-
-      const shared = (collab ?? []).map((c: any) => c.planners).filter(Boolean);
-
-      // 3. Fallback: query all planners accessible via RLS
-      let fallback: any[] = [];
-      if ((!owned || owned.length === 0) && (!shared || shared.length === 0)) {
-        const { data: rlsData } = await supabase
-          .from("planners")
-          .select("id, name, emoji, is_default, workspace_type, custom_config, created_at")
-          .order("created_at", { ascending: true });
-        fallback = rlsData ?? [];
+      if (error) {
+        console.error("Planners fetch error:", error);
+        return [];
       }
-
-      // Merge and deduplicate by id
-      const map = new Map<string, Planner>();
-      (owned ?? []).forEach((p: any) => map.set(p.id, p as Planner));
-      shared.forEach((p: any) => map.set(p.id, p as Planner));
-      fallback.forEach((p: any) => map.set(p.id, p as Planner));
-
-      return Array.from(map.values());
+      return (data || []) as Planner[];
     },
   });
+
+  const { data: routePlanner } = useQuery({
+    queryKey: ["route_planner", plannerId],
+    queryFn: async () => {
+      if (!plannerId) return null;
+      const { data } = await supabase
+        .from("planners")
+        .select("id, name, emoji, is_default, workspace_type, custom_config")
+        .eq("id", plannerId)
+        .maybeSingle();
+      return data as Planner | null;
+    },
+    enabled: !!plannerId,
+  });
+
+  const active = planners.find((p) => p.id === plannerId) || routePlanner || planners[0];
 
   const { data: profile } = useQuery({
     queryKey: ["profile"],
@@ -96,7 +95,6 @@ export function AppSidebar() {
     },
   });
 
-  const active = planners.find((p) => p.id === plannerId) ?? planners[0];
   const [dialogOpen, setDialogOpen] = useState<null | "new" | "rename" | "settings">(null);
   const [signOutOpen, setSignOutOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -165,27 +163,31 @@ export function AppSidebar() {
   }
 
   async function updatePlannerSettings() {
-    if (!active) return;
-    const targetName = name.trim() || active.name || "My Planner";
+    const targetPlanner = active || routePlanner;
+    const targetId = targetPlanner?.id || plannerId;
+    if (!targetId) return toast.error("No active planner selected");
+
+    const targetName = name.trim() || targetPlanner?.name || "My Planner";
     const defaults = getWorkspaceDefaults(editWorkspaceType);
     
     const { error } = await supabase.from("planners").update({ 
       name: targetName,
       workspace_type: editWorkspaceType,
       custom_config: {
-        ...(active.custom_config || {}),
+        ...(targetPlanner?.custom_config || {}),
         hideModules: defaults.hideModules,
         primaryMetrics: defaults.primaryMetrics,
         clientTerm: defaults.clientTerm,
       }
-    }).eq("id", active.id);
+    }).eq("id", targetId);
 
     if (error) return toast.error(error.message);
     toast.success("Planner settings updated!");
     
-    qc.invalidateQueries({ queryKey: ["planners"] });
-    qc.invalidateQueries({ queryKey: ["planner", active.id] });
-    qc.invalidateQueries({ queryKey: ["profile"] });
+    await qc.invalidateQueries({ queryKey: ["planners"] });
+    await qc.invalidateQueries({ queryKey: ["planner", targetId] });
+    await qc.invalidateQueries({ queryKey: ["route_planner", targetId] });
+    await qc.invalidateQueries({ queryKey: ["profile"] });
     setDialogOpen(null);
   }
 

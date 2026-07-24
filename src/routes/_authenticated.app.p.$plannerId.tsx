@@ -117,7 +117,7 @@ function PlannerLayout() {
       <div className="min-h-screen flex w-full bg-transparent pb-[80px] md:pb-0 relative">
 
         <div className="hidden md:flex relative z-10">
-          <AppSidebar />
+          <AppSidebar currentPlannerId={plannerId} />
         </div>
         <SidebarInset className="flex-1 overflow-hidden relative z-10">
           <header className="hidden md:flex sticky top-0 z-20 h-14 items-center gap-4 px-4 bg-[#0b0e0c] border-b border-white/5 transition-all duration-300 relative">
