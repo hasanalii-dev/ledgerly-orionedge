@@ -58,7 +58,7 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("planners")
-        .select("*")
+        .select("id, name, emoji, is_default, workspace_type, custom_config")
         .order("created_at", { ascending: true });
 
       if (error) {
@@ -75,7 +75,7 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
       if (!plannerId) return null;
       const { data } = await supabase
         .from("planners")
-        .select("*")
+        .select("id, name, emoji, is_default, workspace_type, custom_config")
         .eq("id", plannerId)
         .maybeSingle();
       return data as Planner | null;
@@ -135,7 +135,12 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
     const { data, error } = await supabase.from("planners").insert({ 
       user_id: user.id, 
       name: name.trim(),
-      workspace_type: newWorkspaceType
+      workspace_type: newWorkspaceType,
+      custom_config: {
+        hideModules: defaults.hideModules,
+        primaryMetrics: defaults.primaryMetrics,
+        clientTerm: defaults.clientTerm,
+      }
     }).select("id").single();
 
     if (error) return toast.error(error.message);
@@ -167,7 +172,13 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
     
     const { error } = await supabase.from("planners").update({ 
       name: targetName,
-      workspace_type: editWorkspaceType
+      workspace_type: editWorkspaceType,
+      custom_config: {
+        ...(targetPlanner?.custom_config || {}),
+        hideModules: defaults.hideModules,
+        primaryMetrics: defaults.primaryMetrics,
+        clientTerm: defaults.clientTerm,
+      }
     }).eq("id", targetId);
 
     if (error) return toast.error(error.message);
