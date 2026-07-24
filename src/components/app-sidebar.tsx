@@ -131,10 +131,12 @@ export function AppSidebar() {
   }
 
   async function updatePlannerSettings() {
-    if (!active || !name.trim()) return;
+    if (!active) return;
+    const targetName = name.trim() || active.name || "My Planner";
     const defaults = getWorkspaceDefaults(editWorkspaceType);
+    
     const { error } = await supabase.from("planners").update({ 
-      name: name.trim(),
+      name: targetName,
       workspace_type: editWorkspaceType,
       custom_config: {
         ...(active.custom_config || {}),
@@ -146,9 +148,20 @@ export function AppSidebar() {
 
     if (error) return toast.error(error.message);
     toast.success("Planner settings updated!");
+    
     qc.invalidateQueries({ queryKey: ["planners"] });
+    qc.invalidateQueries({ queryKey: ["planner", active.id] });
+    qc.invalidateQueries({ queryKey: ["profile"] });
     setDialogOpen(null);
   }
+
+  const handleSwitchPlanner = async (targetPlannerId: string) => {
+    navigate({ to: `/app/p/${targetPlannerId}/dashboard`, params: { plannerId: targetPlannerId } });
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from("profiles").update({ last_planner_id: targetPlannerId }).eq("id", user.id);
+    }
+  };
 
   async function duplicatePlanner() {
     if (!active) return;
@@ -260,10 +273,10 @@ export function AppSidebar() {
               {planners.map((p) => {
                 const isActive = p.id === active?.id;
                 return (
-                  <DropdownMenuItem key={p.id} className={`rounded-lg cursor-pointer my-0.5 ${isActive ? "bg-white/5" : ""}`} onClick={() => navigate({ to: `/app/p/${p.id}/dashboard`, params: { plannerId: p.id } })}>
-                    <Book className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className={`text-[13px] ${isActive ? "text-foreground font-medium" : "text-muted-foreground"}`}>{p.name}</span>
-                    {isActive && <span className="ml-auto text-xs text-primary font-medium">Active</span>}
+                  <DropdownMenuItem key={p.id} className={`rounded-lg cursor-pointer my-0.5 ${isActive ? "bg-white/10" : ""}`} onClick={() => handleSwitchPlanner(p.id)}>
+                    <Book className={`h-4 w-4 mr-2 ${isActive ? "text-[#3DDC97]" : "text-muted-foreground"}`} />
+                    <span className={`text-[13px] ${isActive ? "text-white font-semibold" : "text-muted-foreground"}`}>{p.name}</span>
+                    {isActive && <Check className="ml-auto h-4 w-4 text-[#3DDC97]" />}
                   </DropdownMenuItem>
                 );
               })}
