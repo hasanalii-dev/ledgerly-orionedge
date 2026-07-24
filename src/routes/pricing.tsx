@@ -7,6 +7,7 @@ import { useState } from "react";
 import MagicRings from "@/components/magic/MagicRings";
 import LightRays from "@/components/magic/LightRays";
 import PixelCard from "@/components/magic/PixelCard";
+import { MarketingFooter } from "@/components/MarketingFooter";
 
 export const Route = createFileRoute("/pricing")({
   component: PricingPage,
@@ -94,13 +95,13 @@ function PricingPage() {
           <div className="inline-flex items-center p-1 rounded-full bg-[#111312] border border-white/5 shadow-xl relative">
             <button 
               onClick={() => setIsYearly(false)}
-              className={`px-8 py-2.5 rounded-full text-[15px] font-medium transition-all duration-300 relative z-10 ${!isYearly ? 'text-white' : 'text-muted-foreground hover:text-white'}`}
+              className={`w-[130px] py-2.5 rounded-full text-[15px] font-medium transition-all duration-300 flex items-center justify-center relative z-10 ${!isYearly ? 'text-white' : 'text-muted-foreground hover:text-white'}`}
             >
               Monthly
             </button>
             <button 
               onClick={() => setIsYearly(true)}
-              className={`px-6 py-2.5 rounded-full text-[15px] font-medium transition-all duration-300 flex items-center gap-2 relative z-10 ${isYearly ? 'text-black' : 'text-[#3DDC97] hover:bg-white/5'}`}
+              className={`w-[130px] py-2.5 rounded-full text-[15px] font-medium transition-all duration-300 flex items-center justify-center gap-2 relative z-10 ${isYearly ? 'text-black' : 'text-[#3DDC97] hover:bg-white/5'}`}
             >
               Yearly
               <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${isYearly ? 'bg-black/15 text-black' : 'bg-[#3DDC97]/20 text-[#3DDC97]'}`}>
@@ -110,7 +111,7 @@ function PricingPage() {
             
             {/* Sliding Pill Background */}
             <div 
-              className={`absolute top-1 bottom-1 w-[130px] rounded-full transition-all duration-300 ease-out z-0 ${isYearly ? 'bg-[#3DDC97] left-[105px] shadow-[0_12px_25px_-8px_rgba(61,220,151,0.6)] w-[140px]' : 'bg-white/5 left-1'}`}
+              className={`absolute top-1 bottom-1 w-[130px] rounded-full transition-all duration-300 ease-out z-0 ${isYearly ? 'bg-[#3DDC97] left-[134px] shadow-[0_12px_25px_-8px_rgba(61,220,151,0.6)]' : 'bg-white/5 left-1'}`}
             />
           </div>
         </div>
@@ -240,6 +241,10 @@ function PricingPage() {
                     <span>{feature}</span>
                   </li>
                 ))}
+                <li className="flex items-center gap-3 text-[13px] text-white/70">
+                  <CheckCircle2 className="w-[14px] h-[14px] text-[#3DDC97] shrink-0" />
+                  <span>Enterprise-grade security</span>
+                </li>
               </ul>
             </div>
           </PixelCard>
@@ -409,6 +414,7 @@ function PricingPage() {
                     {[
                       { name: "Collaborators", info: "Invite team members to your workspaces.", starter: "Just you", pro: "Just you", studio: "Up to 5" },
                       { name: "Document vault", info: "Secure cloud storage for receipts and contracts.", starter: "100 MB", pro: "10 GB", studio: "100 GB" },
+                      { name: "Data Security", info: "Bank-level encryption and privacy controls.", starter: true, pro: true, studio: true },
                       { name: "Custom columns", info: "Add custom metadata to your transactions.", starter: "—", pro: "Limited", studio: true },
                       { name: "Support", info: "Get help when you need it.", starter: "Community", pro: "Priority email", studio: "Dedicated" }
                     ].map((row, i) => (
@@ -503,6 +509,7 @@ function PricingPage() {
         </div>
 
       </main>
+      <MarketingFooter />
     </div>
   );
 }

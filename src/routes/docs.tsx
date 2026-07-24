@@ -267,22 +267,22 @@ function DocsPage() {
                   Interactive Simulation
                 </div>
                 
-                <form onSubmit={handleAddAccount} className="flex gap-3 mb-8 mt-4 max-w-xl">
+                <form onSubmit={handleAddAccount} className="flex flex-col sm:flex-row gap-3 mb-8 mt-4 max-w-xl">
                   <input 
                     type="text" 
                     placeholder="Account Name (e.g. Chase)"
                     value={newAccName}
                     onChange={(e) => setNewAccName(e.target.value)}
-                    className="flex-1 bg-[#111312] border border-white/10 rounded-lg px-4 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-primary/50"
+                    className="flex-1 bg-[#111312] border border-white/10 rounded-lg px-4 py-2 sm:py-0 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-primary/50"
                   />
                   <input 
                     type="number" 
                     placeholder="Balance ($)"
                     value={newAccBalance}
                     onChange={(e) => setNewAccBalance(e.target.value)}
-                    className="w-32 bg-[#111312] border border-white/10 rounded-lg px-4 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-primary/50"
+                    className="w-full sm:w-32 bg-[#111312] border border-white/10 rounded-lg px-4 py-2 sm:py-0 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-primary/50"
                   />
-                  <Button type="submit" size="sm" className="bg-primary hover:bg-primary/90 text-black shrink-0 font-medium px-6">
+                  <Button type="submit" size="sm" className="bg-primary hover:bg-primary/90 text-black shrink-0 font-medium px-6 w-full sm:w-auto h-10 sm:h-auto">
                     <Plus className="h-4 w-4 mr-2" /> Create
                   </Button>
                 </form>

@@ -16,15 +16,30 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Plus, Settings, LogOut, ChevronDown, LayoutDashboard, TrendingUp, TrendingDown, LineChart, 
   Wallet, Users, FolderKanban, FileText, CandlestickChart, Target, ArrowLeftRight, FileBarChart, 
-  PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles, Calculator, SlidersHorizontal, Check
+  PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles, Calculator, SlidersHorizontal, Check, Dices,
+  Building, Briefcase, Rocket, Video, GraduationCap
 } from "lucide-react";
 import { InviteDialog } from "./invite-dialog";
 import { WORKSPACE_TYPES, WorkspaceType, getWorkspaceDefaults, getCategoryPresets, getWorkspaceNavigation } from "@/lib/workspace-presets";
 import { toast } from "sonner";
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  Building, Briefcase, Rocket, Video, GraduationCap, Book
+};
+
+const PRESET_ICONS = [
+  { name: "Finance", id: "Building" },
+  { name: "Agency", id: "Briefcase" },
+  { name: "Startup", id: "Rocket" },
+  { name: "Creator", id: "Video" },
+  { name: "Student", id: "GraduationCap" },
+];
 
 type Planner = { 
   id: string; 
@@ -58,14 +73,19 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("planners")
-        .select("id, name, emoji, is_default, workspace_type, custom_config")
+        .select("*")
         .order("created_at", { ascending: true });
 
       if (error) {
         console.error("Planners fetch error:", error);
         return [];
       }
-      return (data || []) as Planner[];
+      const localConfigs = JSON.parse(localStorage.getItem("capient_planner_configs") || "{}");
+      return (data || []).map(p => ({
+        ...p,
+        workspace_type: localConfigs[p.id]?.workspace_type || p.workspace_type || "personal",
+        custom_config: localConfigs[p.id]?.custom_config || p.custom_config || {}
+      })) as Planner[];
     },
   });
 
@@ -75,10 +95,16 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
       if (!plannerId) return null;
       const { data } = await supabase
         .from("planners")
-        .select("id, name, emoji, is_default, workspace_type, custom_config")
+        .select("*")
         .eq("id", plannerId)
         .maybeSingle();
-      return data as Planner | null;
+      if (!data) return null;
+      const localConfigs = JSON.parse(localStorage.getItem("capient_planner_configs") || "{}");
+      return {
+        ...data,
+        workspace_type: localConfigs[data.id]?.workspace_type || data.workspace_type || "personal",
+        custom_config: localConfigs[data.id]?.custom_config || data.custom_config || {}
+      } as Planner;
     },
     enabled: !!plannerId,
   });
@@ -99,6 +125,7 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
   const [signOutOpen, setSignOutOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [name, setName] = useState("");
+  const [iconUrl, setIconUrl] = useState("");
   const [newWorkspaceType, setNewWorkspaceType] = useState<WorkspaceType>("personal");
   const [editWorkspaceType, setEditWorkspaceType] = useState<WorkspaceType>("personal");
 
@@ -106,10 +133,12 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
     if ((dialogOpen === "rename" || dialogOpen === "settings") && active) { 
       setName(active.name); 
       setEditWorkspaceType((active.workspace_type as WorkspaceType) || "personal");
+      setIconUrl(active.custom_config?.iconUrl || "");
     } 
     if (dialogOpen === "new") { 
       setName(""); 
       setNewWorkspaceType("personal"); 
+      setIconUrl("");
     } 
   }, [dialogOpen, active]);
 
@@ -134,16 +163,29 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
 
     const { data, error } = await supabase.from("planners").insert({ 
       user_id: user.id, 
-      name: name.trim(),
-      workspace_type: newWorkspaceType,
-      custom_config: {
-        hideModules: defaults.hideModules,
-        primaryMetrics: defaults.primaryMetrics,
-        clientTerm: defaults.clientTerm,
-      }
+      name: name.trim()
     }).select("id").single();
 
     if (error) return toast.error(error.message);
+
+    if (data?.id) {
+      const localConfigs = JSON.parse(localStorage.getItem("capient_planner_configs") || "{}");
+      localConfigs[data.id] = {
+        workspace_type: newWorkspaceType,
+        custom_config: {
+          hideModules: defaults.hideModules,
+          primaryMetrics: defaults.primaryMetrics,
+          clientTerm: defaults.clientTerm,
+          iconUrl: iconUrl.trim(),
+        }
+      };
+      localStorage.setItem("capient_planner_configs", JSON.stringify(localConfigs));
+      
+      await supabase.from("planners").update({
+        workspace_type: newWorkspaceType,
+        custom_config: localConfigs[data.id].custom_config
+      }).eq("id", data.id);
+    }
 
     // Seed default categories
     if (data?.id && categoryPresets.length > 0) {
@@ -170,18 +212,25 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
     const targetName = name.trim() || targetPlanner?.name || "My Planner";
     const defaults = getWorkspaceDefaults(editWorkspaceType);
     
-    const { error } = await supabase.from("planners").update({ 
-      name: targetName,
+    const localConfigs = JSON.parse(localStorage.getItem("capient_planner_configs") || "{}");
+    localConfigs[targetId] = {
       workspace_type: editWorkspaceType,
       custom_config: {
         ...(targetPlanner?.custom_config || {}),
         hideModules: defaults.hideModules,
         primaryMetrics: defaults.primaryMetrics,
         clientTerm: defaults.clientTerm,
+        iconUrl: iconUrl.trim(),
       }
+    };
+    localStorage.setItem("capient_planner_configs", JSON.stringify(localConfigs));
+
+    const { error } = await supabase.from("planners").update({ 
+      name: targetName,
+      workspace_type: editWorkspaceType,
+      custom_config: localConfigs[targetId].custom_config
     }).eq("id", targetId);
 
-    if (error) return toast.error(error.message);
     toast.success("Planner settings updated!");
     
     await qc.invalidateQueries({ queryKey: ["planners"] });
@@ -301,15 +350,19 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
                 <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64 rounded-2xl bg-[#0a1010]/95 backdrop-blur-3xl border-white/10 p-1.5 shadow-2xl font-['Questrial',_sans-serif] relative overflow-hidden" align="start">
-              <div className="absolute inset-0 rounded-2xl border border-primary/20 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
+            <DropdownMenuContent className="w-64 !rounded-2xl bg-[#0a1010]/95 backdrop-blur-3xl border border-white/10 p-1.5 shadow-2xl font-['Questrial',_sans-serif] relative !overflow-hidden" align="start">
+              <div className="absolute inset-0 !rounded-2xl border border-primary/20 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
               <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/20 blur-[40px] rounded-full pointer-events-none" />
               <DropdownMenuLabel className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold px-2 py-1.5">Planners ({planners.length})</DropdownMenuLabel>
               {planners.map((p) => {
                 const isActive = p.id === active?.id;
                 return (
                   <DropdownMenuItem key={p.id} className={`rounded-lg cursor-pointer my-0.5 ${isActive ? "bg-white/10" : ""}`} onClick={() => handleSwitchPlanner(p.id)}>
-                    <Book className={`h-4 w-4 mr-2 ${isActive ? "text-[#3DDC97]" : "text-muted-foreground"}`} />
+                    {p.custom_config?.iconUrl ? (
+                      <img src={p.custom_config.iconUrl} className="h-4 w-4 mr-2 rounded-sm object-cover" alt="icon" />
+                    ) : (
+                      <Book className={`h-4 w-4 mr-2 ${isActive ? "text-[#3DDC97]" : "text-muted-foreground"}`} />
+                    )}
                     <span className={`text-[13px] ${isActive ? "text-white font-semibold" : "text-muted-foreground"}`}>{p.name}</span>
                     {isActive && <Check className="ml-auto h-4 w-4 text-[#3DDC97]" />}
                   </DropdownMenuItem>
@@ -342,14 +395,23 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
                     <img src="/side-bar-logo.png" alt="Capient" className="h-5 w-auto object-contain" />
                   </button>
                </DropdownMenuTrigger>
-               <DropdownMenuContent className="w-64 rounded-2xl bg-[#0a1010]/95 backdrop-blur-3xl border-white/10 p-1.5 shadow-2xl font-['Questrial',_sans-serif] relative overflow-hidden" align="start">
-                 <div className="absolute inset-0 rounded-2xl border border-primary/20 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
+               <DropdownMenuContent className="w-64 !rounded-2xl bg-[#0a1010]/95 backdrop-blur-3xl border border-white/10 p-1.5 shadow-2xl font-['Questrial',_sans-serif] relative !overflow-hidden" align="start">
+                 <div className="absolute inset-0 !rounded-2xl border border-primary/20 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
                  <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/20 blur-[40px] rounded-full pointer-events-none" />
                   {planners.map((p) => {
                     const isActive = p.id === active?.id;
                     return (
                       <DropdownMenuItem key={p.id} className={`rounded-lg cursor-pointer my-0.5 ${isActive ? "bg-white/10" : ""}`} onClick={() => handleSwitchPlanner(p.id)}>
-                        <Book className={`h-4 w-4 mr-2 ${isActive ? "text-[#3DDC97]" : "text-muted-foreground"}`} />
+                        {(() => {
+                          const iconVal = p.custom_config?.iconUrl;
+                          const isUrl = iconVal && (iconVal.startsWith("http") || iconVal.startsWith("data:"));
+                          const IconComp = iconVal && !isUrl && ICON_MAP[iconVal] ? ICON_MAP[iconVal] : Book;
+                          return isUrl ? (
+                            <img src={iconVal} className="h-4 w-4 mr-2 rounded-sm object-cover" alt="icon" />
+                          ) : (
+                            <IconComp className={`h-4 w-4 mr-2 ${isActive ? "text-[#3DDC97]" : "text-muted-foreground"}`} />
+                          );
+                        })()}
                         <span className={`text-[13px] ${isActive ? "text-white font-semibold" : "text-muted-foreground"}`}>{p.name}</span>
                         {isActive && <Check className="ml-auto h-4 w-4 text-[#3DDC97]" />}
                       </DropdownMenuItem>
@@ -404,7 +466,11 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
-                      <Book className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-[#3DDC97]" : "text-muted-foreground"}`} />
+                      {p.custom_config?.iconUrl ? (
+                        <img src={p.custom_config.iconUrl} className="h-3.5 w-3.5 shrink-0 rounded-sm object-cover" alt="icon" />
+                      ) : (
+                        <Book className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-[#3DDC97]" : "text-muted-foreground"}`} />
+                      )}
                       <span className="truncate">{p.name}</span>
                     </div>
                     {isActive && <Check className="h-3.5 w-3.5 shrink-0 text-[#3DDC97]" />}
@@ -589,6 +655,64 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
                 className="bg-black/60 border-white/10 text-white rounded-xl focus:border-[#3DDC97]" 
               />
             </div>
+            
+            {(dialogOpen === "new" || dialogOpen === "settings" || dialogOpen === "rename") && (
+              <div className="flex flex-col gap-4">
+                <label className="text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-white/80 block -mb-2">Planner Icon</label>
+                <div className="flex items-start gap-4">
+                  <div className="relative group shrink-0">
+                    {(() => {
+                      const isUrl = iconUrl && (iconUrl.startsWith("http") || iconUrl.startsWith("data:"));
+                      const IconComp = iconUrl && !isUrl && ICON_MAP[iconUrl] ? ICON_MAP[iconUrl] : Book;
+                      return isUrl ? (
+                        <img src={iconUrl} className="h-16 w-16 rounded-2xl object-cover border-2 border-[#3DDC97]/50" alt="Planner Icon" />
+                      ) : (
+                        <div className="h-16 w-16 rounded-2xl bg-white/5 border-2 border-[#3DDC97]/50 flex items-center justify-center">
+                          <IconComp className="h-8 w-8 text-white" />
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  <div className="flex-1 w-full overflow-hidden">
+                    <Tabs defaultValue="presets" className="w-full">
+                      <TabsList className="grid w-full grid-cols-2 bg-black/60 rounded-xl mb-2">
+                        <TabsTrigger value="presets" className="rounded-lg text-xs">Presets</TabsTrigger>
+                        <TabsTrigger value="custom" className="rounded-lg text-xs">Custom URL</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="presets" className="mt-0">
+                        <Select value={iconUrl} onValueChange={(v) => { if(v) setIconUrl(v); }}>
+                          <SelectTrigger className="w-full bg-black/60 border-white/10 text-white rounded-xl h-9 text-xs">
+                            <SelectValue placeholder="Select an icon..." />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#0c100e] border-white/10 text-white rounded-xl">
+                            {PRESET_ICONS.map((preset, idx) => {
+                              const PresetIcon = ICON_MAP[preset.id];
+                              return (
+                                <SelectItem key={idx} value={preset.id} className="text-xs">
+                                  <div className="flex items-center gap-2">
+                                    <PresetIcon className="h-4 w-4" />
+                                    <span>{preset.name}</span>
+                                  </div>
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </TabsContent>
+                      <TabsContent value="custom" className="mt-0">
+                        <Input 
+                          value={iconUrl} 
+                          onChange={(e) => setIconUrl(e.target.value)} 
+                          placeholder="https://..." 
+                          className="bg-black/60 border-white/10 text-white rounded-xl h-9 text-xs focus:border-[#3DDC97]" 
+                        />
+                      </TabsContent>
+                    </Tabs>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {(dialogOpen === "new" || dialogOpen === "settings") && (
               <div>

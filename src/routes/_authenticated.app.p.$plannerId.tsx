@@ -34,7 +34,13 @@ function PlannerLayout() {
     queryFn: async () => {
       const { data, error } = await supabase.from("planners").select("*").eq("id", plannerId).maybeSingle();
       if (error) throw error;
-      return data;
+      if (!data) return null;
+      const localConfigs = JSON.parse(localStorage.getItem("capient_planner_configs") || "{}");
+      return {
+        ...data,
+        workspace_type: localConfigs[data.id]?.workspace_type || data.workspace_type || "personal",
+        custom_config: localConfigs[data.id]?.custom_config || data.custom_config || {}
+      };
     },
   });
 
@@ -141,13 +147,14 @@ function PlannerLayout() {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <DialogTrigger asChild>
-                                <button className="rounded-full border-2 border-background ring-1 ring-primary/20 shadow-md transition-transform hover:scale-110 hover:z-20 relative cursor-pointer outline-none focus-visible:ring-2">
-                                  <Avatar className="h-7 w-7">
+                                <button className="rounded-full border-2 border-[#0b0e0c] shadow-md transition-transform hover:scale-110 hover:z-20 relative cursor-pointer outline-none focus-visible:ring-2 bg-[#111312] flex items-center justify-center group h-8 w-8">
+                                  <Avatar className="h-full w-full opacity-100">
                                     <AvatarImage src={collab.avatar_url} />
-                                    <AvatarFallback className="bg-primary/20 text-primary font-medium text-[10px]">
+                                    <AvatarFallback className="bg-primary/20 text-primary font-semibold text-[11px]">
                                       {(collab.display_name || "U").charAt(0).toUpperCase()}
                                     </AvatarFallback>
                                   </Avatar>
+                                  <div className="absolute inset-0 rounded-full border border-primary/40 pointer-events-none group-hover:border-primary/80 transition-colors" />
                                 </button>
                               </DialogTrigger>
                             </TooltipTrigger>
@@ -204,7 +211,7 @@ function PlannerLayout() {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div>
-                          <InviteDialog plannerId={planner.id} trigger={<button className="h-7 w-7 rounded-full border-2 border-background bg-white/5 hover:bg-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground shadow-md z-10 relative transition-colors"><Plus className="h-3 w-3" /></button>} />
+                          <InviteDialog plannerId={planner.id} trigger={<button className="h-8 w-8 rounded-full border-2 border-[#0b0e0c] bg-white/5 backdrop-blur-md hover:bg-white/15 flex items-center justify-center text-white/80 hover:text-white shadow-md z-10 relative transition-colors"><Plus className="h-3.5 w-3.5" /></button>} />
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" className="text-xs">Invite</TooltipContent>
@@ -226,9 +233,7 @@ function PlannerLayout() {
                     <SelectTrigger className="h-8 w-[90px] bg-[#111313] hover:bg-[#151818] border-transparent rounded-lg text-xs transition-colors">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#0a1010]/80 backdrop-blur-3xl border-white/10 rounded-2xl shadow-2xl p-1.5 relative overflow-hidden">
-                      <div className="absolute inset-0 rounded-2xl border border-primary/20 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
-                      <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/20 blur-[40px] rounded-full pointer-events-none" />
+                    <SelectContent position="popper" sideOffset={8} align="end" className="bg-[#0a1010]/95 backdrop-blur-3xl border border-white/10 !rounded-2xl shadow-2xl p-1.5 relative !overflow-hidden">
                       {CURRENCIES.map((c) => (
                         <SelectItem key={c} value={c} className="text-xs cursor-pointer rounded-lg my-0.5 focus:bg-white/5 focus:text-foreground relative z-10">{c}</SelectItem>
                       ))}

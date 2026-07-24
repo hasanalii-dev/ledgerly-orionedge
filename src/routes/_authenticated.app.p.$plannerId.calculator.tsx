@@ -71,6 +71,26 @@ function CalculatorPage() {
     }
   }, [history, plannerId]);
 
+  // Fetch Planner for workspace_type
+  const { data: routePlanner } = useQuery({
+    queryKey: ["route_planner", plannerId],
+    queryFn: async () => {
+      if (!plannerId) return null;
+      const { data } = await supabase.from("planners").select("*").eq("id", plannerId).maybeSingle();
+      if (!data) return null;
+      const localConfigs = JSON.parse(localStorage.getItem("capient_planner_configs") || "{}");
+      return {
+        ...data,
+        workspace_type: localConfigs[data.id]?.workspace_type || data.workspace_type || "personal",
+        custom_config: localConfigs[data.id]?.custom_config || data.custom_config || {}
+      };
+    },
+    enabled: !!plannerId,
+  });
+
+  const workspaceType = routePlanner?.workspace_type || "personal";
+  const isPersonalOrStudent = workspaceType === "personal" || workspaceType === "student";
+
   /* ─────────────────────────────────────────────────────────────
      DATA QUERIES (For Importer)
   ───────────────────────────────────────────────────────────── */
@@ -847,77 +867,79 @@ function CalculatorPage() {
               </div>
 
               {/* 4. BREAK-EVEN TARGET MODEL CARD */}
-              <div className="rounded-[32px] border border-white/10 bg-[#0c100e]/95 backdrop-blur-2xl p-6 md:p-8 space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 blur-[100px] rounded-full pointer-events-none" />
-                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
+              {!isPersonalOrStudent && (
+                <div className="rounded-[32px] border border-white/10 bg-[#0c100e]/95 backdrop-blur-2xl p-6 md:p-8 space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 blur-[100px] rounded-full pointer-events-none" />
+                  <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
 
-                {/* Card Header */}
-                <div className="flex items-center justify-between border-b border-white/5 pb-4 relative z-10">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 shadow-lg">
-                      <Target className="h-5 w-5" />
+                  {/* Card Header */}
+                  <div className="flex items-center justify-between border-b border-white/5 pb-4 relative z-10">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 shadow-lg">
+                        <Target className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-['Samsung_Sharp_Sans',_sans-serif] text-base md:text-lg font-bold text-white tracking-wide">
+                          Break-Even Units Target Model
+                        </h3>
+                        <p className="font-['Questrial',_sans-serif] text-xs text-muted-foreground mt-0.5">
+                          Calculate sales volume required to cover fixed overhead expenses.
+                        </p>
+                      </div>
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10">
+                    <div className="space-y-1.5">
+                      <label className="font-['Questrial',_sans-serif] text-xs text-muted-foreground uppercase font-semibold block">
+                        Fixed Overhead ({currency})
+                      </label>
+                      <Input
+                        type="number"
+                        value={beFixed}
+                        onChange={(e) => setBeFixed(e.target.value)}
+                        className="bg-black/50 border-white/10 text-white font-['Samsung_Sharp_Sans',_sans-serif] font-bold rounded-xl h-11 text-xs px-3"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="font-['Questrial',_sans-serif] text-xs text-muted-foreground uppercase font-semibold block">
+                        Unit Sale Price ({currency})
+                      </label>
+                      <Input
+                        type="number"
+                        value={bePrice}
+                        onChange={(e) => setBePrice(e.target.value)}
+                        className="bg-black/50 border-white/10 text-white font-['Samsung_Sharp_Sans',_sans-serif] font-bold rounded-xl h-11 text-xs px-3"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="font-['Questrial',_sans-serif] text-xs text-muted-foreground uppercase font-semibold block">
+                        Unit Variable Cost ({currency})
+                      </label>
+                      <Input
+                        type="number"
+                        value={beCost}
+                        onChange={(e) => setBeCost(e.target.value)}
+                        className="bg-black/50 border-white/10 text-white font-['Samsung_Sharp_Sans',_sans-serif] font-bold rounded-xl h-11 text-xs px-3"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="bg-[#151a17] p-5 rounded-2xl border border-white/5 flex items-center justify-between relative z-10 shadow-md">
                     <div>
-                      <h3 className="font-['Samsung_Sharp_Sans',_sans-serif] text-base md:text-lg font-bold text-white tracking-wide">
-                        Break-Even Units Target Model
-                      </h3>
-                      <p className="font-['Questrial',_sans-serif] text-xs text-muted-foreground mt-0.5">
-                        Calculate sales volume required to cover fixed overhead expenses.
-                      </p>
+                      <span className="font-['Questrial',_sans-serif] text-xs uppercase font-bold tracking-widest text-amber-400 block">
+                        Break-Even Point
+                      </span>
+                      <span className="font-['Samsung_Sharp_Sans',_sans-serif] text-2xl font-bold text-white mt-1 block">
+                        {beUnitsNeeded} Units Needed
+                      </span>
+                    </div>
+                    <div className="text-right font-['Questrial',_sans-serif] text-xs text-muted-foreground">
+                      Contribution Margin: <span className="font-['Samsung_Sharp_Sans',_sans-serif] text-white font-bold">{formatMoney(beMarginPerUnit, currency)} / unit</span>
                     </div>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10">
-                  <div className="space-y-1.5">
-                    <label className="font-['Questrial',_sans-serif] text-xs text-muted-foreground uppercase font-semibold block">
-                      Fixed Overhead ({currency})
-                    </label>
-                    <Input
-                      type="number"
-                      value={beFixed}
-                      onChange={(e) => setBeFixed(e.target.value)}
-                      className="bg-black/50 border-white/10 text-white font-['Samsung_Sharp_Sans',_sans-serif] font-bold rounded-xl h-11 text-xs px-3"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="font-['Questrial',_sans-serif] text-xs text-muted-foreground uppercase font-semibold block">
-                      Unit Sale Price ({currency})
-                    </label>
-                    <Input
-                      type="number"
-                      value={bePrice}
-                      onChange={(e) => setBePrice(e.target.value)}
-                      className="bg-black/50 border-white/10 text-white font-['Samsung_Sharp_Sans',_sans-serif] font-bold rounded-xl h-11 text-xs px-3"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="font-['Questrial',_sans-serif] text-xs text-muted-foreground uppercase font-semibold block">
-                      Unit Variable Cost ({currency})
-                    </label>
-                    <Input
-                      type="number"
-                      value={beCost}
-                      onChange={(e) => setBeCost(e.target.value)}
-                      className="bg-black/50 border-white/10 text-white font-['Samsung_Sharp_Sans',_sans-serif] font-bold rounded-xl h-11 text-xs px-3"
-                    />
-                  </div>
-                </div>
-
-                <div className="bg-[#151a17] p-5 rounded-2xl border border-white/5 flex items-center justify-between relative z-10 shadow-md">
-                  <div>
-                    <span className="font-['Questrial',_sans-serif] text-xs uppercase font-bold tracking-widest text-amber-400 block">
-                      Break-Even Point
-                    </span>
-                    <span className="font-['Samsung_Sharp_Sans',_sans-serif] text-2xl font-bold text-white mt-1 block">
-                      {beUnitsNeeded} Units Needed
-                    </span>
-                  </div>
-                  <div className="text-right font-['Questrial',_sans-serif] text-xs text-muted-foreground">
-                    Contribution Margin: <span className="font-['Samsung_Sharp_Sans',_sans-serif] text-white font-bold">{formatMoney(beMarginPerUnit, currency)} / unit</span>
-                  </div>
-                </div>
-              </div>
+              )}
 
             </div>
           )}

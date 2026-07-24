@@ -77,7 +77,16 @@ function DashboardPage() {
 
   const { data: planner } = useQuery({
     queryKey: ["planner", plannerId],
-    queryFn: async () => (await supabase.from("planners").select("*").eq("id", plannerId).single()).data,
+    queryFn: async () => {
+      const { data } = await supabase.from("planners").select("*").eq("id", plannerId).single();
+      if (!data) return null;
+      const localConfigs = JSON.parse(localStorage.getItem("capient_planner_configs") || "{}");
+      return {
+        ...data,
+        workspace_type: localConfigs[data.id]?.workspace_type || data.workspace_type || "personal",
+        custom_config: localConfigs[data.id]?.custom_config || data.custom_config || {}
+      };
+    },
   });
   const currency = planner?.currency ?? "USD";
   const workspaceType = (planner?.workspace_type as WorkspaceType) || "personal";
@@ -95,6 +104,21 @@ function DashboardPage() {
   });
 
 
+
+  const getKpiLabels = () => {
+    switch(workspaceType) {
+      case "freelancer": return { income: "Client Revenue", expenses: "Project Expenses", net: "Net Profit", wealth: "Business Balance", thisMonth: "This Month Profit", avgIncome: "Avg Monthly Revenue", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
+      case "agency": return { income: "Agency Revenue", expenses: "Operating Expenses", net: "Net Cash Flow", wealth: "Agency Balance", thisMonth: "This Month Net", avgIncome: "Avg Monthly Revenue", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
+      case "smb": return { income: "Business Revenue", expenses: "Operating Expenses", net: "Net Profit", wealth: "Total Equity", thisMonth: "This Month Profit", avgIncome: "Avg Monthly Revenue", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
+      case "startup": return { income: "ARR / Revenue", expenses: "Burn Rate", net: "Net Burn", wealth: "Runway Balance", thisMonth: "This Month Burn", avgIncome: "Avg Monthly Revenue", reserve: "Emergency Runway", topCat: "Pending Invoices" };
+      case "creator": return { income: "Sponsorships & Ads", expenses: "Production Costs", net: "Net Earnings", wealth: "Business Balance", thisMonth: "This Month Net", avgIncome: "Avg Monthly Earnings", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
+      case "nonprofit": return { income: "Donations & Grants", expenses: "Program Expenses", net: "Net Funds", wealth: "Total Funds", thisMonth: "This Month Net", avgIncome: "Avg Monthly Donations", reserve: "Operating Reserve", topCat: "Pending Invoices" };
+      case "student":
+      case "personal":
+      default: return { income: "Personal Income", expenses: "Household Expenses", net: "Net Savings", wealth: "Total Wealth", thisMonth: "This Month Savings", avgIncome: "Avg Monthly Income", reserve: "Emergency Reserve", topCat: "Top Category" };
+    }
+  };
+  const labels = getKpiLabels();
 
   const { data: income = [] } = useQuery({
     queryKey: ["income", plannerId],
@@ -212,17 +236,19 @@ function DashboardPage() {
               variant="outline" 
               size="icon" 
               asChild 
-              className="absolute top-0 -right-2 rounded-full h-8 w-8 z-10 bg-[#1A1A1A] backdrop-blur-md shadow-xl border border-[#3DDC97]/30"
+              className="absolute top-0 -right-2 rounded-full h-8 w-8 z-10 bg-[#1A1A1A]/80 backdrop-blur-md shadow-xl border border-white/10"
             >
               <Link to="/app/p/$plannerId/notifications" params={{ plannerId }}>
                 <motion.div
                   animate={{ rotate: [0, -18, 18, -18, 18, 0], scale: [1, 1.1, 1] }}
                   transition={{ repeat: Infinity, repeatDelay: 2.5, duration: 0.7 }}
                 >
-                  <Bell className="h-3.5 w-3.5 text-[#3DDC97]" />
+                  <Bell className="h-4 w-4 text-white" />
                 </motion.div>
                 {pendingInvites.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-[#3DDC97] rounded-full border border-background animate-pulse shadow-[0_0_8px_#3DDC97]" />
+                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-[#3DDC97]/90 text-white text-[9px] font-bold rounded-full border border-white/20 flex items-center justify-center shadow-[0_0_8px_#3DDC97] animate-pulse">
+                    {pendingInvites.length}
+                  </span>
                 )}
               </Link>
             </Button>
@@ -240,12 +266,13 @@ function DashboardPage() {
               Welcome back, {profile?.display_name?.split(' ')[0] || "there"}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {workspaceType === "personal" || workspaceType === "student" 
-                ? `Personal Household Budget — ${planner?.name ?? "Planner"}`
-                : workspaceType === "freelancer"
-                  ? `Freelance Projects & Client Financials — ${planner?.name ?? "Planner"}`
-                  : `Company Revenue & Operating Financials — ${planner?.name ?? "Planner"}`
-              }
+              {workspaceType === "freelancer" ? `Freelance Projects & Client Financials — ${planner?.name ?? "Planner"}`
+               : workspaceType === "agency" ? `Agency Retainers & Client Accounts — ${planner?.name ?? "Planner"}`
+               : workspaceType === "smb" ? `Small Business Financial Suite — ${planner?.name ?? "Planner"}`
+               : workspaceType === "startup" ? `Startup Runway & Burn Rate — ${planner?.name ?? "Planner"}`
+               : workspaceType === "creator" ? `Creator Monetization & Expenses — ${planner?.name ?? "Planner"}`
+               : workspaceType === "nonprofit" ? `Non-Profit Funds & Grants — ${planner?.name ?? "Planner"}`
+               : `Personal Household Budget — ${planner?.name ?? "Planner"}`}
             </p>
           </div>
           
@@ -260,17 +287,17 @@ function DashboardPage() {
               variant="outline" 
               size="icon" 
               asChild 
-              className="absolute -top-1 -right-1 rounded-full h-9 w-9 z-10 bg-background/95 backdrop-blur-md shadow-lg border-white/20 hover:scale-110 transition-transform"
+              className="absolute -top-1 -right-1 rounded-full h-9 w-9 z-10 bg-[#1A1A1A]/80 backdrop-blur-md shadow-lg border-white/10 hover:scale-110 transition-transform"
             >
               <Link to="/app/p/$plannerId/notifications" params={{ plannerId }}>
                 <motion.div
                   animate={{ rotate: [0, -15, 15, -15, 15, 0] }}
                   transition={{ repeat: Infinity, repeatDelay: 3, duration: 0.6 }}
                 >
-                  <Bell className="h-4 w-4 text-foreground" />
+                  <Bell className="h-4 w-4 text-white" />
                 </motion.div>
                 {pendingInvites.length > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-white text-[9px] font-bold rounded-full border-2 border-background flex items-center justify-center animate-pulse">
+                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-[#3DDC97]/90 text-white text-[9px] font-bold rounded-full border border-white/20 flex items-center justify-center shadow-[0_0_8px_#3DDC97] animate-pulse">
                     {pendingInvites.length}
                   </span>
                 )}
@@ -283,51 +310,51 @@ function DashboardPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-2 md:mt-0 font-['Questrial',_sans-serif]">
           <KpiCard 
             icon={TrendingUp} 
-            label={isPersonalOrStudent ? "Personal Income" : isFreelancer ? "Client Revenue" : "Company Revenue"} 
+            label={labels.income} 
             value={formatMoney(totalIncome, currency)} 
             compactValue={formatMoney(totalIncome, currency, true)} 
             accent 
           />
           <KpiCard 
             icon={TrendingDown} 
-            label={isPersonalOrStudent ? "Household Expenses" : isFreelancer ? "Project Expenses" : "Operating Expenses"} 
+            label={labels.expenses} 
             value={formatMoney(totalExpenses, currency)} 
             compactValue={formatMoney(totalExpenses, currency, true)} 
           />
           <KpiCard 
             icon={Sparkles} 
-            label={isPersonalOrStudent ? "Net Savings" : "Net Cash Flow"} 
+            label={labels.net} 
             value={formatMoney(net, currency)} 
             compactValue={formatMoney(net, currency, true)} 
             sub={net >= 0 ? "In the green" : "In the red"} 
           />
           <KpiCard 
             icon={Wallet} 
-            label={isPersonalOrStudent ? "Total Wealth" : "Current Balance"} 
+            label={labels.wealth} 
             value={formatMoney(balance, currency)} 
             compactValue={formatMoney(balance, currency, true)} 
           />
           <KpiCard 
             icon={PiggyBank} 
-            label={isPersonalOrStudent ? "This Month Savings" : "This Month Net"} 
+            label={labels.thisMonth} 
             value={formatMoney(monthProfit, currency)} 
             compactValue={formatMoney(monthProfit, currency, true)} 
           />
           <KpiCard 
             icon={Calendar} 
-            label={isPersonalOrStudent ? "Avg Monthly Income" : "Avg Monthly Revenue"} 
+            label={labels.avgIncome} 
             value={formatMoney(avgMonthlyIncome, currency)} 
             compactValue={formatMoney(avgMonthlyIncome, currency, true)} 
           />
           <KpiCard 
             icon={ShieldCheck} 
-            label={isPersonalOrStudent ? "Emergency Reserve" : "Tax Reserve (Est)"} 
+            label={labels.reserve} 
             value={formatMoney(yearIncome * (isPersonalOrStudent ? 0.15 : 0.25), currency)} 
             compactValue={formatMoney(yearIncome * (isPersonalOrStudent ? 0.15 : 0.25), currency, true)} 
           />
           <KpiCard 
             icon={Flame} 
-            label={isPersonalOrStudent ? "Top Category" : "Pending Invoices"} 
+            label={labels.topCat} 
             value={isPersonalOrStudent ? (topCat ? topCat[0] : "None") : String(pendingInvoiceCount)} 
           />
         </div>

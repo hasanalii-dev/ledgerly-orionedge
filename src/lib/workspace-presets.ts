@@ -7,6 +7,7 @@ export type WorkspaceType =
   | "creator"
   | "student"
   | "nonprofit"
+  | "society"
   | "other";
 
 export interface WorkspaceTypeOption {
@@ -73,6 +74,13 @@ export const WORKSPACE_TYPES: WorkspaceTypeOption[] = [
     description: "Track grants, donor contributions, and operational expenses",
     iconName: "HeartHandshake",
     isBusiness: true,
+  },
+  {
+    id: "society",
+    title: "Society / Event",
+    description: "Uni/college societies, outside events, ticketing, and budgets",
+    iconName: "Ticket",
+    isBusiness: false,
   },
   {
     id: "other",
@@ -202,6 +210,17 @@ export function getCategoryPresets(workspaceType: WorkspaceType): CategoryPreset
         { name: "Administrative Costs", color: "#64748B", type: "expense" },
       ];
 
+    case "society":
+      return [
+        { name: "Ticket Sales", color: "#3DDC97", type: "income" },
+        { name: "Sponsorships", color: "#38BDF8", type: "income" },
+        { name: "Membership Fees", color: "#A855F7", type: "income" },
+        { name: "Venue Booking", color: "#F43F5E", type: "expense" },
+        { name: "Marketing & Promo", color: "#FB923C", type: "expense" },
+        { name: "Equipment & Logistics", color: "#EAB308", type: "expense" },
+        { name: "Guest Speakers / Performers", color: "#EC4899", type: "expense" },
+      ];
+
     case "personal":
     default:
       return [
@@ -263,6 +282,13 @@ export function getWorkspaceDefaults(workspaceType: WorkspaceType): WorkspaceDef
         clientTerm: "Donors",
       };
 
+    case "society":
+      return {
+        hideModules: ["invoices"],
+        primaryMetrics: ["ticket_sales", "sponsorships", "event_budget", "balance"],
+        clientTerm: "Sponsors/Members",
+      };
+
     default:
       return {
         hideModules: [],
@@ -284,6 +310,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
   const isFreelancer = workspaceType === "freelancer";
   const isCreator = workspaceType === "creator";
   const isNonProfit = workspaceType === "nonprofit";
+  const isSociety = workspaceType === "society";
 
   if (isPersonalOrStudent) {
     return {
@@ -353,6 +380,30 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "monthly", title: "Monthly Revenue", routeKey: "monthly", group: "insights" },
         { id: "vault", title: "Brand Assets Vault", routeKey: "vault", group: "insights" },
         { id: "notes", title: "Idea Notes", routeKey: "notes", group: "insights" },
+      ],
+    };
+  }
+
+  if (isSociety) {
+    return {
+      workspace: [
+        { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
+        { id: "income", title: "Ticket Sales & Income", routeKey: "income", group: "workspace" },
+        { id: "expenses", title: "Event Expenses", routeKey: "expenses", group: "workspace" },
+        { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
+        { id: "accounts", title: "Society Bank & Cash", routeKey: "accounts", group: "workspace" },
+        { id: "clients", title: "Sponsors & Members", routeKey: "clients", group: "workspace" },
+        { id: "projects", title: "Events & Campaigns", routeKey: "projects", group: "workspace" },
+      ],
+      insights: [
+        { id: "budget", title: "Event Budgets", routeKey: "budget", group: "insights" },
+        { id: "goals", title: "Fundraising Goals", routeKey: "goals", group: "insights" },
+        { id: "reports", title: "Financial Reports", routeKey: "reports", group: "insights" },
+        { id: "charts", title: "Analytics", routeKey: "charts", group: "insights" },
+        { id: "monthly", title: "Monthly Breakdown", routeKey: "monthly", group: "insights" },
+        { id: "vault", title: "Event Documents Vault", routeKey: "vault", group: "insights" },
+        { id: "timeline", title: "Activity Log", routeKey: "timeline", group: "insights" },
+        { id: "notes", title: "Meeting Minutes", routeKey: "notes", group: "insights" },
       ],
     };
   }

@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 const navLinks = [
   { name: "About", to: "/about" },
   { name: "Features", href: "/#features" },
-  { name: "Modules", href: "/#modules" },
   { name: "Pricing", to: "/pricing" },
+  { name: "Security", to: "/security" },
   { name: "Docs", to: "/docs" },
 ];
 
@@ -49,13 +49,20 @@ export function MarketingNavbar() {
       >
         <div
           className={cn(
-            "flex items-center justify-between w-full max-w-[54rem] transition-all duration-300 ease-out",
+            "flex items-center justify-between w-full max-w-[54rem] transition-all duration-300 ease-out relative overflow-hidden",
             isScrolled
               ? "bg-[#050a0a]/90 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl px-6 py-3"
               : "bg-transparent border border-transparent rounded-full px-2 py-2"
           )}
         >
-          <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
+          <div 
+            className={cn(
+              "absolute -bottom-4 left-1/2 -translate-x-1/2 w-1/2 h-8 bg-[#3DDC97]/20 blur-[16px] pointer-events-none rounded-full transition-opacity duration-300",
+              isScrolled ? "opacity-100" : "opacity-0"
+            )} 
+          />
+          
+          <Link to="/" className="flex items-center hover:opacity-80 transition-opacity relative z-10">
             <img src="/side-bar-logo.png" alt="Capient" className="h-8 w-auto object-contain" />
           </Link>
           
