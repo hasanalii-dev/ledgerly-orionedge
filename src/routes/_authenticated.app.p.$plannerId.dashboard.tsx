@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Bell } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import { WorkspaceType } from "@/lib/workspace-presets";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/dashboard")({
   component: DashboardPage,
@@ -79,6 +80,9 @@ function DashboardPage() {
     queryFn: async () => (await supabase.from("planners").select("*").eq("id", plannerId).single()).data,
   });
   const currency = planner?.currency ?? "USD";
+  const workspaceType = (planner?.workspace_type as WorkspaceType) || "personal";
+  const isPersonalOrStudent = workspaceType === "personal" || workspaceType === "student";
+  const isFreelancer = workspaceType === "freelancer";
 
   const { data: profile } = useQuery({
     queryKey: ["profile"],
