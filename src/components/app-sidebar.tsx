@@ -20,7 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Plus, Settings, LogOut, ChevronDown, LayoutDashboard, TrendingUp, TrendingDown, LineChart, 
   Wallet, Users, FolderKanban, FileText, CandlestickChart, Target, ArrowLeftRight, FileBarChart, 
-  PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles, Calculator, SlidersHorizontal
+  PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles, Calculator, SlidersHorizontal, Check
 } from "lucide-react";
 import { InviteDialog } from "./invite-dialog";
 import { WORKSPACE_TYPES, WorkspaceType, getWorkspaceDefaults, getCategoryPresets, getWorkspaceNavigation } from "@/lib/workspace-presets";
@@ -46,9 +46,43 @@ export function AppSidebar() {
   const { data: planners = [] } = useQuery({
     queryKey: ["planners"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("planners").select("id, name, emoji, is_default, workspace_type, custom_config").order("created_at");
-      if (error) throw error;
-      return data as Planner[];
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      // 1. Fetch planners owned by current user
+      const { data: owned, error: ownedErr } = await supabase
+        .from("planners")
+        .select("id, name, emoji, is_default, workspace_type, custom_config, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
+
+      if (ownedErr) console.error("Owned planners query error:", ownedErr);
+
+      // 2. Fetch shared planners via planner_collaborators
+      const { data: collab } = await supabase
+        .from("planner_collaborators")
+        .select("planner_id, planners(id, name, emoji, is_default, workspace_type, custom_config, created_at)")
+        .eq("user_id", user.id);
+
+      const shared = (collab ?? []).map((c: any) => c.planners).filter(Boolean);
+
+      // 3. Fallback: query all planners accessible via RLS
+      let fallback: any[] = [];
+      if ((!owned || owned.length === 0) && (!shared || shared.length === 0)) {
+        const { data: rlsData } = await supabase
+          .from("planners")
+          .select("id, name, emoji, is_default, workspace_type, custom_config, created_at")
+          .order("created_at", { ascending: true });
+        fallback = rlsData ?? [];
+      }
+
+      // Merge and deduplicate by id
+      const map = new Map<string, Planner>();
+      (owned ?? []).forEach((p: any) => map.set(p.id, p as Planner));
+      shared.forEach((p: any) => map.set(p.id, p as Planner));
+      fallback.forEach((p: any) => map.set(p.id, p as Planner));
+
+      return Array.from(map.values());
     },
   });
 
@@ -242,7 +276,6 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-none bg-[#0b0e0c] overflow-hidden font-['Questrial',_sans-serif]">
       <SidebarHeader className={`py-4 z-10 relative ${collapsed ? 'px-0' : 'px-4'}`}>
-        {/* macOS window controls */}
         {!collapsed && (
           <div className="flex items-center gap-2 mb-8 pl-1">
             <div className="w-3 h-3 rounded-full bg-[#FF5F56] shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]" />
@@ -269,7 +302,7 @@ export function AppSidebar() {
             <DropdownMenuContent className="w-64 rounded-2xl bg-[#0a1010]/95 backdrop-blur-3xl border-white/10 p-1.5 shadow-2xl font-['Questrial',_sans-serif] relative overflow-hidden" align="start">
               <div className="absolute inset-0 rounded-2xl border border-primary/20 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
               <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/20 blur-[40px] rounded-full pointer-events-none" />
-              <DropdownMenuLabel className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold px-2 py-1.5">Planners</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold px-2 py-1.5">Planners ({planners.length})</DropdownMenuLabel>
               {planners.map((p) => {
                 const isActive = p.id === active?.id;
                 return (
@@ -307,16 +340,16 @@ export function AppSidebar() {
                     <img src="/side-bar-logo.png" alt="Capient" className="h-5 w-auto object-contain" />
                   </button>
                </DropdownMenuTrigger>
-               <DropdownMenuContent className="w-64 rounded-2xl bg-[#0a1010]/80 backdrop-blur-3xl border-white/10 p-1.5 shadow-2xl font-['Questrial',_sans-serif] relative overflow-hidden" align="start">
+               <DropdownMenuContent className="w-64 rounded-2xl bg-[#0a1010]/95 backdrop-blur-3xl border-white/10 p-1.5 shadow-2xl font-['Questrial',_sans-serif] relative overflow-hidden" align="start">
                  <div className="absolute inset-0 rounded-2xl border border-primary/20 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
                  <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/20 blur-[40px] rounded-full pointer-events-none" />
                   {planners.map((p) => {
                     const isActive = p.id === active?.id;
                     return (
-                      <DropdownMenuItem key={p.id} className={`rounded-lg cursor-pointer my-0.5 ${isActive ? "bg-white/5" : ""}`} onClick={() => navigate({ to: `/app/p/${p.id}/dashboard`, params: { plannerId: p.id } })}>
-                        <Book className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className={`text-[13px] ${isActive ? "text-foreground font-medium" : "text-muted-foreground"}`}>{p.name}</span>
-                        {isActive && <span className="ml-auto text-xs text-primary font-medium">Active</span>}
+                      <DropdownMenuItem key={p.id} className={`rounded-lg cursor-pointer my-0.5 ${isActive ? "bg-white/10" : ""}`} onClick={() => handleSwitchPlanner(p.id)}>
+                        <Book className={`h-4 w-4 mr-2 ${isActive ? "text-[#3DDC97]" : "text-muted-foreground"}`} />
+                        <span className={`text-[13px] ${isActive ? "text-white font-semibold" : "text-muted-foreground"}`}>{p.name}</span>
+                        {isActive && <Check className="ml-auto h-4 w-4 text-[#3DDC97]" />}
                       </DropdownMenuItem>
                     );
                   })}
@@ -325,7 +358,6 @@ export function AppSidebar() {
           </div>
         )}
 
-        {/* Faux Search Input */}
         {!collapsed && (
           <div className="mt-6 relative group cursor-pointer" onClick={() => setSearchOpen(true)}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
@@ -348,6 +380,38 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className={`pb-4 z-10 relative ${collapsed ? 'px-0' : 'px-3'}`}>
+        {!collapsed && planners.length > 1 && (
+          <SidebarGroup className="py-1 px-0 border-b border-white/5 pb-3 mb-1">
+            <div className="flex items-center justify-between px-3 mb-1.5">
+              <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold p-0">Planners ({planners.length})</SidebarGroupLabel>
+              <button onClick={() => setDialogOpen("new")} className="text-muted-foreground hover:text-[#3DDC97] transition-colors p-1 rounded-md hover:bg-white/5" title="Create New Planner">
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <div className="space-y-0.5 px-1 max-h-36 overflow-y-auto">
+              {planners.map((p) => {
+                const isActive = p.id === active?.id;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => handleSwitchPlanner(p.id)}
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all ${
+                      isActive
+                        ? "bg-[#3DDC97]/15 text-[#3DDC97] border border-[#3DDC97]/30 shadow-[0_0_10px_rgba(61,220,151,0.1)]"
+                        : "text-muted-foreground hover:bg-white/[0.04] hover:text-white border border-transparent"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <Book className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-[#3DDC97]" : "text-muted-foreground"}`} />
+                      <span className="truncate">{p.name}</span>
+                    </div>
+                    {isActive && <Check className="h-3.5 w-3.5 shrink-0 text-[#3DDC97]" />}
+                  </button>
+                );
+              })}
+            </div>
+          </SidebarGroup>
+        )}
         <SidebarGroup className="group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-2">
           {!collapsed && <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-2 mt-2 px-3">Workspace</SidebarGroupLabel>}
           <SidebarGroupContent>
