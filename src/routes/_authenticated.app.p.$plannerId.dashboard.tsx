@@ -230,12 +230,19 @@ function DashboardPage() {
         </div>
 
         {/* Desktop Header */}
-        <div className="hidden md:flex md:items-center justify-between gap-4 md:gap-0">
+        <div className="hidden md:flex md:items-center justify-between gap-4 md:gap-0 font-['Questrial',_sans-serif]">
           <div className="text-left">
-            <h1 className="text-3xl font-display tracking-tight">
+            <h1 className="text-3xl font-['Samsung_Sharp_Sans',_sans-serif] font-bold tracking-tight text-white">
               Welcome back, {profile?.display_name?.split(' ')[0] || "there"}
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">Snapshot of {planner?.name ?? "your planner"}</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {workspaceType === "personal" || workspaceType === "student" 
+                ? `Personal Household Budget — ${planner?.name ?? "Planner"}`
+                : workspaceType === "freelancer"
+                  ? `Freelance Projects & Client Financials — ${planner?.name ?? "Planner"}`
+                  : `Company Revenue & Operating Financials — ${planner?.name ?? "Planner"}`
+              }
+            </p>
           </div>
           
           <div className="flex items-center relative">
@@ -267,16 +274,58 @@ function DashboardPage() {
             </Button>
           </div>
         </div>
-        {/* KPI Grids (Universal 2-col Mobile / 4-col Desktop) */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-2 md:mt-0">
-          <KpiCard icon={TrendingUp} label="Total Income" value={formatMoney(totalIncome, currency)} compactValue={formatMoney(totalIncome, currency, true)} accent />
-          <KpiCard icon={TrendingDown} label="Total Expenses" value={formatMoney(totalExpenses, currency)} compactValue={formatMoney(totalExpenses, currency, true)} />
-          <KpiCard icon={Sparkles} label="Net Cash Flow" value={formatMoney(net, currency)} compactValue={formatMoney(net, currency, true)} sub={net >= 0 ? "In the green" : "In the red"} />
-          <KpiCard icon={Wallet} label="Current Balance" value={formatMoney(balance, currency)} compactValue={formatMoney(balance, currency, true)} />
-          <KpiCard icon={PiggyBank} label="This Month Profit" value={formatMoney(monthProfit, currency)} compactValue={formatMoney(monthProfit, currency, true)} />
-          <KpiCard icon={Calendar} label="Avg Monthly Income" value={formatMoney(avgMonthlyIncome, currency)} compactValue={formatMoney(avgMonthlyIncome, currency, true)} />
-          <KpiCard icon={ShieldCheck} label="Tax Reserve" value={formatMoney(yearIncome * 0.25, currency)} compactValue={formatMoney(yearIncome * 0.25, currency, true)} />
-          <KpiCard icon={Flame} label="Pending Invoices" value={String(pendingInvoiceCount)} />
+
+        {/* Dynamic KPI Grids (Tailored per Workspace Type) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-2 md:mt-0 font-['Questrial',_sans-serif]">
+          <KpiCard 
+            icon={TrendingUp} 
+            label={isPersonalOrStudent ? "Personal Income" : isFreelancer ? "Client Revenue" : "Company Revenue"} 
+            value={formatMoney(totalIncome, currency)} 
+            compactValue={formatMoney(totalIncome, currency, true)} 
+            accent 
+          />
+          <KpiCard 
+            icon={TrendingDown} 
+            label={isPersonalOrStudent ? "Household Expenses" : isFreelancer ? "Project Expenses" : "Operating Expenses"} 
+            value={formatMoney(totalExpenses, currency)} 
+            compactValue={formatMoney(totalExpenses, currency, true)} 
+          />
+          <KpiCard 
+            icon={Sparkles} 
+            label={isPersonalOrStudent ? "Net Savings" : "Net Cash Flow"} 
+            value={formatMoney(net, currency)} 
+            compactValue={formatMoney(net, currency, true)} 
+            sub={net >= 0 ? "In the green" : "In the red"} 
+          />
+          <KpiCard 
+            icon={Wallet} 
+            label={isPersonalOrStudent ? "Total Wealth" : "Current Balance"} 
+            value={formatMoney(balance, currency)} 
+            compactValue={formatMoney(balance, currency, true)} 
+          />
+          <KpiCard 
+            icon={PiggyBank} 
+            label={isPersonalOrStudent ? "This Month Savings" : "This Month Net"} 
+            value={formatMoney(monthProfit, currency)} 
+            compactValue={formatMoney(monthProfit, currency, true)} 
+          />
+          <KpiCard 
+            icon={Calendar} 
+            label={isPersonalOrStudent ? "Avg Monthly Income" : "Avg Monthly Revenue"} 
+            value={formatMoney(avgMonthlyIncome, currency)} 
+            compactValue={formatMoney(avgMonthlyIncome, currency, true)} 
+          />
+          <KpiCard 
+            icon={ShieldCheck} 
+            label={isPersonalOrStudent ? "Emergency Reserve" : "Tax Reserve (Est)"} 
+            value={formatMoney(yearIncome * (isPersonalOrStudent ? 0.15 : 0.25), currency)} 
+            compactValue={formatMoney(yearIncome * (isPersonalOrStudent ? 0.15 : 0.25), currency, true)} 
+          />
+          <KpiCard 
+            icon={Flame} 
+            label={isPersonalOrStudent ? "Top Category" : "Pending Invoices"} 
+            value={isPersonalOrStudent ? (topCat ? topCat[0] : "None") : String(pendingInvoiceCount)} 
+          />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-4 px-4 md:px-0">

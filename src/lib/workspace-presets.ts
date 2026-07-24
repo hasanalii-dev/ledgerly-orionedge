@@ -228,7 +228,7 @@ export function getWorkspaceDefaults(workspaceType: WorkspaceType): WorkspaceDef
     case "student":
     case "personal":
       return {
-        hideModules: ["clients", "projects", "invoices"], // Hidden by default, customizable anytime
+        hideModules: ["clients", "projects", "invoices"], // Hidden by default for Personal / Student
         primaryMetrics: ["balance", "income", "expenses", "budget_progress", "goals"],
         clientTerm: "Clients",
       };
@@ -270,4 +270,115 @@ export function getWorkspaceDefaults(workspaceType: WorkspaceType): WorkspaceDef
         clientTerm: "Clients",
       };
   }
+}
+
+export interface NavItemConfig {
+  id: string;
+  title: string;
+  routeKey: string;
+  group: "workspace" | "insights";
+}
+
+export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"): { workspace: NavItemConfig[]; insights: NavItemConfig[] } {
+  const isPersonalOrStudent = workspaceType === "personal" || workspaceType === "student";
+  const isFreelancer = workspaceType === "freelancer";
+  const isCreator = workspaceType === "creator";
+  const isNonProfit = workspaceType === "nonprofit";
+
+  if (isPersonalOrStudent) {
+    return {
+      workspace: [
+        { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
+        { id: "income", title: "Personal Income", routeKey: "income", group: "workspace" },
+        { id: "expenses", title: "Household Expenses", routeKey: "expenses", group: "workspace" },
+        { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
+        { id: "accounts", title: "My Accounts & Wealth", routeKey: "accounts", group: "workspace" },
+      ],
+      insights: [
+        { id: "budget", title: "Household Budget", routeKey: "budget", group: "insights" },
+        { id: "goals", title: "Savings Goals", routeKey: "goals", group: "insights" },
+        { id: "reports", title: "Financial Reports", routeKey: "reports", group: "insights" },
+        { id: "charts", title: "Interactive Analytics", routeKey: "charts", group: "insights" },
+        { id: "monthly", title: "Monthly Trends", routeKey: "monthly", group: "insights" },
+        { id: "calculator", title: "Financial Calculator", routeKey: "calculator", group: "insights" },
+        { id: "vault", title: "Secure Vault", routeKey: "vault", group: "insights" },
+        { id: "timeline", title: "Activity Timeline", routeKey: "timeline", group: "insights" },
+        { id: "notes", title: "Personal Notes", routeKey: "notes", group: "insights" },
+      ],
+    };
+  }
+
+  if (isFreelancer) {
+    return {
+      workspace: [
+        { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
+        { id: "income", title: "Client Income", routeKey: "income", group: "workspace" },
+        { id: "expenses", title: "Project Expenses", routeKey: "expenses", group: "workspace" },
+        { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
+        { id: "accounts", title: "Accounts & Wallets", routeKey: "accounts", group: "workspace" },
+        { id: "clients", title: "Client CRM", routeKey: "clients", group: "workspace" },
+        { id: "projects", title: "Project Profitability", routeKey: "projects", group: "workspace" },
+        { id: "invoices", title: "Invoices & Retainers", routeKey: "invoices", group: "workspace" },
+      ],
+      insights: [
+        { id: "calculator", title: "Hourly Rate & Estimator", routeKey: "calculator", group: "insights" },
+        { id: "budget", title: "Operating Budget", routeKey: "budget", group: "insights" },
+        { id: "goals", title: "Revenue Targets", routeKey: "goals", group: "insights" },
+        { id: "reports", title: "Financial Reports", routeKey: "reports", group: "insights" },
+        { id: "charts", title: "Interactive Analytics", routeKey: "charts", group: "insights" },
+        { id: "monthly", title: "Monthly Trends", routeKey: "monthly", group: "insights" },
+        { id: "vault", title: "Contracts & Documents", routeKey: "vault", group: "insights" },
+        { id: "timeline", title: "Activity Log", routeKey: "timeline", group: "insights" },
+        { id: "notes", title: "Project Notes", routeKey: "notes", group: "insights" },
+      ],
+    };
+  }
+
+  if (isCreator) {
+    return {
+      workspace: [
+        { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
+        { id: "income", title: "Sponsorships & Ads", routeKey: "income", group: "workspace" },
+        { id: "expenses", title: "Production Costs", routeKey: "expenses", group: "workspace" },
+        { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
+        { id: "accounts", title: "Accounts & Payouts", routeKey: "accounts", group: "workspace" },
+        { id: "clients", title: "Sponsors & Brands", routeKey: "clients", group: "workspace" },
+        { id: "projects", title: "Content Campaigns", routeKey: "projects", group: "workspace" },
+      ],
+      insights: [
+        { id: "budget", title: "Content Budget", routeKey: "budget", group: "insights" },
+        { id: "goals", title: "Monetization Goals", routeKey: "goals", group: "insights" },
+        { id: "reports", title: "Channel Reports", routeKey: "reports", group: "insights" },
+        { id: "charts", title: "Analytics", routeKey: "charts", group: "insights" },
+        { id: "monthly", title: "Monthly Revenue", routeKey: "monthly", group: "insights" },
+        { id: "vault", title: "Brand Assets Vault", routeKey: "vault", group: "insights" },
+        { id: "notes", title: "Idea Notes", routeKey: "notes", group: "insights" },
+      ],
+    };
+  }
+
+  return {
+    workspace: [
+      { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
+      { id: "income", title: isNonProfit ? "Grants & Donations" : "Company Revenue", routeKey: "income", group: "workspace" },
+      { id: "expenses", title: "Operating Expenses", routeKey: "expenses", group: "workspace" },
+      { id: "cashflow", title: "Cash Flow Statement", routeKey: "cashflow", group: "workspace" },
+      { id: "accounts", title: "Corporate Accounts", routeKey: "accounts", group: "workspace" },
+      { id: "clients", title: isNonProfit ? "Donors & Partners" : "Client CRM", routeKey: "clients", group: "workspace" },
+      { id: "projects", title: "Client Projects", routeKey: "projects", group: "workspace" },
+      { id: "invoices", title: "Invoices & Billing", routeKey: "invoices", group: "workspace" },
+      { id: "investments", title: "Cap Table & Capital", routeKey: "investments", group: "workspace" },
+    ],
+    insights: [
+      { id: "reports", title: "P&L & Financial Statements", routeKey: "reports", group: "insights" },
+      { id: "calculator", title: "Break-Even & KPI Calc", routeKey: "calculator", group: "insights" },
+      { id: "budget", title: "Corporate Budget", routeKey: "budget", group: "insights" },
+      { id: "goals", title: "Corporate Targets", routeKey: "goals", group: "insights" },
+      { id: "charts", title: "Executive Analytics", routeKey: "charts", group: "insights" },
+      { id: "monthly", title: "Monthly Performance", routeKey: "monthly", group: "insights" },
+      { id: "vault", title: "Compliance Vault", routeKey: "vault", group: "insights" },
+      { id: "timeline", title: "Audit Trail", routeKey: "timeline", group: "insights" },
+      { id: "notes", title: "Internal Notes", routeKey: "notes", group: "insights" },
+    ],
+  };
 }

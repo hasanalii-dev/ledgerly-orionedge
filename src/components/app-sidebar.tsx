@@ -20,13 +20,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Plus, Settings, LogOut, ChevronDown, LayoutDashboard, TrendingUp, TrendingDown, LineChart, 
   Wallet, Users, FolderKanban, FileText, CandlestickChart, Target, ArrowLeftRight, FileBarChart, 
-  PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles, Calculator
+  PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles, Calculator, SlidersHorizontal
 } from "lucide-react";
 import { InviteDialog } from "./invite-dialog";
-import { WORKSPACE_TYPES, WorkspaceType, getWorkspaceDefaults, getCategoryPresets } from "@/lib/workspace-presets";
+import { WORKSPACE_TYPES, WorkspaceType, getWorkspaceDefaults, getCategoryPresets, getWorkspaceNavigation } from "@/lib/workspace-presets";
 import { toast } from "sonner";
 
-type Planner = { id: string; name: string; emoji: string | null; is_default: boolean };
+type Planner = { 
+  id: string; 
+  name: string; 
+  emoji: string | null; 
+  is_default: boolean;
+  workspace_type: WorkspaceType | null;
+  custom_config: any;
+};
 
 export function AppSidebar() {
   const { plannerId } = useParams({ strict: false }) as { plannerId?: string };
@@ -39,7 +46,7 @@ export function AppSidebar() {
   const { data: planners = [] } = useQuery({
     queryKey: ["planners"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("planners").select("id, name, emoji, is_default").order("created_at");
+      const { data, error } = await supabase.from("planners").select("id, name, emoji, is_default, workspace_type, custom_config").order("created_at");
       if (error) throw error;
       return data as Planner[];
     },
@@ -56,13 +63,23 @@ export function AppSidebar() {
   });
 
   const active = planners.find((p) => p.id === plannerId) ?? planners[0];
-  const [dialogOpen, setDialogOpen] = useState<null | "new" | "rename">(null);
+  const [dialogOpen, setDialogOpen] = useState<null | "new" | "rename" | "settings">(null);
   const [signOutOpen, setSignOutOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [name, setName] = useState("");
   const [newWorkspaceType, setNewWorkspaceType] = useState<WorkspaceType>("personal");
+  const [editWorkspaceType, setEditWorkspaceType] = useState<WorkspaceType>("personal");
 
-  useEffect(() => { if (dialogOpen === "rename" && active) setName(active.name); if (dialogOpen === "new") { setName(""); setNewWorkspaceType("personal"); } }, [dialogOpen, active]);
+  useEffect(() => { 
+    if ((dialogOpen === "rename" || dialogOpen === "settings") && active) { 
+      setName(active.name); 
+      setEditWorkspaceType((active.workspace_type as WorkspaceType) || "personal");
+    } 
+    if (dialogOpen === "new") { 
+      setName(""); 
+      setNewWorkspaceType("personal"); 
+    } 
+  }, [dialogOpen, active]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -107,17 +124,28 @@ export function AppSidebar() {
       await supabase.from("expense_categories").insert(categoriesToInsert as any);
     }
 
-    toast.success("Planner created");
+    toast.success("Planner initialized");
     qc.invalidateQueries({ queryKey: ["planners"] });
     setDialogOpen(null);
     if (data) navigate({ to: `/app/p/${data.id}/dashboard` as any });
   }
 
-  async function renamePlanner() {
+  async function updatePlannerSettings() {
     if (!active || !name.trim()) return;
-    const { error } = await supabase.from("planners").update({ name: name.trim() }).eq("id", active.id);
+    const defaults = getWorkspaceDefaults(editWorkspaceType);
+    const { error } = await supabase.from("planners").update({ 
+      name: name.trim(),
+      workspace_type: editWorkspaceType,
+      custom_config: {
+        ...(active.custom_config || {}),
+        hideModules: defaults.hideModules,
+        primaryMetrics: defaults.primaryMetrics,
+        clientTerm: defaults.clientTerm,
+      }
+    }).eq("id", active.id);
+
     if (error) return toast.error(error.message);
-    toast.success("Renamed");
+    toast.success("Planner settings updated!");
     qc.invalidateQueries({ queryKey: ["planners"] });
     setDialogOpen(null);
   }
@@ -126,7 +154,13 @@ export function AppSidebar() {
     if (!active) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const { data, error } = await supabase.from("planners").insert({ user_id: user.id, name: `${active.name} (copy)` }).select("id").single();
+    const { data, error } = await supabase.from("planners").insert({ 
+      user_id: user.id, 
+      name: `${active.name} (copy)`,
+      workspace_type: active.workspace_type,
+      custom_config: active.custom_config
+    }).select("id").single();
+
     if (error) return toast.error(error.message);
     toast.success("Planner duplicated");
     qc.invalidateQueries({ queryKey: ["planners"] });
@@ -152,35 +186,48 @@ export function AppSidebar() {
     navigate({ to: "/auth", replace: true });
   }
 
+  const activeType = (active?.workspace_type as WorkspaceType) || "personal";
+  const navConfig = getWorkspaceNavigation(activeType);
+
+  const iconMap: Record<string, any> = {
+    dashboard: LayoutDashboard,
+    income: TrendingUp,
+    expenses: TrendingDown,
+    cashflow: LineChart,
+    accounts: Wallet,
+    clients: Users,
+    projects: FolderKanban,
+    invoices: FileText,
+    investments: CandlestickChart,
+    vault: Files,
+    goals: Target,
+    budget: ArrowLeftRight,
+    reports: FileBarChart,
+    charts: PieChart,
+    monthly: Calendar,
+    calculator: Calculator,
+    timeline: Activity,
+    notes: StickyNote,
+  };
+
   const items = plannerId
-    ? [
-        { title: "Dashboard", to: `/app/p/${plannerId}/dashboard`, icon: LayoutDashboard },
-        { title: "Income", to: `/app/p/${plannerId}/income`, icon: TrendingUp },
-        { title: "Expenses", to: `/app/p/${plannerId}/expenses`, icon: TrendingDown },
-        { title: "Cash Flow", to: `/app/p/${plannerId}/cashflow`, icon: LineChart },
-        { title: "Accounts", to: `/app/p/${plannerId}/accounts`, icon: Wallet },
-        { title: "Clients", to: `/app/p/${plannerId}/clients`, icon: Users },
-        { title: "Projects", to: `/app/p/${plannerId}/projects`, icon: FolderKanban },
-        { title: "Invoices", to: `/app/p/${plannerId}/invoices`, icon: FileText },
-        { title: "Investments", to: `/app/p/${plannerId}/investments`, icon: CandlestickChart },
-      ]
+    ? navConfig.workspace.map(item => ({
+        title: item.title,
+        to: `/app/p/${plannerId}/${item.routeKey}`,
+        icon: iconMap[item.routeKey] || LayoutDashboard,
+      }))
     : [];
+
   const items2 = plannerId
-    ? [
-        { title: "Vault", to: `/app/p/${plannerId}/vault`, icon: Files },
-        { title: "Goals", to: `/app/p/${plannerId}/goals`, icon: Target },
-        { title: "Budget", to: `/app/p/${plannerId}/budget`, icon: ArrowLeftRight },
-        { title: "Reports", to: `/app/p/${plannerId}/reports`, icon: FileBarChart },
-        { title: "Charts", to: `/app/p/${plannerId}/charts`, icon: PieChart },
-        { title: "Monthly Tracking", to: `/app/p/${plannerId}/monthly`, icon: Calendar },
-        { title: "Calculator", to: `/app/p/${plannerId}/calculator`, icon: Calculator },
-        { title: "Timeline", to: `/app/p/${plannerId}/timeline`, icon: Activity },
-        { title: "Notes", to: `/app/p/${plannerId}/notes`, icon: StickyNote },
-      ]
+    ? navConfig.insights.map(item => ({
+        title: item.title,
+        to: `/app/p/${plannerId}/${item.routeKey}`,
+        icon: iconMap[item.routeKey] || Activity,
+      }))
     : [];
 
   return (
-    <Sidebar collapsible="icon" className="border-none bg-[#0b0e0c] overflow-hidden">
+    <Sidebar collapsible="icon" className="border-none bg-[#0b0e0c] overflow-hidden font-['Questrial',_sans-serif]">
       <SidebarHeader className={`py-4 z-10 relative ${collapsed ? 'px-0' : 'px-4'}`}>
         {/* macOS window controls */}
         {!collapsed && (
@@ -201,12 +248,12 @@ export function AppSidebar() {
                 </div>
                 <div className="flex flex-col flex-1 overflow-hidden">
                   <span className="text-[10px] font-semibold text-muted-foreground tracking-widest uppercase mb-0.5">Capient</span>
-                  <span className="font-display font-medium text-sm text-foreground truncate">{active?.name ?? "Planner"}</span>
+                  <span className="font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-sm text-foreground truncate">{active?.name ?? "Planner"}</span>
                 </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64 rounded-2xl bg-[#0a1010]/80 backdrop-blur-3xl border-white/10 p-1.5 shadow-2xl font-['Questrial',_sans-serif] relative overflow-hidden" align="start">
+            <DropdownMenuContent className="w-64 rounded-2xl bg-[#0a1010]/95 backdrop-blur-3xl border-white/10 p-1.5 shadow-2xl font-['Questrial',_sans-serif] relative overflow-hidden" align="start">
               <div className="absolute inset-0 rounded-2xl border border-primary/20 pointer-events-none [mask-image:linear-gradient(to_bottom_right,black_0%,transparent_60%)]" />
               <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/20 blur-[40px] rounded-full pointer-events-none" />
               <DropdownMenuLabel className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold px-2 py-1.5">Planners</DropdownMenuLabel>
@@ -228,7 +275,7 @@ export function AppSidebar() {
                 />
               )}
               <DropdownMenuItem className="rounded-lg cursor-pointer my-0.5 text-muted-foreground focus:text-foreground" onClick={() => setDialogOpen("new")}><Plus className="h-4 w-4 mr-2" />New planner</DropdownMenuItem>
-              <DropdownMenuItem className="rounded-lg cursor-pointer my-0.5 text-muted-foreground focus:text-foreground" onClick={() => setDialogOpen("rename")}><Pencil className="h-4 w-4 mr-2" />Rename</DropdownMenuItem>
+              <DropdownMenuItem className="rounded-lg cursor-pointer my-0.5 text-muted-foreground focus:text-foreground" onClick={() => setDialogOpen("settings")}><SlidersHorizontal className="h-4 w-4 mr-2" />Planner Settings & Type</DropdownMenuItem>
               <DropdownMenuItem className="rounded-lg cursor-pointer my-0.5 text-muted-foreground focus:text-foreground" onClick={duplicatePlanner}><Copy className="h-4 w-4 mr-2" />Duplicate</DropdownMenuItem>
               <DropdownMenuSeparator className="bg-white/5 my-1" />
               <DropdownMenuItem onClick={deletePlanner} className="text-[#FF5F56] focus:bg-[#FF5F56]/10 focus:text-[#FF5F56] rounded-lg cursor-pointer my-0.5"><Trash2 className="h-4 w-4 mr-2" />Delete</DropdownMenuItem>
@@ -444,7 +491,11 @@ export function AppSidebar() {
         <DialogContent className="bg-[#0c100e] border-white/10 text-white rounded-3xl font-['Questrial',_sans-serif]">
           <DialogHeader>
             <DialogTitle className="font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-lg text-white">
-              {dialogOpen === "new" ? "Create New Workspace Planner" : "Rename Planner"}
+              {dialogOpen === "new" 
+                ? "Create New Workspace Planner" 
+                : dialogOpen === "settings" 
+                  ? "Planner Settings & Workspace Type" 
+                  : "Rename Planner"}
             </DialogTitle>
           </DialogHeader>
 
@@ -460,24 +511,29 @@ export function AppSidebar() {
               />
             </div>
 
-            {dialogOpen === "new" && (
+            {(dialogOpen === "new" || dialogOpen === "settings") && (
               <div>
-                <label className="text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-white/80 block mb-1.5">Planner Use Case / Preset</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
-                  {WORKSPACE_TYPES.map(wt => (
-                    <button
-                      key={wt.id}
-                      type="button"
-                      onClick={() => setNewWorkspaceType(wt.id)}
-                      className={`p-2.5 rounded-xl border text-left text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all ${
-                        newWorkspaceType === wt.id
-                          ? "bg-[#3DDC97]/20 border-[#3DDC97] text-[#3DDC97]"
-                          : "bg-black/40 border-white/10 text-white/70 hover:bg-white/5"
-                      }`}
-                    >
-                      {wt.title}
-                    </button>
-                  ))}
+                <label className="text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-white/80 block mb-1.5">Planner Workspace Type / Preset</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1">
+                  {WORKSPACE_TYPES.map(wt => {
+                    const currentSelected = dialogOpen === "new" ? newWorkspaceType : editWorkspaceType;
+                    const isSel = currentSelected === wt.id;
+                    return (
+                      <button
+                        key={wt.id}
+                        type="button"
+                        onClick={() => dialogOpen === "new" ? setNewWorkspaceType(wt.id) : setEditWorkspaceType(wt.id)}
+                        className={`p-2.5 rounded-xl border text-left text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all flex flex-col justify-between ${
+                          isSel
+                            ? "bg-[#3DDC97]/20 border-[#3DDC97] text-[#3DDC97]"
+                            : "bg-black/40 border-white/10 text-white/70 hover:bg-white/5"
+                        }`}
+                      >
+                        <span>{wt.title}</span>
+                        <span className="text-[10px] text-muted-foreground font-normal line-clamp-1 mt-0.5">{wt.description}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -485,8 +541,8 @@ export function AppSidebar() {
 
           <DialogFooter className="gap-2">
             <Button variant="ghost" onClick={() => setDialogOpen(null)} className="rounded-xl text-xs font-bold text-muted-foreground hover:text-white">Cancel</Button>
-            <Button onClick={dialogOpen === "new" ? createPlanner : renamePlanner} className="bg-[#3DDC97] hover:bg-[#3DDC97]/90 text-black rounded-xl text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold">
-              {dialogOpen === "new" ? "Initialize Planner" : "Save Name"}
+            <Button onClick={dialogOpen === "new" ? createPlanner : updatePlannerSettings} className="bg-[#3DDC97] hover:bg-[#3DDC97]/90 text-black rounded-xl text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold">
+              {dialogOpen === "new" ? "Initialize Planner" : "Save Settings"}
             </Button>
           </DialogFooter>
         </DialogContent>

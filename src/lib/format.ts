@@ -52,7 +52,7 @@ export const COUNTRIES = [
   "South Africa",
   "Other Country",
 ] as const;
-export const ACCOUNT_KINDS = ["bank", "wallet", "cash", "other"] as const;
+export const ACCOUNT_KINDS = ["bank", "wallet", "cash", "credit_card", "savings", "investment", "crypto", "loan", "asset", "liability", "other"] as const;
 export const INCOME_STATUSES = ["pending", "advance", "partial", "paid", "refunded"] as const;
 export const INVOICE_STATUSES = ["pending", "sent", "paid", "overdue", "cancelled"] as const;
 export const PROJECT_STATUSES = ["active", "on-hold", "completed", "cancelled"] as const;
