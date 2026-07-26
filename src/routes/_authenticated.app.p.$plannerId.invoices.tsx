@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EditableTable, CellInput, CellSelect } from "@/components/editable-table";
+import { InvoicePdfGenerator } from "@/components/invoice-pdf-generator";
 import { INVOICE_STATUSES } from "@/lib/format";
 import { useEffect, useState } from "react";
 import { usePlannerCurrency } from "@/hooks/use-planner-currency";
@@ -49,6 +50,10 @@ function InvoicesPage() {
           { key: "amount", label: "Amount", width: "130px", render: (r, on) => <CellInput type="number" value={String(r.amount ?? 0)} onChange={(v) => on({ amount: parseFloat(v) || 0 })} className="text-right font-mono" /> },
           { key: "currency", label: "CCY", width: "80px", render: (r, on) => <CellInput value={r.currency ?? currency} onChange={(v) => on({ currency: v.toUpperCase() })} className="uppercase" /> },
           { key: "status", label: "Status", width: "140px", render: (r, on) => <CellSelect value={r.status ?? "pending"} onChange={(v) => on({ status: v })} options={INVOICE_STATUSES.map((s) => ({ value: s, label: s }))} /> },
+          { key: "actions", label: "", width: "80px", render: (r) => {
+            const clientName = clients.find(c => c.id === r.client_id)?.name || "";
+            return <InvoicePdfGenerator invoice={r} clientName={clientName} currency={r.currency || currency} />;
+          } },
         ]}
       />
     </div>

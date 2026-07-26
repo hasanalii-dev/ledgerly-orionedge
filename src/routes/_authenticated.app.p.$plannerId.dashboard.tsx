@@ -16,6 +16,7 @@ import { Bell } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { WorkspaceType } from "@/lib/workspace-presets";
+import PixelCard from "@/components/magic/PixelCard";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/dashboard")({
   component: DashboardPage,
@@ -39,22 +40,44 @@ const renderCustomizedLabel = (props: any) => {
   );
 };
 
-function KpiCard({ icon: Icon, label, value, compactValue, sub, accent }: { icon: React.ElementType; label: string; value: string; compactValue?: string; sub?: string; accent?: boolean }) {
+function KpiCard({ icon: Icon, label, value, compactValue, sub, variant = 'default' }: { icon: React.ElementType; label: string; value: string; compactValue?: string; sub?: string; variant?: 'default' | 'green' | 'red' }) {
+  const isGreen = variant === 'green';
+  const isRed = variant === 'red';
+
   return (
-    <div className="relative overflow-hidden rounded-[24px] md:rounded-[20px] p-6 md:p-5 shadow-lg flex flex-col justify-between min-h-[160px] md:min-h-[120px] transition-all duration-300 bg-[#111312] border border-white/5 hover:bg-[#151716] hover:border-white/10 hover:-translate-y-0.5 hover:shadow-xl group">
+    <PixelCard variant={variant} noFocus={true} className="relative overflow-hidden rounded-[24px] md:rounded-[20px] p-6 md:p-5 shadow-lg flex flex-col justify-between min-h-[160px] md:min-h-[120px] transition-all duration-300 bg-[#111312] border border-white/5 hover:bg-[#151716] hover:border-white/10 hover:-translate-y-0.5 hover:shadow-xl group">
+      
+      {/* Subtle Grid Background */}
+      <div className={`absolute inset-0 bg-[size:20px_20px] [mask-image:radial-gradient(ellipse_at_bottom_right,black_20%,transparent_80%)] opacity-50 z-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none ${
+        isGreen ? 'bg-[linear-gradient(rgba(61,220,151,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(61,220,151,0.05)_1px,transparent_1px)]' : 
+        isRed ? 'bg-[linear-gradient(rgba(255,51,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,51,102,0.05)_1px,transparent_1px)]' : 
+        'bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)]'}`} />
+      
       {/* Glow & Gradients */}
-      {accent && (
+      {isGreen && (
         <>
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[1px] bg-gradient-to-r from-transparent via-[#3DDC97]/50 to-transparent z-0" />
-          <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-32 bg-[#3DDC97]/40 blur-[50px] rounded-full pointer-events-none z-0" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[1px] bg-gradient-to-r from-transparent via-[#3DDC97]/30 to-transparent z-0 hidden md:block" />
+          <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-32 bg-[#3DDC97]/20 blur-[50px] rounded-full pointer-events-none z-0 hidden md:block" />
+        </>
+      )}
+      {isRed && (
+        <>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[1px] bg-gradient-to-r from-transparent via-[#FF3366]/30 to-transparent z-0 hidden md:block" />
+          <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-32 bg-[#FF3366]/20 blur-[50px] rounded-full pointer-events-none z-0 hidden md:block" />
         </>
       )}
       
       <div className="flex items-start justify-between mb-4 md:mb-4 relative z-10">
-        <span className={`text-[12px] md:text-[11px] font-bold uppercase tracking-widest leading-tight w-2/3 ${accent ? 'bg-gradient-to-b from-[#3DDC97] to-white/40 bg-clip-text text-transparent' : 'text-muted-foreground'}`}>
+        <span className={`text-[12px] md:text-[11px] font-bold uppercase tracking-widest leading-tight w-2/3 ${
+          isGreen ? 'bg-gradient-to-b from-[#3DDC97] to-white/40 bg-clip-text text-transparent' : 
+          isRed ? 'bg-gradient-to-b from-[#FF3366] to-white/40 bg-clip-text text-transparent' : 
+          'text-muted-foreground'}`}>
           {label}
         </span>
-        <div className={`p-2.5 md:p-2 rounded-full shadow-inner ml-2 shrink-0 ${accent ? 'bg-gradient-to-b from-[#3DDC97]/20 to-white/5 text-[#3DDC97]' : 'bg-[#1C201E] text-muted-foreground border border-white/5'}`}>
+        <div className={`p-2.5 md:p-2 rounded-full shadow-inner ml-2 shrink-0 ${
+          isGreen ? 'bg-gradient-to-b from-[#3DDC97]/20 to-white/5 text-[#3DDC97]' : 
+          isRed ? 'bg-gradient-to-b from-[#FF3366]/20 to-white/5 text-[#FF3366]' : 
+          'bg-[#1C201E] text-muted-foreground border border-white/5'}`}>
           <Icon className="h-5 w-5 md:h-4 md:w-4" />
         </div>
       </div>
@@ -64,11 +87,14 @@ function KpiCard({ icon: Icon, label, value, compactValue, sub, accent }: { icon
             <Activity className="h-4 w-4 md:h-3.5 md:w-3.5" /> {sub}
           </div>
         )}
-        <div className={`text-[24px] md:text-[28px] font-display font-medium tracking-tight truncate relative z-10 ${accent ? 'bg-gradient-to-b from-[#3DDC97] to-white bg-clip-text text-transparent' : 'text-white'}`} title={value}>
+        <div className={`text-[24px] md:text-[28px] font-display font-medium tracking-tight truncate relative z-10 ${
+          isGreen ? 'bg-gradient-to-b from-[#3DDC97] to-white bg-clip-text text-transparent' : 
+          isRed ? 'bg-gradient-to-b from-[#FF3366] to-white bg-clip-text text-transparent' : 
+          'text-white'}`} title={value}>
           {compactValue || value}
         </div>
       </div>
-    </div>
+    </PixelCard>
   );
 }
 
@@ -107,15 +133,15 @@ function DashboardPage() {
 
   const getKpiLabels = () => {
     switch(workspaceType) {
-      case "freelancer": return { income: "Client Revenue", expenses: "Project Expenses", net: "Net Profit", wealth: "Business Balance", thisMonth: "This Month Profit", avgIncome: "Avg Monthly Revenue", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
-      case "agency": return { income: "Agency Revenue", expenses: "Operating Expenses", net: "Net Cash Flow", wealth: "Agency Balance", thisMonth: "This Month Net", avgIncome: "Avg Monthly Revenue", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
-      case "smb": return { income: "Business Revenue", expenses: "Operating Expenses", net: "Net Profit", wealth: "Total Equity", thisMonth: "This Month Profit", avgIncome: "Avg Monthly Revenue", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
-      case "startup": return { income: "ARR / Revenue", expenses: "Burn Rate", net: "Net Burn", wealth: "Runway Balance", thisMonth: "This Month Burn", avgIncome: "Avg Monthly Revenue", reserve: "Emergency Runway", topCat: "Pending Invoices" };
-      case "creator": return { income: "Sponsorships & Ads", expenses: "Production Costs", net: "Net Earnings", wealth: "Business Balance", thisMonth: "This Month Net", avgIncome: "Avg Monthly Earnings", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
-      case "nonprofit": return { income: "Donations & Grants", expenses: "Program Expenses", net: "Net Funds", wealth: "Total Funds", thisMonth: "This Month Net", avgIncome: "Avg Monthly Donations", reserve: "Operating Reserve", topCat: "Pending Invoices" };
+      case "freelancer": return { income: "Client Revenue", expenses: "Project Expenses", net: "Net Profit", wealth: "Current Balance", thisMonth: "This Month Profit", avgIncome: "Avg Monthly Revenue", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
+      case "agency": return { income: "Agency Revenue", expenses: "Operating Expenses", net: "Net Cash Flow", wealth: "Current Balance", thisMonth: "This Month Net", avgIncome: "Avg Monthly Revenue", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
+      case "smb": return { income: "Business Revenue", expenses: "Operating Expenses", net: "Net Profit", wealth: "Current Balance", thisMonth: "This Month Profit", avgIncome: "Avg Monthly Revenue", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
+      case "startup": return { income: "ARR / Revenue", expenses: "Burn Rate", net: "Net Burn", wealth: "Current Balance", thisMonth: "This Month Burn", avgIncome: "Avg Monthly Revenue", reserve: "Emergency Runway", topCat: "Pending Invoices" };
+      case "creator": return { income: "Sponsorships & Ads", expenses: "Production Costs", net: "Net Earnings", wealth: "Current Balance", thisMonth: "This Month Net", avgIncome: "Avg Monthly Earnings", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
+      case "nonprofit": return { income: "Donations & Grants", expenses: "Program Expenses", net: "Net Funds", wealth: "Current Balance", thisMonth: "This Month Net", avgIncome: "Avg Monthly Donations", reserve: "Operating Reserve", topCat: "Pending Invoices" };
       case "student":
       case "personal":
-      default: return { income: "Personal Income", expenses: "Household Expenses", net: "Net Savings", wealth: "Total Wealth", thisMonth: "This Month Savings", avgIncome: "Avg Monthly Income", reserve: "Emergency Reserve", topCat: "Top Category" };
+      default: return { income: "Total Income", expenses: "Total Expenses", net: "Net Savings", wealth: "Current Balance", thisMonth: "This Month Savings", avgIncome: "Avg Monthly Income", reserve: "Emergency Reserve", topCat: "Top Category" };
     }
   };
   const labels = getKpiLabels();
@@ -313,13 +339,14 @@ function DashboardPage() {
             label={labels.income} 
             value={formatMoney(totalIncome, currency)} 
             compactValue={formatMoney(totalIncome, currency, true)} 
-            accent 
+            variant="green"
           />
           <KpiCard 
             icon={TrendingDown} 
             label={labels.expenses} 
             value={formatMoney(totalExpenses, currency)} 
             compactValue={formatMoney(totalExpenses, currency, true)} 
+            variant="red"
           />
           <KpiCard 
             icon={Sparkles} 

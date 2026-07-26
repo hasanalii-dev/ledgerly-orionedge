@@ -15,6 +15,10 @@ import appCss from "../styles.css?url";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { ReactLenis } from 'lenis/react';
+import { WifiOff } from "lucide-react";
+import { initOfflineSync } from "@/lib/offline-sync";
+import { persistQueryClient } from '@tanstack/react-query-persist-client';
+import { queryPersister } from '@/lib/query-persister';
 
 // Global log buffer for bug reporting
 declare global {
@@ -135,7 +139,7 @@ export const Route = createRootRouteWithContext<{
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { title: "Capient — Premium Personal & Business Finance Planner App" },
+        { title: "Capient | Premium Personal & Business Finance Planner App" },
         { name: "description", content: "Capient is a premium financial operating system for entrepreneurs, freelancers, and agencies. Replace disconnected spreadsheets with the ultimate ledger app to track income, expenses, invoices, and clients." },
         { name: "keywords", content: "finance app, personal finance app, business ledger, ledger apps, freelance invoicing software, multi-planner workspace, cash flow tracker, financial operating system, capient, CapientApp, expense tracker, budget app, agency finance tool" },
         { name: "robots", content: "index, follow" },
@@ -143,7 +147,7 @@ export const Route = createRootRouteWithContext<{
         { name: "author", content: "Capient" },
         { property: "og:site_name", content: "Capient" },
         { property: "og:url", content: "https://capientapp.com/" },
-        { property: "og:title", content: "Capient — Premium Personal & Business Finance Planner App" },
+        { property: "og:title", content: "Capient | Premium Personal & Business Finance Planner App" },
         { property: "og:description", content: "Replace disconnected spreadsheets with the ultimate ledger app to track income, expenses, invoices, and clients." },
         { property: "og:type", content: "website" },
         { property: "og:image", content: "https://capientapp.com/og-image.png" },
@@ -151,13 +155,15 @@ export const Route = createRootRouteWithContext<{
         { property: "og:image:height", content: "630" },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:site", content: "@capientapp" },
-        { name: "twitter:title", content: "Capient — Premium Finance Planner App" },
+        { name: "twitter:title", content: "Capient | Premium Finance Planner App" },
         { name: "twitter:description", content: "Replace disconnected spreadsheets with the ultimate ledger app to track income, expenses, invoices, and clients." },
         { name: "twitter:image", content: "https://capientapp.com/og-image.png" },
       ],
       links: [
         { rel: "canonical", href: "https://capientapp.com/" },
         { rel: "stylesheet", href: appCss },
+        { rel: "apple-touch-icon", href: "/favicon.png", sizes: "180x180" },
+        { rel: "manifest", href: "/manifest.webmanifest" },
         { rel: "icon", href: "/favicon.png", type: "image/png" },
         { rel: "apple-touch-icon", href: "/favicon.png" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -198,7 +204,7 @@ function PageLoader() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed top-0 left-0 right-0 z-50 h-1 bg-primary origin-left overflow-hidden"
+          className="fixed top-0 left-0 right-0 z-50 h-1 bg-primary origin-left overflow-hidden pointer-events-none"
         >
           <motion.div
             className="h-full bg-white/40"
@@ -237,7 +243,7 @@ function InitialSplash() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="relative flex flex-col items-center justify-center gap-10 w-full max-w-xs will-change-transform"
           >
-            <div className="relative will-change-transform">
+            <div className="relative will-change-transform flex items-center justify-center">
               <motion.div
                  animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }}
                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
@@ -290,6 +296,27 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   const location = useLocation();
+  const [isOffline, setIsOffline] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && queryPersister) {
+      persistQueryClient({
+        queryClient,
+        persister: queryPersister,
+        maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      });
+    }
+
+    initOfflineSync();
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
@@ -324,6 +351,12 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <InitialSplash />
       <PageLoader />
+      {isOffline && (
+        <div className="fixed top-0 left-0 right-0 bg-rose-500 text-white text-[11px] font-semibold py-1.5 px-4 z-[9999] flex items-center justify-center gap-2 shadow-md">
+          <WifiOff className="w-3.5 h-3.5" />
+          You are offline. Changes will be saved locally and synced when you reconnect.
+        </div>
+      )}
       <ReactLenis root options={{ lerp: 0.1, duration: 1.5, smoothWheel: true }}>
         {isDashboard ? (
           <Outlet />

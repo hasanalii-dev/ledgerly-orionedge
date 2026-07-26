@@ -154,7 +154,7 @@ function PreferencesPage() {
 
   async function signOut() {
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    window.location.href = "/auth";
   }
 
   async function deleteAccount() {
@@ -164,7 +164,7 @@ function PreferencesPage() {
     if (user) {
       await supabase.from("profiles").delete().eq("id", user.id);
       await supabase.auth.signOut();
-      navigate({ to: "/", replace: true });
+      window.location.href = "/";
     }
   }
 

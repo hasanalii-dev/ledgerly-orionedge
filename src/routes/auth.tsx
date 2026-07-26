@@ -12,7 +12,7 @@ import SideRays from "@/components/magic/SideRays";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Join Beta — Capient" },
+      { title: "Join Beta | Capient" },
       { name: "description", content: "Join the Capient Beta program." },
       { name: "robots", content: "noindex" },
     ],

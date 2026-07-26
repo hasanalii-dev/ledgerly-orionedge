@@ -119,7 +119,7 @@ function ProfilePage() {
 
   async function signOut() {
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    window.location.href = "/auth";
   }
 
   function generateAvatar() {

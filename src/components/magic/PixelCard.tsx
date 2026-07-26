@@ -105,6 +105,13 @@ const VARIANTS = {
     speed: 25,
     colors: '#064e3b,#047857,#34d399,#3DDC97,#17965a',
     noFocus: false
+  },
+  red: {
+    activeColor: '#FF3366',
+    gap: 15,
+    speed: 25,
+    colors: '#4c0519,#9f1239,#e11d48,#FF3366,#f43f5e',
+    noFocus: false
   }
 };
 

@@ -23,14 +23,15 @@ import {
   Plus, Settings, LogOut, ChevronDown, LayoutDashboard, TrendingUp, TrendingDown, LineChart, 
   Wallet, Users, FolderKanban, FileText, CandlestickChart, Target, ArrowLeftRight, FileBarChart, 
   PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles, Calculator, SlidersHorizontal, Check, Dices,
-  Building, Briefcase, Rocket, Video, GraduationCap
+  Building, Briefcase, Rocket, Video, GraduationCap, Store, Landmark, Palette, Code, Plane, Camera, Gamepad, Utensils, Music, Laptop
 } from "lucide-react";
 import { InviteDialog } from "./invite-dialog";
 import { WORKSPACE_TYPES, WorkspaceType, getWorkspaceDefaults, getCategoryPresets, getWorkspaceNavigation } from "@/lib/workspace-presets";
 import { toast } from "sonner";
 
 const ICON_MAP: Record<string, React.ElementType> = {
-  Building, Briefcase, Rocket, Video, GraduationCap, Book
+  Building, Briefcase, Rocket, Video, GraduationCap, Book,
+  Store, Landmark, Palette, Code, Plane, Camera, Gamepad, Utensils, Music, Laptop
 };
 
 const PRESET_ICONS = [
@@ -39,6 +40,16 @@ const PRESET_ICONS = [
   { name: "Startup", id: "Rocket" },
   { name: "Creator", id: "Video" },
   { name: "Student", id: "GraduationCap" },
+  { name: "Retail", id: "Store" },
+  { name: "Institution", id: "Landmark" },
+  { name: "Design", id: "Palette" },
+  { name: "Software", id: "Code" },
+  { name: "Travel", id: "Plane" },
+  { name: "Photography", id: "Camera" },
+  { name: "Gaming", id: "Gamepad" },
+  { name: "Food & Bev", id: "Utensils" },
+  { name: "Music", id: "Music" },
+  { name: "Tech", id: "Laptop" },
 ];
 
 type Planner = { 
@@ -281,7 +292,7 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    window.location.href = "/auth";
   }
 
   const activeType = (active?.workspace_type as WorkspaceType) || "personal";
@@ -675,40 +686,24 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
                   </div>
 
                   <div className="flex-1 w-full overflow-hidden">
-                    <Tabs defaultValue="presets" className="w-full">
-                      <TabsList className="grid w-full grid-cols-2 bg-black/60 rounded-xl mb-2">
-                        <TabsTrigger value="presets" className="rounded-lg text-xs">Presets</TabsTrigger>
-                        <TabsTrigger value="custom" className="rounded-lg text-xs">Custom URL</TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="presets" className="mt-0">
-                        <Select value={iconUrl} onValueChange={(v) => { if(v) setIconUrl(v); }}>
-                          <SelectTrigger className="w-full bg-black/60 border-white/10 text-white rounded-xl h-9 text-xs">
-                            <SelectValue placeholder="Select an icon..." />
-                          </SelectTrigger>
-                          <SelectContent className="bg-[#0c100e] border-white/10 text-white rounded-xl">
-                            {PRESET_ICONS.map((preset, idx) => {
-                              const PresetIcon = ICON_MAP[preset.id];
-                              return (
-                                <SelectItem key={idx} value={preset.id} className="text-xs">
-                                  <div className="flex items-center gap-2">
-                                    <PresetIcon className="h-4 w-4" />
-                                    <span>{preset.name}</span>
-                                  </div>
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
-                      </TabsContent>
-                      <TabsContent value="custom" className="mt-0">
-                        <Input 
-                          value={iconUrl} 
-                          onChange={(e) => setIconUrl(e.target.value)} 
-                          placeholder="https://..." 
-                          className="bg-black/60 border-white/10 text-white rounded-xl h-9 text-xs focus:border-[#3DDC97]" 
-                        />
-                      </TabsContent>
-                    </Tabs>
+                    <Select value={iconUrl} onValueChange={(v) => { if(v) setIconUrl(v); }}>
+                      <SelectTrigger className="w-full bg-black/60 border-white/10 text-white rounded-xl h-[42px] text-xs">
+                        <SelectValue placeholder="Select an icon..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#0c100e] border-white/10 text-white rounded-xl max-h-[250px]">
+                        {PRESET_ICONS.map((preset, idx) => {
+                          const PresetIcon = ICON_MAP[preset.id];
+                          return (
+                            <SelectItem key={idx} value={preset.id} className="text-xs py-2">
+                              <div className="flex items-center gap-3">
+                                <PresetIcon className="h-4 w-4 text-[#3DDC97]" />
+                                <span>{preset.name}</span>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>

@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/docs")({
   head: () => ({
     meta: [
-      { title: "Documentation — Capient" },
+      { title: "Documentation | Capient" },
       { name: "description", content: "Comprehensive documentation, guides, and API references for Capient's financial operating system." },
     ]
   }),

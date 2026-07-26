@@ -123,14 +123,25 @@ function AllocationTable({
          if (netCashflow - newAmt < 0) throw new Error("Cannot allocate more than your available net cash flow!");
       }
 
-      const { error } = await (supabase as any).from("monthly_allocations").insert({
+      const payload = {
         planner_id: plannerId,
         month_year: monthYear,
         allocation_type: type,
         category: addCat,
         description: addDesc || null,
         amount: newAmt
-      });
+      };
+
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        const { queueOfflineAction } = await import('@/lib/offline-sync');
+        const tempId = crypto.randomUUID();
+        const finalPayload = { ...payload, id: tempId };
+        await queueOfflineAction({ type: 'INSERT', table: 'monthly_allocations', payload: finalPayload });
+        qc.setQueryData(["monthly_allocations", plannerId, monthYear], (old: any[]) => old ? [...old, finalPayload] : [finalPayload]);
+        return;
+      }
+
+      const { error } = await (supabase as any).from("monthly_allocations").insert(payload);
       if (error) throw error;
     },
     onSuccess: () => {

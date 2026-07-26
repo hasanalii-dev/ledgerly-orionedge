@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, Copy, Search } from "lucide-react";
 import { formatMoney } from "@/lib/format";
 import { useQueryClient } from "@tanstack/react-query";
+import { queueOfflineAction } from "@/lib/offline-sync";
 
 type ColumnDef<T> = {
   key: keyof T | string;
@@ -42,9 +43,16 @@ export function EditableTable<T extends BaseRow>({
       const entries = Object.entries(dirty);
       if (entries.length === 0) return;
       for (const [id, patch] of entries) {
-        // @ts-expect-error dynamic table name
-        const { error } = await supabase.from(table).update(patch).eq("id", id);
-        if (error) toast.error(error.message);
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+          await queueOfflineAction({ type: 'UPDATE', table, payload: { id, ...patch } });
+          invalidateKeys.forEach((k) => {
+            qc.setQueryData(k, (old: any[]) => old ? old.map((r: any) => r.id === id ? { ...r, ...patch } : r) : old);
+          });
+        } else {
+          // @ts-expect-error dynamic table name
+          const { error } = await supabase.from(table).update(patch).eq("id", id);
+          if (error) toast.error(error.message);
+        }
       }
       setDirty({});
       invalidateKeys.forEach((k) => qc.invalidateQueries({ queryKey: k }));
@@ -58,18 +66,33 @@ export function EditableTable<T extends BaseRow>({
 
   async function addRow() {
     const insert = { ...onNewRow(), planner_id, user_id };
-    // @ts-expect-error dynamic table name
-    const { error } = await supabase.from(table).insert(insert);
-    if (error) return toast.error(error.message);
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      const tempId = crypto.randomUUID();
+      const payload = { ...insert, id: tempId };
+      await queueOfflineAction({ type: 'INSERT', table, payload });
+      invalidateKeys.forEach((k) => qc.setQueryData(k, (old: any[]) => old ? [...old, payload] : [payload]));
+    } else {
+      // @ts-expect-error dynamic table name
+      const { error } = await supabase.from(table).insert(insert);
+      if (error) return toast.error(error.message);
+    }
     invalidateKeys.forEach((k) => qc.invalidateQueries({ queryKey: k }));
   }
 
   async function deleteSelected() {
     if (selected.size === 0) return;
     if (!confirm(`Delete ${selected.size} row(s)?`)) return;
-    // @ts-expect-error dynamic table name
-    const { error } = await supabase.from(table).delete().in("id", Array.from(selected));
-    if (error) return toast.error(error.message);
+    
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      for (const id of Array.from(selected)) {
+        await queueOfflineAction({ type: 'DELETE', table, payload: { id } });
+      }
+      invalidateKeys.forEach((k) => qc.setQueryData(k, (old: any[]) => old ? old.filter((r: any) => !selected.has(r.id)) : old));
+    } else {
+      // @ts-expect-error dynamic table name
+      const { error } = await supabase.from(table).delete().in("id", Array.from(selected));
+      if (error) return toast.error(error.message);
+    }
     setSelected(new Set());
     invalidateKeys.forEach((k) => qc.invalidateQueries({ queryKey: k }));
   }
@@ -82,9 +105,19 @@ export function EditableTable<T extends BaseRow>({
       void id; void created_at; void updated_at;
       return { ...rest, planner_id, user_id };
     });
-    // @ts-expect-error dynamic
-    const { error } = await supabase.from(table).insert(inserts);
-    if (error) return toast.error(error.message);
+    
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      for (const insert of inserts) {
+        const payload = { ...insert, id: crypto.randomUUID() };
+        await queueOfflineAction({ type: 'INSERT', table, payload });
+        invalidateKeys.forEach((k) => qc.setQueryData(k, (old: any[]) => old ? [...old, payload] : [payload]));
+      }
+    } else {
+      // @ts-expect-error dynamic table name
+      const { error } = await supabase.from(table).insert(inserts);
+      if (error) return toast.error(error.message);
+    }
+    
     setSelected(new Set());
     invalidateKeys.forEach((k) => qc.invalidateQueries({ queryKey: k }));
   }

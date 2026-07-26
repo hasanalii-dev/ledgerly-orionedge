@@ -14,7 +14,7 @@ import { MarketingFooter } from "@/components/MarketingFooter";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Capient — The Ultimate Finance Planner & Ledger App" },
+      { title: "Capient | The Ultimate Finance Planner & Ledger App" },
       { name: "description", content: "The ultimate personal finance and business ledger software. Capient makes tracking income, expenses, and invoices effortless for modern professionals." },
       { name: "keywords", content: "best personal finance tracker, agency ledger software, finance workspace, capient, expense tracker, freelance invoice tool, business bookkeeping" },
     ]
