@@ -37,13 +37,18 @@ function AccountsPage() {
   const { data: bals = [] } = useQuery({
     queryKey: ["account_balances", plannerId],
     queryFn: async () => {
-      const [{ data: inc }, { data: exp }] = await Promise.all([
+      const [{ data: inc }, { data: exp }, { data: trf }] = await Promise.all([
         supabase.from("income_entries").select("account_id, amount").eq("planner_id", plannerId),
         supabase.from("expense_entries").select("account_id, amount").eq("planner_id", plannerId),
+        supabase.from("transfers").select("from_account_id, to_account_id, amount").eq("planner_id", plannerId),
       ]);
       const map = new Map<string, number>();
       (inc ?? []).forEach((r) => { if (r.account_id) map.set(r.account_id, (map.get(r.account_id) ?? 0) + Number(r.amount)); });
       (exp ?? []).forEach((r) => { if (r.account_id) map.set(r.account_id, (map.get(r.account_id) ?? 0) - Number(r.amount)); });
+      (trf ?? []).forEach((r) => {
+        if (r.to_account_id) map.set(r.to_account_id, (map.get(r.to_account_id) ?? 0) + Number(r.amount));
+        if (r.from_account_id) map.set(r.from_account_id, (map.get(r.from_account_id) ?? 0) - Number(r.amount));
+      });
       return Array.from(map.entries());
     },
   });

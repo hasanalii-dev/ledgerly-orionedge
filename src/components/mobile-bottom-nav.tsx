@@ -1,18 +1,30 @@
 import { Link, useRouterState, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Calendar, Wallet, Menu, User, Calculator } from "lucide-react";
+import { LayoutDashboard, Calendar, Wallet, Menu, User, Calculator, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useState, useEffect } from "react";
 
 export function MobileBottomNav() {
   const { setOpenMobile, openMobile } = useSidebar();
   const params = useParams({ strict: false });
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [dockHidden, setDockHidden] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("capient_mobile_dock_hidden");
+    if (saved === "true") setDockHidden(true);
+  }, []);
+
+  const toggleDock = (hidden: boolean) => {
+    setDockHidden(hidden);
+    localStorage.setItem("capient_mobile_dock_hidden", hidden ? "true" : "false");
+  };
 
   let plannerId = (params as any)?.plannerId;
 
-  // If not in URL (e.g. on /app/profile), fetch it from profile
+  // Fallback if not in URL
   const { data: profile } = useQuery({
     queryKey: ["profile_nav_fallback"],
     queryFn: async () => {
@@ -38,22 +50,49 @@ export function MobileBottomNav() {
   ];
 
   return (
-    <div className={cn(
-      "fixed bottom-5 left-1/2 -translate-x-1/2 z-[100] md:hidden w-[92%] max-w-[420px] transition-all duration-300 ease-out",
-      openMobile ? "translate-y-[150%] opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
-    )}>
+    <div
+      onClick={dockHidden ? () => toggleDock(false) : undefined}
+      className={cn(
+        "fixed bottom-0 left-1/2 -translate-x-1/2 z-[100] md:hidden w-[94%] max-w-[430px] transition-all duration-300 ease-out cursor-pointer pb-3",
+        openMobile
+          ? "translate-y-[200%] opacity-0 pointer-events-none"
+          : dockHidden
+          ? "translate-y-[calc(100%-20px)] opacity-90"
+          : "translate-y-0 opacity-100"
+      )}
+    >
+      {/* Center Top Handle (Chevron Down when open, Chevron Up when hidden) */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleDock(!dockHidden);
+        }}
+        className={cn(
+          "absolute -top-3.5 left-1/2 -translate-x-1/2 z-30 h-6 px-3 rounded-full border backdrop-blur-xl flex items-center justify-center shadow-lg active:scale-95 transition-all group",
+          dockHidden
+            ? "bg-[#0b0e0d] border-[#3DDC97]/70 text-[#3DDC97] shadow-[0_0_15px_rgba(61,220,151,0.4)] animate-bounce"
+            : "bg-[#0b0e0d] border-white/20 text-white/70 hover:text-white"
+        )}
+        title={dockHidden ? "Show Dock" : "Hide Dock"}
+      >
+        {dockHidden ? (
+          <ChevronUp className="w-4 h-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
+        ) : (
+          <ChevronDown className="w-4 h-4 transition-transform duration-200 group-hover:translate-y-0.5" />
+        )}
+      </button>
+
       {/* Outer Glow Wrapper */}
       <div className="relative rounded-[2.5rem] p-[1px] bg-[#111] shadow-[0_20px_50px_rgba(0,0,0,0.95)] border border-white/10">
-        
         {/* Top Highlight Line */}
         <div className="absolute top-0 left-8 right-8 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent z-20 pointer-events-none" />
 
-        {/* Pure Black Glassmorphic Translucent Container */}
-        <div 
-          className="relative flex items-center justify-between px-3 py-2 rounded-[2.4rem] bg-black/80 backdrop-blur-2xl backdrop-saturate-[180%] overflow-hidden"
+        {/* Translucent Container */}
+        <div
+          className="relative flex items-center justify-between px-3 py-1.5 rounded-[2.4rem] bg-black/85 backdrop-blur-2xl backdrop-saturate-[180%] overflow-hidden"
           style={{ WebkitBackdropFilter: "blur(24px) saturate(180%)", backdropFilter: "blur(24px) saturate(180%)" }}
         >
-          {/* Subtle Ambient Emerald Glow */}
+          {/* Ambient Emerald Glow */}
           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-44 h-8 bg-[#3DDC97]/10 blur-xl rounded-full pointer-events-none z-0" />
 
           {links.map((link) => {
@@ -64,6 +103,12 @@ export function MobileBottomNav() {
               <Link
                 key={link.name}
                 to={link.href as any}
+                onClick={(e) => {
+                  if (dockHidden) {
+                    e.preventDefault();
+                    toggleDock(false);
+                  }
+                }}
                 className={cn(
                   "flex flex-col items-center justify-center flex-1 h-12 rounded-full transition-all duration-300 relative group z-10 active:scale-90",
                   isActive ? "text-[#3DDC97]" : "text-white/60 hover:text-white"
@@ -71,26 +116,33 @@ export function MobileBottomNav() {
               >
                 {isActive && (
                   <>
-                    {/* Glowing Refractive Emerald Glass Pill behind active icon */}
-                    <div 
+                    <div
                       className="absolute inset-x-1 inset-y-1 rounded-2xl bg-gradient-to-tr from-[#3DDC97]/35 via-[#3DDC97]/20 to-[#3DDC97]/30 border border-[#3DDC97]/70 shadow-[0_0_20px_rgba(61,220,151,0.5),inset_0_1px_1px_rgba(255,255,255,0.6)] backdrop-blur-md"
                       style={{ WebkitBackdropFilter: "blur(12px)" }}
                     />
-                    {/* Active Bottom Glow Dot */}
                     <div className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-[#3DDC97] shadow-[0_0_8px_#3DDC97,0_0_16px_#3DDC97]" />
                   </>
                 )}
-                <Icon className={cn(
-                  "w-5 h-5 relative z-10 transition-all duration-300",
-                  isActive ? "scale-110 text-[#3DDC97] drop-shadow-[0_0_10px_rgba(61,220,151,0.8)]" : "group-hover:scale-105"
-                )} />
+                <Icon
+                  className={cn(
+                    "w-5 h-5 relative z-10 transition-all duration-300",
+                    isActive ? "scale-110 text-[#3DDC97] drop-shadow-[0_0_10px_rgba(61,220,151,0.8)]" : "group-hover:scale-105"
+                  )}
+                />
               </Link>
             );
           })}
 
-          {/* Menu Trigger Button */}
+          {/* Sidebar Drawer Trigger */}
           <button
-            onClick={() => setOpenMobile(true)}
+            onClick={(e) => {
+              if (dockHidden) {
+                e.stopPropagation();
+                toggleDock(false);
+              } else {
+                setOpenMobile(true);
+              }
+            }}
             className="flex flex-col items-center justify-center flex-1 h-12 rounded-full transition-all duration-300 relative group z-10 active:scale-90 text-white/60 hover:text-white"
             title="Open Drawer Menu"
           >

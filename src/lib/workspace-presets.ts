@@ -316,6 +316,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
     return {
       workspace: [
         { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
+        { id: "monthly", title: "Monthly", routeKey: "monthly", group: "workspace" },
         { id: "income", title: "Income", routeKey: "income", group: "workspace" },
         { id: "expenses", title: "Expenses", routeKey: "expenses", group: "workspace" },
         { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
@@ -326,7 +327,6 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "goals", title: "Goals", routeKey: "goals", group: "insights" },
         { id: "reports", title: "Reports", routeKey: "reports", group: "insights" },
         { id: "charts", title: "Analytics", routeKey: "charts", group: "insights" },
-        { id: "monthly", title: "Monthly", routeKey: "monthly", group: "insights" },
         { id: "calculator", title: "Calculator", routeKey: "calculator", group: "insights" },
         { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
         { id: "timeline", title: "Timeline", routeKey: "timeline", group: "insights" },
@@ -339,6 +339,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
     return {
       workspace: [
         { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
+        { id: "monthly", title: "Monthly", routeKey: "monthly", group: "workspace" },
         { id: "income", title: "Income", routeKey: "income", group: "workspace" },
         { id: "expenses", title: "Expenses", routeKey: "expenses", group: "workspace" },
         { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
@@ -353,7 +354,6 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "goals", title: "Goals", routeKey: "goals", group: "insights" },
         { id: "reports", title: "Reports", routeKey: "reports", group: "insights" },
         { id: "charts", title: "Analytics", routeKey: "charts", group: "insights" },
-        { id: "monthly", title: "Monthly", routeKey: "monthly", group: "insights" },
         { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
         { id: "timeline", title: "Timeline", routeKey: "timeline", group: "insights" },
         { id: "notes", title: "Notes", routeKey: "notes", group: "insights" },
@@ -365,6 +365,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
     return {
       workspace: [
         { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
+        { id: "monthly", title: "Monthly", routeKey: "monthly", group: "workspace" },
         { id: "income", title: "Sponsorships", routeKey: "income", group: "workspace" },
         { id: "expenses", title: "Expenses", routeKey: "expenses", group: "workspace" },
         { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
@@ -377,7 +378,6 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "goals", title: "Goals", routeKey: "goals", group: "insights" },
         { id: "reports", title: "Reports", routeKey: "reports", group: "insights" },
         { id: "charts", title: "Analytics", routeKey: "charts", group: "insights" },
-        { id: "monthly", title: "Monthly", routeKey: "monthly", group: "insights" },
         { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
         { id: "notes", title: "Notes", routeKey: "notes", group: "insights" },
       ],
@@ -388,6 +388,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
     return {
       workspace: [
         { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
+        { id: "monthly", title: "Monthly", routeKey: "monthly", group: "workspace" },
         { id: "income", title: "Income", routeKey: "income", group: "workspace" },
         { id: "expenses", title: "Expenses", routeKey: "expenses", group: "workspace" },
         { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
@@ -400,7 +401,6 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "goals", title: "Goals", routeKey: "goals", group: "insights" },
         { id: "reports", title: "Reports", routeKey: "reports", group: "insights" },
         { id: "charts", title: "Analytics", routeKey: "charts", group: "insights" },
-        { id: "monthly", title: "Monthly", routeKey: "monthly", group: "insights" },
         { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
         { id: "timeline", title: "Timeline", routeKey: "timeline", group: "insights" },
         { id: "notes", title: "Notes", routeKey: "notes", group: "insights" },
@@ -411,6 +411,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
   return {
     workspace: [
       { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
+      { id: "monthly", title: "Monthly", routeKey: "monthly", group: "workspace" },
       { id: "income", title: isNonProfit ? "Donations" : "Income", routeKey: "income", group: "workspace" },
       { id: "expenses", title: "Expenses", routeKey: "expenses", group: "workspace" },
       { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
@@ -426,7 +427,6 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
       { id: "budget", title: "Budget", routeKey: "budget", group: "insights" },
       { id: "goals", title: "Goals", routeKey: "goals", group: "insights" },
       { id: "charts", title: "Analytics", routeKey: "charts", group: "insights" },
-      { id: "monthly", title: "Monthly", routeKey: "monthly", group: "insights" },
       { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
       { id: "timeline", title: "Timeline", routeKey: "timeline", group: "insights" },
       { id: "notes", title: "Notes", routeKey: "notes", group: "insights" },

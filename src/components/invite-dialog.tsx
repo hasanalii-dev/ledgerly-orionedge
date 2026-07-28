@@ -10,7 +10,7 @@ import { Mail, Loader2, Send } from "lucide-react";
 export function InviteDialog({ plannerId, trigger, open, onOpenChange }: { plannerId: string, trigger?: React.ReactNode, open?: boolean, onOpenChange?: (open: boolean) => void }) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("viewer");
+  const [role, setRole] = useState("editor");
   const [loading, setLoading] = useState(false);
 
   const isOpen = open !== undefined ? open : internalOpen;
@@ -80,8 +80,8 @@ export function InviteDialog({ plannerId, trigger, open, onOpenChange }: { plann
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="viewer">Viewer (Read only)</SelectItem>
                 <SelectItem value="editor">Editor (Can make changes)</SelectItem>
+                <SelectItem value="viewer" disabled className="opacity-50 cursor-not-allowed">Viewer (Read only) — Coming Soon</SelectItem>
               </SelectContent>
             </Select>
           </div>

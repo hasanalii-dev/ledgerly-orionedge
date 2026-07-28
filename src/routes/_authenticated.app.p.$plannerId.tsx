@@ -127,7 +127,6 @@ function PlannerLayout() {
         </div>
         <SidebarInset className="flex-1 overflow-hidden relative z-10">
           <header className="hidden md:flex sticky top-0 z-20 h-14 items-center gap-4 px-4 bg-[#0b0e0c] border-b border-white/5 transition-all duration-300 relative">
-            <div className="absolute right-0 top-0 h-full w-96 bg-gradient-to-l from-primary/10 via-primary/5 to-transparent pointer-events-none" />
             <SidebarTrigger className="text-muted-foreground hover:text-foreground transition-colors -ml-2 h-8 w-8 relative z-10" />
             <div className="text-[15px] font-medium text-foreground truncate flex-1 tracking-wide ml-2 relative z-10">
               {planner?.name ?? ""}

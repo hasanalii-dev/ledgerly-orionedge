@@ -395,50 +395,66 @@ function MonthlyTracking() {
   const { data: bals = [] } = useQuery({
     queryKey: ["account_balances", plannerId],
     queryFn: async () => {
-      const [{ data: inc }, { data: exp }] = await Promise.all([
+      const [{ data: inc }, { data: exp }, { data: trf }] = await Promise.all([
         supabase.from("income_entries").select("account_id, amount").eq("planner_id", plannerId),
         supabase.from("expense_entries").select("account_id, amount").eq("planner_id", plannerId),
+        supabase.from("transfers").select("from_account_id, to_account_id, amount").eq("planner_id", plannerId),
       ]);
       const map = new Map<string, number>();
       (inc ?? []).forEach((r) => { if (r.account_id) map.set(r.account_id, (map.get(r.account_id) ?? 0) + Number(r.amount)); });
       (exp ?? []).forEach((r) => { if (r.account_id) map.set(r.account_id, (map.get(r.account_id) ?? 0) - Number(r.amount)); });
+      (trf ?? []).forEach((r) => {
+        if (r.to_account_id) map.set(r.to_account_id, (map.get(r.to_account_id) ?? 0) + Number(r.amount));
+        if (r.from_account_id) map.set(r.from_account_id, (map.get(r.from_account_id) ?? 0) - Number(r.amount));
+      });
       return Array.from(map.entries());
     },
   });
   const balMap = new Map(bals);
 
   const assignMutation = useMutation({
-    mutationFn: async (mode: "add" | "overwrite" = "add") => {
+    mutationFn: async () => {
       if (assignType !== "earning" && !assignSourceAcc) throw new Error("Select a source account");
       if (!assignTargetAcc) throw new Error("Select a destination account");
 
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
       const target = accounts.find(a => a.id === assignTargetAcc);
       if (!target) throw new Error("Target account not found");
-      const targetLive = Number(target.opening_balance || 0) + (balMap.get(target.id) ?? 0);
 
       if (assignType === "earning") {
-        const diff = mode === "overwrite" ? assignTotal - targetLive : assignTotal;
-        const newBalance = Number(target.opening_balance || 0) + diff;
-        const { error } = await supabase.from("accounts").update({ opening_balance: newBalance }).eq("id", assignTargetAcc);
+        const { error } = await supabase.from("income_entries").insert({
+          planner_id: plannerId,
+          user_id: user.id,
+          account_id: assignTargetAcc,
+          amount: assignTotal,
+          description: `Monthly Earning: ${assignTitle}`,
+          date: new Date().toISOString().split("T")[0],
+        });
         if (error) throw error;
       } else {
         const source = accounts.find(a => a.id === assignSourceAcc);
         if (!source) throw new Error("Source account not found");
-        
-        const targetDiff = mode === "overwrite" ? assignTotal - targetLive : assignTotal;
-        const newTargetBalance = Number(target.opening_balance || 0) + targetDiff;
-        const newSourceBalance = Number(source.opening_balance || 0) - assignTotal;
-        
-        const { error: err1 } = await supabase.from("accounts").update({ opening_balance: newSourceBalance }).eq("id", assignSourceAcc);
-        if (err1) throw err1;
-        const { error: err2 } = await supabase.from("accounts").update({ opening_balance: newTargetBalance }).eq("id", assignTargetAcc);
-        if (err2) throw err2;
+
+        const { error } = await supabase.from("transfers").insert({
+          planner_id: plannerId,
+          user_id: user.id,
+          from_account_id: assignSourceAcc,
+          to_account_id: assignTargetAcc,
+          amount: assignTotal,
+          description: `Allocation Transfer: ${assignTitle}`,
+        });
+        if (error) throw error;
       }
     },
     onSuccess: () => {
-      toast.success(assignType === "earning" ? "Money assigned!" : "Transfer complete!");
+      toast.success(assignType === "earning" ? "Earnings assigned to account!" : "Transfer created successfully!");
       setAssignOpen(false);
       qc.invalidateQueries({ queryKey: ["accounts", plannerId] });
+      qc.invalidateQueries({ queryKey: ["account_balances", plannerId] });
+      qc.invalidateQueries({ queryKey: ["income_entries", plannerId] });
+      qc.invalidateQueries({ queryKey: ["transfers", plannerId] });
     },
     onError: (e) => toast.error(e.message),
   });
