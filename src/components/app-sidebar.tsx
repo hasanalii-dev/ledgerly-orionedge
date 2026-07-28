@@ -22,7 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Plus, Settings, LogOut, ChevronDown, LayoutDashboard, TrendingUp, TrendingDown, LineChart, 
   Wallet, Users, FolderKanban, FileText, CandlestickChart, Target, ArrowLeftRight, FileBarChart, 
-  PieChart, Calendar, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles, Calculator, SlidersHorizontal, Check, Dices,
+  PieChart, Calendar, CalendarCheck, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles, Calculator, SlidersHorizontal, Check, Dices,
   Building, Briefcase, Rocket, Video, GraduationCap, Store, Landmark, Palette, Code, Plane, Camera, Gamepad, Utensils, Music, Laptop
 } from "lucide-react";
 import { InviteDialog } from "./invite-dialog";
@@ -314,7 +314,9 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
     reports: FileBarChart,
     charts: PieChart,
     monthly: Calendar,
+    calendar: CalendarCheck,
     calculator: Calculator,
+    loans: Landmark,
     timeline: Activity,
     notes: StickyNote,
   };
@@ -367,12 +369,23 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
               <DropdownMenuLabel className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold px-2 py-1.5">Planners ({planners.length})</DropdownMenuLabel>
               {planners.map((p) => {
                 const isActive = p.id === active?.id;
+                const iconVal = p.custom_config?.iconUrl;
+                const isUrl = iconVal && (iconVal.startsWith("http") || iconVal.startsWith("data:"));
+                const IconComp = iconVal && !isUrl && ICON_MAP[iconVal] ? ICON_MAP[iconVal] : Book;
+
                 return (
                   <DropdownMenuItem key={p.id} className={`rounded-lg cursor-pointer my-0.5 ${isActive ? "bg-white/10" : ""}`} onClick={() => handleSwitchPlanner(p.id)}>
-                    {p.custom_config?.iconUrl ? (
-                      <img src={p.custom_config.iconUrl} className="h-4 w-4 mr-2 rounded-sm object-cover" alt="icon" />
+                    {isUrl ? (
+                      <img
+                        src={iconVal}
+                        className="h-4 w-4 mr-2 rounded-sm object-cover"
+                        alt="icon"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLElement).style.display = "none";
+                        }}
+                      />
                     ) : (
-                      <Book className={`h-4 w-4 mr-2 ${isActive ? "text-[#3DDC97]" : "text-muted-foreground"}`} />
+                      <IconComp className={`h-4 w-4 mr-2 ${isActive ? "text-[#3DDC97]" : "text-muted-foreground"}`} />
                     )}
                     <span className={`text-[13px] ${isActive ? "text-white font-semibold" : "text-muted-foreground"}`}>{p.name}</span>
                     {isActive && <Check className="ml-auto h-4 w-4 text-[#3DDC97]" />}
@@ -477,11 +490,23 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
-                      {p.custom_config?.iconUrl ? (
-                        <img src={p.custom_config.iconUrl} className="h-3.5 w-3.5 shrink-0 rounded-sm object-cover" alt="icon" />
-                      ) : (
-                        <Book className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-[#3DDC97]" : "text-muted-foreground"}`} />
-                      )}
+                      {(() => {
+                        const iconVal = p.custom_config?.iconUrl;
+                        const isUrl = iconVal && (iconVal.startsWith("http") || iconVal.startsWith("data:"));
+                        const IconComp = iconVal && !isUrl && ICON_MAP[iconVal] ? ICON_MAP[iconVal] : Book;
+                        return isUrl ? (
+                          <img
+                            src={iconVal}
+                            className="h-3.5 w-3.5 shrink-0 rounded-sm object-cover"
+                            alt="icon"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLElement).style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <IconComp className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-[#3DDC97]" : "text-muted-foreground"}`} />
+                        );
+                      })()}
                       <span className="truncate">{p.name}</span>
                     </div>
                     {isActive && <Check className="h-3.5 w-3.5 shrink-0 text-[#3DDC97]" />}

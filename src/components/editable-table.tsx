@@ -227,11 +227,18 @@ export function CellInput({ value, onChange, type = "text", className = "" }: { 
   );
 }
 
-export function CellSelect({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
+export function CellSelect({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: any[] }) {
+  const normOptions = (options || []).map((o: any) => {
+    if (typeof o === "string") return { value: o, label: o };
+    const val = typeof o?.value === "object" && o?.value !== null ? (o.value.value ?? String(o.value)) : o?.value;
+    const lbl = typeof o?.label === "object" && o?.label !== null ? (o.label.label ?? o.label.value ?? String(o.label)) : (o?.label ?? o?.value ?? String(o));
+    return { value: String(val ?? ""), label: String(lbl ?? "") };
+  });
+
   return (
     <Select value={value || undefined} onValueChange={onChange}>
       <SelectTrigger className="h-8 border-0 bg-transparent hover:bg-elevated px-2 focus:ring-1 focus:ring-primary/40"><SelectValue placeholder="—" /></SelectTrigger>
-      <SelectContent>{options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+      <SelectContent>{normOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
     </Select>
   );
 }

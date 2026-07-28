@@ -1,6 +1,23 @@
 export function formatMoney(amount: number | string | null | undefined, currency = "USD", compact = false) {
   const n = typeof amount === "string" ? parseFloat(amount) : (amount ?? 0);
   if (Number.isNaN(n)) return "—";
+
+  const cryptoSymbols: Record<string, string> = {
+    BTC: "₿",
+    ETH: "Ξ",
+    SOL: "◎",
+    USDT: "₮",
+    BNB: "BNB",
+    XRP: "✕",
+  };
+
+  if (cryptoSymbols[currency]) {
+    const formattedNum = compact
+      ? formatCompact(n)
+      : n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+    return `${cryptoSymbols[currency]} ${formattedNum}`;
+  }
+
   try {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -28,7 +45,10 @@ export function formatDate(d: string | Date | null | undefined, fmt = "medium") 
   });
 }
 
-export const CURRENCIES = ["USD", "EUR", "GBP", "PKR", "AED", "INR", "CAD", "AUD", "JPY"] as const;
+export const CURRENCIES = [
+  "USD", "EUR", "GBP", "PKR", "AED", "SAR", "INR", "CAD", "AUD", "JPY", "CHF", "CNY", "SGD",
+  "BTC", "ETH", "SOL", "USDT", "BNB", "XRP"
+] as const;
 
 export const COUNTRIES = [
   "United States",
@@ -39,6 +59,7 @@ export const COUNTRIES = [
   "France",
   "Pakistan",
   "United Arab Emirates",
+  "Saudi Arabia",
   "India",
   "Japan",
   "Singapore",
@@ -49,35 +70,47 @@ export const COUNTRIES = [
   "Netherlands",
   "Sweden",
   "Switzerland",
-  "South Africa",
-  "Other Country",
-] as const;
-export const ACCOUNT_KINDS = ["bank", "wallet", "cash", "credit_card", "savings", "investment", "crypto", "loan", "asset", "liability", "other"] as const;
-export const INCOME_STATUSES = ["pending", "advance", "partial", "paid", "refunded"] as const;
-export const INVOICE_STATUSES = ["pending", "sent", "paid", "overdue", "cancelled"] as const;
-export const PROJECT_STATUSES = ["active", "on-hold", "completed", "cancelled"] as const;
-
-export const DEFAULT_EXPENSE_CATEGORIES = [
-  { name: "Marketing", color: "#3DDC97" },
-  { name: "Software", color: "#7CC4FF" },
-  { name: "Hosting", color: "#FFB86B" },
-  { name: "Domains", color: "#B794F4" },
-  { name: "Education", color: "#F687B3" },
-  { name: "Hardware", color: "#68D391" },
-  { name: "Office", color: "#F6AD55" },
-  { name: "Internet", color: "#4FD1C5" },
-  { name: "Phone", color: "#9F7AEA" },
-  { name: "Transportation", color: "#F56565" },
-  { name: "Food", color: "#ED8936" },
-  { name: "Taxes", color: "#E53E3E" },
-  { name: "Miscellaneous", color: "#A0AEC0" },
 ];
 
-export const DEFAULT_FOLDERS = [
-  "Invoices",
-  "Payment Proofs",
-  "Receipts",
-  "Contracts",
-  "Tax Documents",
-  "Other Documents",
+export const ACCOUNT_KINDS = [
+  { value: "bank", label: "Bank Account" },
+  { value: "wallet", label: "Digital Wallet" },
+  { value: "cash", label: "Cash" },
+  { value: "crypto_wallet", label: "Crypto Wallet" },
+  { value: "forex_account", label: "Forex Account" },
+  { value: "credit_card", label: "Credit Card" },
+  { value: "loan_account", label: "Loan / Debt" },
+];
+
+export const DEFAULT_EXPENSE_CATEGORIES = [
+  { name: "Rent & Housing", color: "#F43F5E" },
+  { name: "Software & SaaS", color: "#38BDF8" },
+  { name: "Marketing & Ads", color: "#EC4899" },
+  { name: "Subcontractors", color: "#A855F7" },
+  { name: "Office Supplies", color: "#FB923C" },
+  { name: "Travel & Meals", color: "#EAB308" },
+  { name: "Utilities & Wifi", color: "#6366F1" },
+  { name: "Taxes & Legal", color: "#64748B" },
+];
+
+export const DEFAULT_FOLDERS = ["Tax Documents", "Receipts", "Contracts", "Bank Statements"];
+
+export const INCOME_STATUSES = [
+  { value: "received", label: "Received" },
+  { value: "pending", label: "Pending" },
+  { value: "overdue", label: "Overdue" },
+];
+
+export const INVOICE_STATUSES = [
+  { value: "draft", label: "Draft" },
+  { value: "sent", label: "Sent" },
+  { value: "paid", label: "Paid" },
+  { value: "overdue", label: "Overdue" },
+];
+
+export const PROJECT_STATUSES = [
+  { value: "planning", label: "Planning" },
+  { value: "active", label: "In Progress" },
+  { value: "completed", label: "Completed" },
+  { value: "on_hold", label: "On Hold" },
 ];

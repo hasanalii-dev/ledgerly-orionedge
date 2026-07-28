@@ -33,6 +33,7 @@ import { Route as AuthenticatedAppPPlannerIdProjectsRouteImport } from './routes
 import { Route as AuthenticatedAppPPlannerIdNotificationsRouteImport } from './routes/_authenticated.app.p.$plannerId.notifications'
 import { Route as AuthenticatedAppPPlannerIdNotesRouteImport } from './routes/_authenticated.app.p.$plannerId.notes'
 import { Route as AuthenticatedAppPPlannerIdMonthlyRouteImport } from './routes/_authenticated.app.p.$plannerId.monthly'
+import { Route as AuthenticatedAppPPlannerIdLoansRouteImport } from './routes/_authenticated.app.p.$plannerId.loans'
 import { Route as AuthenticatedAppPPlannerIdInvoicesRouteImport } from './routes/_authenticated.app.p.$plannerId.invoices'
 import { Route as AuthenticatedAppPPlannerIdInvestmentsRouteImport } from './routes/_authenticated.app.p.$plannerId.investments'
 import { Route as AuthenticatedAppPPlannerIdIncomeRouteImport } from './routes/_authenticated.app.p.$plannerId.income'
@@ -42,6 +43,7 @@ import { Route as AuthenticatedAppPPlannerIdDashboardRouteImport } from './route
 import { Route as AuthenticatedAppPPlannerIdClientsRouteImport } from './routes/_authenticated.app.p.$plannerId.clients'
 import { Route as AuthenticatedAppPPlannerIdChartsRouteImport } from './routes/_authenticated.app.p.$plannerId.charts'
 import { Route as AuthenticatedAppPPlannerIdCashflowRouteImport } from './routes/_authenticated.app.p.$plannerId.cashflow'
+import { Route as AuthenticatedAppPPlannerIdCalendarRouteImport } from './routes/_authenticated.app.p.$plannerId.calendar'
 import { Route as AuthenticatedAppPPlannerIdCalculatorRouteImport } from './routes/_authenticated.app.p.$plannerId.calculator'
 import { Route as AuthenticatedAppPPlannerIdBudgetRouteImport } from './routes/_authenticated.app.p.$plannerId.budget'
 import { Route as AuthenticatedAppPPlannerIdAccountsRouteImport } from './routes/_authenticated.app.p.$plannerId.accounts'
@@ -174,6 +176,12 @@ const AuthenticatedAppPPlannerIdMonthlyRoute =
     path: '/monthly',
     getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
   } as any)
+const AuthenticatedAppPPlannerIdLoansRoute =
+  AuthenticatedAppPPlannerIdLoansRouteImport.update({
+    id: '/loans',
+    path: '/loans',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
 const AuthenticatedAppPPlannerIdInvoicesRoute =
   AuthenticatedAppPPlannerIdInvoicesRouteImport.update({
     id: '/invoices',
@@ -228,6 +236,12 @@ const AuthenticatedAppPPlannerIdCashflowRoute =
     path: '/cashflow',
     getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
   } as any)
+const AuthenticatedAppPPlannerIdCalendarRoute =
+  AuthenticatedAppPPlannerIdCalendarRouteImport.update({
+    id: '/calendar',
+    path: '/calendar',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
 const AuthenticatedAppPPlannerIdCalculatorRoute =
   AuthenticatedAppPPlannerIdCalculatorRouteImport.update({
     id: '/calculator',
@@ -267,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/app/p/$plannerId/accounts': typeof AuthenticatedAppPPlannerIdAccountsRoute
   '/app/p/$plannerId/budget': typeof AuthenticatedAppPPlannerIdBudgetRoute
   '/app/p/$plannerId/calculator': typeof AuthenticatedAppPPlannerIdCalculatorRoute
+  '/app/p/$plannerId/calendar': typeof AuthenticatedAppPPlannerIdCalendarRoute
   '/app/p/$plannerId/cashflow': typeof AuthenticatedAppPPlannerIdCashflowRoute
   '/app/p/$plannerId/charts': typeof AuthenticatedAppPPlannerIdChartsRoute
   '/app/p/$plannerId/clients': typeof AuthenticatedAppPPlannerIdClientsRoute
@@ -276,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/app/p/$plannerId/income': typeof AuthenticatedAppPPlannerIdIncomeRoute
   '/app/p/$plannerId/investments': typeof AuthenticatedAppPPlannerIdInvestmentsRoute
   '/app/p/$plannerId/invoices': typeof AuthenticatedAppPPlannerIdInvoicesRoute
+  '/app/p/$plannerId/loans': typeof AuthenticatedAppPPlannerIdLoansRoute
   '/app/p/$plannerId/monthly': typeof AuthenticatedAppPPlannerIdMonthlyRoute
   '/app/p/$plannerId/notes': typeof AuthenticatedAppPPlannerIdNotesRoute
   '/app/p/$plannerId/notifications': typeof AuthenticatedAppPPlannerIdNotificationsRoute
@@ -304,6 +320,7 @@ export interface FileRoutesByTo {
   '/app/p/$plannerId/accounts': typeof AuthenticatedAppPPlannerIdAccountsRoute
   '/app/p/$plannerId/budget': typeof AuthenticatedAppPPlannerIdBudgetRoute
   '/app/p/$plannerId/calculator': typeof AuthenticatedAppPPlannerIdCalculatorRoute
+  '/app/p/$plannerId/calendar': typeof AuthenticatedAppPPlannerIdCalendarRoute
   '/app/p/$plannerId/cashflow': typeof AuthenticatedAppPPlannerIdCashflowRoute
   '/app/p/$plannerId/charts': typeof AuthenticatedAppPPlannerIdChartsRoute
   '/app/p/$plannerId/clients': typeof AuthenticatedAppPPlannerIdClientsRoute
@@ -313,6 +330,7 @@ export interface FileRoutesByTo {
   '/app/p/$plannerId/income': typeof AuthenticatedAppPPlannerIdIncomeRoute
   '/app/p/$plannerId/investments': typeof AuthenticatedAppPPlannerIdInvestmentsRoute
   '/app/p/$plannerId/invoices': typeof AuthenticatedAppPPlannerIdInvoicesRoute
+  '/app/p/$plannerId/loans': typeof AuthenticatedAppPPlannerIdLoansRoute
   '/app/p/$plannerId/monthly': typeof AuthenticatedAppPPlannerIdMonthlyRoute
   '/app/p/$plannerId/notes': typeof AuthenticatedAppPPlannerIdNotesRoute
   '/app/p/$plannerId/notifications': typeof AuthenticatedAppPPlannerIdNotificationsRoute
@@ -343,6 +361,7 @@ export interface FileRoutesById {
   '/_authenticated/app/p/$plannerId/accounts': typeof AuthenticatedAppPPlannerIdAccountsRoute
   '/_authenticated/app/p/$plannerId/budget': typeof AuthenticatedAppPPlannerIdBudgetRoute
   '/_authenticated/app/p/$plannerId/calculator': typeof AuthenticatedAppPPlannerIdCalculatorRoute
+  '/_authenticated/app/p/$plannerId/calendar': typeof AuthenticatedAppPPlannerIdCalendarRoute
   '/_authenticated/app/p/$plannerId/cashflow': typeof AuthenticatedAppPPlannerIdCashflowRoute
   '/_authenticated/app/p/$plannerId/charts': typeof AuthenticatedAppPPlannerIdChartsRoute
   '/_authenticated/app/p/$plannerId/clients': typeof AuthenticatedAppPPlannerIdClientsRoute
@@ -352,6 +371,7 @@ export interface FileRoutesById {
   '/_authenticated/app/p/$plannerId/income': typeof AuthenticatedAppPPlannerIdIncomeRoute
   '/_authenticated/app/p/$plannerId/investments': typeof AuthenticatedAppPPlannerIdInvestmentsRoute
   '/_authenticated/app/p/$plannerId/invoices': typeof AuthenticatedAppPPlannerIdInvoicesRoute
+  '/_authenticated/app/p/$plannerId/loans': typeof AuthenticatedAppPPlannerIdLoansRoute
   '/_authenticated/app/p/$plannerId/monthly': typeof AuthenticatedAppPPlannerIdMonthlyRoute
   '/_authenticated/app/p/$plannerId/notes': typeof AuthenticatedAppPPlannerIdNotesRoute
   '/_authenticated/app/p/$plannerId/notifications': typeof AuthenticatedAppPPlannerIdNotificationsRoute
@@ -382,6 +402,7 @@ export interface FileRouteTypes {
     | '/app/p/$plannerId/accounts'
     | '/app/p/$plannerId/budget'
     | '/app/p/$plannerId/calculator'
+    | '/app/p/$plannerId/calendar'
     | '/app/p/$plannerId/cashflow'
     | '/app/p/$plannerId/charts'
     | '/app/p/$plannerId/clients'
@@ -391,6 +412,7 @@ export interface FileRouteTypes {
     | '/app/p/$plannerId/income'
     | '/app/p/$plannerId/investments'
     | '/app/p/$plannerId/invoices'
+    | '/app/p/$plannerId/loans'
     | '/app/p/$plannerId/monthly'
     | '/app/p/$plannerId/notes'
     | '/app/p/$plannerId/notifications'
@@ -419,6 +441,7 @@ export interface FileRouteTypes {
     | '/app/p/$plannerId/accounts'
     | '/app/p/$plannerId/budget'
     | '/app/p/$plannerId/calculator'
+    | '/app/p/$plannerId/calendar'
     | '/app/p/$plannerId/cashflow'
     | '/app/p/$plannerId/charts'
     | '/app/p/$plannerId/clients'
@@ -428,6 +451,7 @@ export interface FileRouteTypes {
     | '/app/p/$plannerId/income'
     | '/app/p/$plannerId/investments'
     | '/app/p/$plannerId/invoices'
+    | '/app/p/$plannerId/loans'
     | '/app/p/$plannerId/monthly'
     | '/app/p/$plannerId/notes'
     | '/app/p/$plannerId/notifications'
@@ -457,6 +481,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/p/$plannerId/accounts'
     | '/_authenticated/app/p/$plannerId/budget'
     | '/_authenticated/app/p/$plannerId/calculator'
+    | '/_authenticated/app/p/$plannerId/calendar'
     | '/_authenticated/app/p/$plannerId/cashflow'
     | '/_authenticated/app/p/$plannerId/charts'
     | '/_authenticated/app/p/$plannerId/clients'
@@ -466,6 +491,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/p/$plannerId/income'
     | '/_authenticated/app/p/$plannerId/investments'
     | '/_authenticated/app/p/$plannerId/invoices'
+    | '/_authenticated/app/p/$plannerId/loans'
     | '/_authenticated/app/p/$plannerId/monthly'
     | '/_authenticated/app/p/$plannerId/notes'
     | '/_authenticated/app/p/$plannerId/notifications'
@@ -660,6 +686,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppPPlannerIdMonthlyRouteImport
       parentRoute: typeof AuthenticatedAppPPlannerIdRoute
     }
+    '/_authenticated/app/p/$plannerId/loans': {
+      id: '/_authenticated/app/p/$plannerId/loans'
+      path: '/loans'
+      fullPath: '/app/p/$plannerId/loans'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdLoansRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
     '/_authenticated/app/p/$plannerId/invoices': {
       id: '/_authenticated/app/p/$plannerId/invoices'
       path: '/invoices'
@@ -723,6 +756,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppPPlannerIdCashflowRouteImport
       parentRoute: typeof AuthenticatedAppPPlannerIdRoute
     }
+    '/_authenticated/app/p/$plannerId/calendar': {
+      id: '/_authenticated/app/p/$plannerId/calendar'
+      path: '/calendar'
+      fullPath: '/app/p/$plannerId/calendar'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdCalendarRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
     '/_authenticated/app/p/$plannerId/calculator': {
       id: '/_authenticated/app/p/$plannerId/calculator'
       path: '/calculator'
@@ -751,6 +791,7 @@ interface AuthenticatedAppPPlannerIdRouteChildren {
   AuthenticatedAppPPlannerIdAccountsRoute: typeof AuthenticatedAppPPlannerIdAccountsRoute
   AuthenticatedAppPPlannerIdBudgetRoute: typeof AuthenticatedAppPPlannerIdBudgetRoute
   AuthenticatedAppPPlannerIdCalculatorRoute: typeof AuthenticatedAppPPlannerIdCalculatorRoute
+  AuthenticatedAppPPlannerIdCalendarRoute: typeof AuthenticatedAppPPlannerIdCalendarRoute
   AuthenticatedAppPPlannerIdCashflowRoute: typeof AuthenticatedAppPPlannerIdCashflowRoute
   AuthenticatedAppPPlannerIdChartsRoute: typeof AuthenticatedAppPPlannerIdChartsRoute
   AuthenticatedAppPPlannerIdClientsRoute: typeof AuthenticatedAppPPlannerIdClientsRoute
@@ -760,6 +801,7 @@ interface AuthenticatedAppPPlannerIdRouteChildren {
   AuthenticatedAppPPlannerIdIncomeRoute: typeof AuthenticatedAppPPlannerIdIncomeRoute
   AuthenticatedAppPPlannerIdInvestmentsRoute: typeof AuthenticatedAppPPlannerIdInvestmentsRoute
   AuthenticatedAppPPlannerIdInvoicesRoute: typeof AuthenticatedAppPPlannerIdInvoicesRoute
+  AuthenticatedAppPPlannerIdLoansRoute: typeof AuthenticatedAppPPlannerIdLoansRoute
   AuthenticatedAppPPlannerIdMonthlyRoute: typeof AuthenticatedAppPPlannerIdMonthlyRoute
   AuthenticatedAppPPlannerIdNotesRoute: typeof AuthenticatedAppPPlannerIdNotesRoute
   AuthenticatedAppPPlannerIdNotificationsRoute: typeof AuthenticatedAppPPlannerIdNotificationsRoute
@@ -777,6 +819,8 @@ const AuthenticatedAppPPlannerIdRouteChildren: AuthenticatedAppPPlannerIdRouteCh
       AuthenticatedAppPPlannerIdBudgetRoute,
     AuthenticatedAppPPlannerIdCalculatorRoute:
       AuthenticatedAppPPlannerIdCalculatorRoute,
+    AuthenticatedAppPPlannerIdCalendarRoute:
+      AuthenticatedAppPPlannerIdCalendarRoute,
     AuthenticatedAppPPlannerIdCashflowRoute:
       AuthenticatedAppPPlannerIdCashflowRoute,
     AuthenticatedAppPPlannerIdChartsRoute:
@@ -794,6 +838,7 @@ const AuthenticatedAppPPlannerIdRouteChildren: AuthenticatedAppPPlannerIdRouteCh
       AuthenticatedAppPPlannerIdInvestmentsRoute,
     AuthenticatedAppPPlannerIdInvoicesRoute:
       AuthenticatedAppPPlannerIdInvoicesRoute,
+    AuthenticatedAppPPlannerIdLoansRoute: AuthenticatedAppPPlannerIdLoansRoute,
     AuthenticatedAppPPlannerIdMonthlyRoute:
       AuthenticatedAppPPlannerIdMonthlyRoute,
     AuthenticatedAppPPlannerIdNotesRoute: AuthenticatedAppPPlannerIdNotesRoute,

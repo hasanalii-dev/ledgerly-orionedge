@@ -61,10 +61,11 @@ function AuthBetaPage() {
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
+      localStorage.setItem("force_onboarding", "true");
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { 
-          redirectTo: `${window.location.origin}/app`,
+          redirectTo: `${window.location.origin}/app?setup=true`,
           queryParams: {
             prompt: 'select_account'
           }
@@ -127,6 +128,7 @@ function AuthBetaPage() {
       });
       
       if (error) throw error;
+      localStorage.setItem("force_onboarding", "true");
       
       // Supabase returns an empty identities array if the user already exists (to prevent enumeration, but we want to tell the user)
       if (data.user && data.user.identities && data.user.identities.length === 0) {

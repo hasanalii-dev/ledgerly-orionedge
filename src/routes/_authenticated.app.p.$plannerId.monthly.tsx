@@ -13,9 +13,10 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Trash2, Plus, PieChart as PieChartIcon, Check, X, Pencil, Wallet } from "lucide-react";
+import { Trash2, Plus, PieChart as PieChartIcon, Check, X, Pencil, Wallet, Download } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { toast } from "sonner";
+import { exportToExcel } from "@/lib/export-excel";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/monthly")({
   component: MonthlyTracking,
@@ -468,22 +469,43 @@ function MonthlyTracking() {
     setAssignOpen(true);
   };
 
+  const handleExport = () => {
+    const headers = ["Month/Year", "Type", "Category", "Description", "Amount", "Currency", "Completed"];
+    const exportRows = allocations.map((a) => [
+      monthYear,
+      a.allocation_type.toUpperCase(),
+      a.category,
+      a.description || "",
+      a.amount,
+      currency,
+      a.is_completed ? "YES" : "NO",
+    ]);
+    exportToExcel(`Monthly_Allocations_${monthYear}`, headers, exportRows);
+  };
+
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto pb-20 pt-4 md:pt-0">
+    <div className="space-y-6 max-w-[1600px] mx-auto pb-20 pt-4 md:pt-0 font-sans">
       
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 px-4 md:px-0 mt-4 md:mt-0">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 px-4 md:px-0 mt-4 md:mt-0 font-sans">
         <div>
           <h1 className="text-[28px] md:text-3xl font-display font-bold tracking-tight text-white">Monthly Tracking</h1>
-          <p className="text-sm text-muted-foreground mt-1">Allocate and track your earnings month over month.</p>
+          <p className="text-sm text-muted-foreground mt-1 font-sans">Allocate and track your earnings month over month.</p>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto font-sans">
           <Input 
             type="month" 
             value={monthYear} 
             onChange={(e) => setMonthYear(e.target.value)} 
-            className="w-full sm:w-48 bg-[#111312] border-white/10 text-white rounded-xl h-11 md:h-10"
+            className="w-full sm:w-48 bg-[#111312] border-white/10 text-white rounded-xl h-11 md:h-10 font-sans"
           />
-          <Button onClick={() => setAddOpen(true)} className="glow-emerald w-full sm:w-auto rounded-xl h-11 md:h-10 text-white"><Plus className="h-4 w-4 mr-2" /> Quick Add</Button>
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            className="bg-white/5 border-white/10 hover:bg-white/10 text-white font-sans text-xs gap-2 h-11 md:h-10 w-full sm:w-auto"
+          >
+            <Download className="h-4 w-4 text-[#3DDC97]" /> Export Excel
+          </Button>
+          <Button onClick={() => setAddOpen(true)} className="glow-emerald w-full sm:w-auto rounded-xl h-11 md:h-10 text-white font-sans"><Plus className="h-4 w-4 mr-2" /> Quick Add</Button>
         </div>
       </div>
 

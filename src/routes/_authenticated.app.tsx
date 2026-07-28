@@ -50,7 +50,9 @@ function OnboardingWizard() {
   });
 
   useEffect(() => {
-    if (existingPlanners && existingPlanners.length > 0) {
+    const searchParams = new URLSearchParams(window.location.search);
+    const isForceSetup = searchParams.get("setup") === "true" || localStorage.getItem("force_onboarding") === "true";
+    if (existingPlanners && existingPlanners.length > 0 && !isForceSetup) {
       router.navigate({ to: `/app/p/${existingPlanners[0].id}/dashboard` as any, replace: true });
     }
   }, [existingPlanners, router]);
@@ -216,6 +218,7 @@ function OnboardingWizard() {
       }
 
       toast.success("Workspace initialized!");
+      localStorage.removeItem("force_onboarding");
       if (newPlanner?.id) {
         router.navigate({ to: `/app/p/${newPlanner.id}/dashboard` as any, replace: true });
       } else {

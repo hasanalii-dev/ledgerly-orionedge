@@ -237,9 +237,9 @@ export function getCategoryPresets(workspaceType: WorkspaceType): CategoryPreset
 }
 
 export interface WorkspaceDefaults {
-  hideModules: string[]; // Modules hidden by default (user can unhide anytime)
+  hideModules: string[];
   primaryMetrics: string[];
-  clientTerm: string; // e.g. "Clients", "Customers", "Donors", "Sponsors"
+  clientTerm: string;
 }
 
 export function getWorkspaceDefaults(workspaceType: WorkspaceType): WorkspaceDefaults {
@@ -247,7 +247,7 @@ export function getWorkspaceDefaults(workspaceType: WorkspaceType): WorkspaceDef
     case "student":
     case "personal":
       return {
-        hideModules: ["clients", "projects", "invoices"], // Hidden by default for Personal / Student
+        hideModules: ["clients", "projects", "invoices"],
         primaryMetrics: ["balance", "income", "expenses", "budget_progress", "goals"],
         clientTerm: "Clients",
       };
@@ -309,18 +309,22 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
   const isPersonalOrStudent = workspaceType === "personal" || workspaceType === "student";
   const isFreelancer = workspaceType === "freelancer";
   const isCreator = workspaceType === "creator";
-  const isNonProfit = workspaceType === "nonprofit";
   const isSociety = workspaceType === "society";
+  const isNonProfit = workspaceType === "nonprofit";
 
+  // 1. Personal & Student: Strictly NO Clients, NO Projects, NO Invoices
   if (isPersonalOrStudent) {
     return {
       workspace: [
         { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
         { id: "monthly", title: "Monthly", routeKey: "monthly", group: "workspace" },
+        { id: "calendar", title: "Calendar", routeKey: "calendar", group: "workspace" },
         { id: "income", title: "Income", routeKey: "income", group: "workspace" },
         { id: "expenses", title: "Expenses", routeKey: "expenses", group: "workspace" },
         { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
         { id: "accounts", title: "Accounts", routeKey: "accounts", group: "workspace" },
+        { id: "loans", title: "Loans & Debts", routeKey: "loans", group: "workspace" },
+        { id: "investments", title: "Investments", routeKey: "investments", group: "workspace" },
       ],
       insights: [
         { id: "budget", title: "Budget", routeKey: "budget", group: "insights" },
@@ -335,43 +339,21 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
     };
   }
 
-  if (isFreelancer) {
-    return {
-      workspace: [
-        { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
-        { id: "monthly", title: "Monthly", routeKey: "monthly", group: "workspace" },
-        { id: "income", title: "Income", routeKey: "income", group: "workspace" },
-        { id: "expenses", title: "Expenses", routeKey: "expenses", group: "workspace" },
-        { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
-        { id: "accounts", title: "Accounts", routeKey: "accounts", group: "workspace" },
-        { id: "clients", title: "Clients", routeKey: "clients", group: "workspace" },
-        { id: "projects", title: "Projects", routeKey: "projects", group: "workspace" },
-        { id: "invoices", title: "Invoices", routeKey: "invoices", group: "workspace" },
-      ],
-      insights: [
-        { id: "calculator", title: "Calculator", routeKey: "calculator", group: "insights" },
-        { id: "budget", title: "Budget", routeKey: "budget", group: "insights" },
-        { id: "goals", title: "Goals", routeKey: "goals", group: "insights" },
-        { id: "reports", title: "Reports", routeKey: "reports", group: "insights" },
-        { id: "charts", title: "Analytics", routeKey: "charts", group: "insights" },
-        { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
-        { id: "timeline", title: "Timeline", routeKey: "timeline", group: "insights" },
-        { id: "notes", title: "Notes", routeKey: "notes", group: "insights" },
-      ],
-    };
-  }
-
+  // 2. Creator: NO Invoices
   if (isCreator) {
     return {
       workspace: [
         { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
         { id: "monthly", title: "Monthly", routeKey: "monthly", group: "workspace" },
+        { id: "calendar", title: "Calendar", routeKey: "calendar", group: "workspace" },
         { id: "income", title: "Sponsorships", routeKey: "income", group: "workspace" },
         { id: "expenses", title: "Expenses", routeKey: "expenses", group: "workspace" },
         { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
         { id: "accounts", title: "Accounts", routeKey: "accounts", group: "workspace" },
         { id: "clients", title: "Brands", routeKey: "clients", group: "workspace" },
         { id: "projects", title: "Campaigns", routeKey: "projects", group: "workspace" },
+        { id: "loans", title: "Loans & Debts", routeKey: "loans", group: "workspace" },
+        { id: "investments", title: "Investments", routeKey: "investments", group: "workspace" },
       ],
       insights: [
         { id: "budget", title: "Budget", routeKey: "budget", group: "insights" },
@@ -379,22 +361,27 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "reports", title: "Reports", routeKey: "reports", group: "insights" },
         { id: "charts", title: "Analytics", routeKey: "charts", group: "insights" },
         { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
+        { id: "timeline", title: "Timeline", routeKey: "timeline", group: "insights" },
         { id: "notes", title: "Notes", routeKey: "notes", group: "insights" },
       ],
     };
   }
 
+  // 3. Society / Event: NO Invoices
   if (isSociety) {
     return {
       workspace: [
         { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
         { id: "monthly", title: "Monthly", routeKey: "monthly", group: "workspace" },
+        { id: "calendar", title: "Calendar", routeKey: "calendar", group: "workspace" },
         { id: "income", title: "Income", routeKey: "income", group: "workspace" },
         { id: "expenses", title: "Expenses", routeKey: "expenses", group: "workspace" },
         { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
         { id: "accounts", title: "Accounts", routeKey: "accounts", group: "workspace" },
         { id: "clients", title: "Members", routeKey: "clients", group: "workspace" },
         { id: "projects", title: "Events", routeKey: "projects", group: "workspace" },
+        { id: "loans", title: "Loans & Debts", routeKey: "loans", group: "workspace" },
+        { id: "investments", title: "Investments", routeKey: "investments", group: "workspace" },
       ],
       insights: [
         { id: "budget", title: "Budgets", routeKey: "budget", group: "insights" },
@@ -408,10 +395,12 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
     };
   }
 
+  // 4. Business, Agency, Startup, Freelancer, Non-Profit, Other
   return {
     workspace: [
       { id: "dashboard", title: "Dashboard", routeKey: "dashboard", group: "workspace" },
       { id: "monthly", title: "Monthly", routeKey: "monthly", group: "workspace" },
+      { id: "calendar", title: "Calendar", routeKey: "calendar", group: "workspace" },
       { id: "income", title: isNonProfit ? "Donations" : "Income", routeKey: "income", group: "workspace" },
       { id: "expenses", title: "Expenses", routeKey: "expenses", group: "workspace" },
       { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
@@ -419,6 +408,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
       { id: "clients", title: isNonProfit ? "Donors" : "Clients", routeKey: "clients", group: "workspace" },
       { id: "projects", title: "Projects", routeKey: "projects", group: "workspace" },
       { id: "invoices", title: "Invoices", routeKey: "invoices", group: "workspace" },
+      { id: "loans", title: "Loans & Debts", routeKey: "loans", group: "workspace" },
       { id: "investments", title: "Investments", routeKey: "investments", group: "workspace" },
     ],
     insights: [

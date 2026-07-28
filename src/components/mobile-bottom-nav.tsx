@@ -68,17 +68,15 @@ export function MobileBottomNav() {
           toggleDock(!dockHidden);
         }}
         className={cn(
-          "absolute -top-3.5 left-1/2 -translate-x-1/2 z-30 h-6 px-3 rounded-full border backdrop-blur-xl flex items-center justify-center shadow-lg active:scale-95 transition-all group",
-          dockHidden
-            ? "bg-[#0b0e0d] border-[#3DDC97]/70 text-[#3DDC97] shadow-[0_0_15px_rgba(61,220,151,0.4)] animate-bounce"
-            : "bg-[#0b0e0d] border-white/20 text-white/70 hover:text-white"
+          "absolute -top-2.5 left-1/2 -translate-x-1/2 z-30 h-4.5 w-9 rounded-full border border-white/15 bg-[#0b0e0d]/90 backdrop-blur-md flex items-center justify-center text-white/50 hover:text-white transition-colors",
+          dockHidden && "border-white/25 text-white/80"
         )}
         title={dockHidden ? "Show Dock" : "Hide Dock"}
       >
         {dockHidden ? (
-          <ChevronUp className="w-4 h-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
+          <ChevronUp className="w-3 h-3" />
         ) : (
-          <ChevronDown className="w-4 h-4 transition-transform duration-200 group-hover:translate-y-0.5" />
+          <ChevronDown className="w-3 h-3" />
         )}
       </button>
 

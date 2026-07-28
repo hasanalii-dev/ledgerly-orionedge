@@ -41,7 +41,7 @@ function ProjectsPage() {
         columns={[
           { key: "name", label: "Name", render: (r, on) => <CellInput value={r.name ?? ""} onChange={(v) => on({ name: v })} /> },
           { key: "client_id", label: "Client", width: "170px", render: (r, on) => <CellSelect value={r.client_id ?? ""} onChange={(v) => on({ client_id: v || null })} options={clients.map((c) => ({ value: c.id, label: c.name }))} /> },
-          { key: "status", label: "Status", width: "140px", render: (r, on) => <CellSelect value={r.status ?? "active"} onChange={(v) => on({ status: v })} options={PROJECT_STATUSES.map((s) => ({ value: s, label: s }))} /> },
+          { key: "status", label: "Status", width: "140px", render: (r, on) => <CellSelect value={r.status ?? "active"} onChange={(v) => on({ status: v })} options={PROJECT_STATUSES} /> },
           { key: "value", label: "Value", width: "130px", render: (r, on) => <CellInput type="number" value={String(r.value ?? 0)} onChange={(v) => on({ value: parseFloat(v) || 0 })} className="text-right font-mono" /> },
           { key: "start_date", label: "Start", width: "140px", render: (r, on) => <CellInput type="date" value={r.start_date ?? ""} onChange={(v) => on({ start_date: v || null })} /> },
           { key: "deadline", label: "Deadline", width: "140px", render: (r, on) => <CellInput type="date" value={r.deadline ?? ""} onChange={(v) => on({ deadline: v || null })} /> },

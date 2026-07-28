@@ -5,13 +5,14 @@ import { EditableTable, CellInput, CellSelect } from "@/components/editable-tabl
 import { ACCOUNT_KINDS } from "@/lib/format";
 import { useEffect, useState } from "react";
 import { formatMoney } from "@/lib/format";
-import { Wallet, Pencil } from "lucide-react";
+import { Download, Wallet, Pencil } from "lucide-react";
 import { usePlannerCurrency } from "@/hooks/use-planner-currency";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { exportToExcel } from "@/lib/export-excel";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/accounts")({
   component: AccountsPage,
@@ -57,9 +58,7 @@ function AccountsPage() {
   const updateMutation = useMutation({
     mutationFn: async () => {
       if (!editAcc || !editAmt) return;
-      const b = balMap.get(editAcc.id) ?? 0;
-      const newOpening = Number(editAmt) - b;
-      const { error } = await supabase.from("accounts").update({ opening_balance: newOpening }).eq("id", editAcc.id);
+      const { error } = await supabase.from("accounts").update({ opening_balance: Number(editAmt) }).eq("id", editAcc.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -70,11 +69,34 @@ function AccountsPage() {
     onError: (e) => toast.error(e.message)
   });
 
+  const handleExport = () => {
+    const headers = ["Account Name", "Category Kind", "Opening Balance", "Live Calculated Balance", "Currency"];
+    const exportRows = rows.map((r) => [
+      r.name,
+      r.kind,
+      r.opening_balance ?? 0,
+      Number(r.opening_balance ?? 0) + (balMap.get(r.id) ?? 0),
+      r.currency || currency,
+    ]);
+    exportToExcel("Accounts_Registry", headers, exportRows);
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-3xl">Accounts</h1>
-        <p className="text-sm text-muted-foreground">Wallets, banks and cash — with live balances.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Wallet className="h-7 w-7 text-[#3DDC97]" /> Accounts & Wallets
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">Wallets, banks and cash — with live balances.</p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={handleExport}
+          className="bg-white/5 border-white/10 hover:bg-white/10 text-white text-xs gap-2 self-start sm:self-auto"
+        >
+          <Download className="h-4 w-4 text-[#3DDC97]" /> Export Excel
+        </Button>
       </div>
 
       {rows.length > 0 && (
@@ -190,7 +212,7 @@ function AccountsPage() {
         onNewRow={() => ({ name: "New account", kind: "bank", currency, opening_balance: 0 })}
         columns={[
           { key: "name", label: "Name", render: (r, on) => <CellInput value={r.name ?? ""} onChange={(v) => on({ name: v })} /> },
-          { key: "kind", label: "Type", width: "140px", render: (r, on) => <CellSelect value={r.kind ?? "bank"} onChange={(v) => on({ kind: v })} options={ACCOUNT_KINDS.map((k) => ({ value: k, label: k }))} /> },
+          { key: "kind", label: "Type", width: "140px", render: (r, on) => <CellSelect value={r.kind ?? "bank"} onChange={(v) => on({ kind: v })} options={ACCOUNT_KINDS} /> },
           { key: "currency", label: "CCY", width: "80px", render: (r, on) => <CellInput value={r.currency ?? currency} onChange={(v) => on({ currency: v.toUpperCase() })} className="uppercase" /> },
           { key: "opening_balance", label: "Opening", width: "140px", render: (r, on) => <CellInput type="number" value={String(r.opening_balance ?? 0)} onChange={(v) => on({ opening_balance: parseFloat(v) || 0 })} className="text-right font-mono" /> },
         ]}
