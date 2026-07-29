@@ -146,8 +146,8 @@ export function EditableTable<T extends BaseRow>({
         )}
         <Button size="sm" onClick={addRow} className="glow-emerald"><Plus className="h-4 w-4 mr-1" />New</Button>
       </div>
-      <div className="overflow-auto max-h-[calc(100vh-260px)] w-full">
-        <table className="w-full text-sm max-md:min-w-[600px]">
+      <div className="overflow-y-auto overflow-x-auto md:overflow-x-hidden max-h-[calc(100vh-260px)] w-full">
+        <table className="w-full text-sm">
           <thead>
             <tr className="text-xs text-muted-foreground bg-card sticky-th">
               <th className="w-8 p-2 border-b border-hairline">

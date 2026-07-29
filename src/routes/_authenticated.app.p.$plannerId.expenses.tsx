@@ -179,13 +179,13 @@ function ExpensesPage() {
         currency={currency}
         totals={{ amountKey: "amount", label: "Total" }}
         columns={[
-          { key: "date", label: "Date", width: "130px", render: (r, on) => <CellInput type="date" value={r.date ?? ""} onChange={(v) => on({ date: v })} /> },
-          { key: "vendor", label: "Vendor / Payee", width: "170px", render: (r, on) => <CellInput value={r.vendor ?? ""} onChange={(v) => on({ vendor: v })} /> },
+          { key: "date", label: "Date", width: "115px", render: (r, on) => <CellInput type="date" value={r.date ?? ""} onChange={(v) => on({ date: v })} /> },
+          { key: "vendor", label: "Vendor / Payee", width: "140px", render: (r, on) => <CellInput value={r.vendor ?? ""} onChange={(v) => on({ vendor: v })} /> },
           { key: "description", label: "Description", render: (r, on) => <CellInput value={r.description ?? ""} onChange={(v) => on({ description: v })} /> },
-          { key: "category_id", label: "Category", width: "160px", render: (r, on) => <CellSelect value={r.category_id ?? ""} onChange={(v) => on({ category_id: v || null })} options={cats.map((c) => ({ value: c.id, label: c.name }))} /> },
-          { key: "amount", label: "Amount", width: "130px", render: (r, on) => <CellInput type="number" value={String(r.amount ?? 0)} onChange={(v) => on({ amount: parseFloat(v) || 0 })} className="text-right font-sans" /> },
-          { key: "currency", label: "CCY", width: "80px", render: (r, on) => <CellInput value={r.currency ?? currency} onChange={(v) => on({ currency: v.toUpperCase() })} className="uppercase font-sans" /> },
-          { key: "account_id", label: "Paid From Account", width: "170px", render: (r, on) => <CellSelect value={r.account_id ?? ""} onChange={(v) => on({ account_id: v || null })} options={accounts.map((a) => ({ value: a.id, label: a.name }))} /> },
+          { key: "category_id", label: "Category", width: "130px", render: (r, on) => <CellSelect value={r.category_id ?? ""} onChange={(v) => on({ category_id: v || null })} options={cats.map((c) => ({ value: c.id, label: c.name }))} /> },
+          { key: "amount", label: "Amount", width: "100px", render: (r, on) => <CellInput type="number" value={String(r.amount ?? 0)} onChange={(v) => on({ amount: parseFloat(v) || 0 })} className="text-right font-sans" /> },
+          { key: "currency", label: "CCY", width: "65px", render: (r, on) => <CellInput value={r.currency ?? currency} onChange={(v) => on({ currency: v.toUpperCase() })} className="uppercase font-sans" /> },
+          { key: "account_id", label: "Paid From Account", width: "140px", render: (r, on) => <CellSelect value={r.account_id ?? ""} onChange={(v) => on({ account_id: v || null })} options={accounts.map((a) => ({ value: a.id, label: a.name }))} /> },
           { key: "notes", label: "Notes", render: (r, on) => <CellInput value={r.notes ?? ""} onChange={(v) => on({ notes: v })} /> },
         ]}
       />
