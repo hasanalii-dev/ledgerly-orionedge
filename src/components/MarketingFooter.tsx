@@ -5,7 +5,7 @@ const LazySideRays = lazy(() => import('@/components/magic/SideRays'));
 
 export function MarketingFooter() {
   return (
-    <footer className="pt-32 pb-4 text-sm text-muted-foreground relative z-10 overflow-hidden bg-black border-t border-white/5 shadow-2xl mt-8">
+    <footer className="pt-12 pb-4 text-sm text-muted-foreground relative z-10 overflow-hidden bg-black border-t border-white/5 shadow-2xl">
       <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen">
         <div className="absolute inset-0">
           <Suspense fallback={null}>

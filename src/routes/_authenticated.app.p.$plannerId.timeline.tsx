@@ -30,7 +30,7 @@ function safeString(val: any, fallback = ""): string {
   return fallback;
 }
 
-export function TimelinePage() {
+function TimelinePage() {
   const { plannerId } = Route.useParams();
   const currency = usePlannerCurrency(plannerId);
   const qc = useQueryClient();

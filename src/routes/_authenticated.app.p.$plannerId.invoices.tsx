@@ -12,7 +12,7 @@ import { exportToExcel } from "@/lib/export-excel";
 
 type Row = { id: string; invoice_number: string; client_id: string | null; project_id: string | null; issue_date: string; due_date: string | null; amount: number; currency: string; status: string };
 
-export function InvoicesPage() {
+function InvoicesPage() {
   const { plannerId } = Route.useParams();
   const [uid, setUid] = useState("");
   const currency = usePlannerCurrency(plannerId);

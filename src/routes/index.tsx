@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, LineChart, Wallet, Users, FileText, LayoutGrid, Receipt, Target, User, Briefcase, Building2 } from "lucide-react";
+import { ArrowRight, LineChart, Wallet, Users, FileText, LayoutGrid, Receipt, Target, User, Briefcase, Building2, Sparkles, Zap } from "lucide-react";
 import { lazy, Suspense } from "react";
 const LazyLightRays = lazy(() => import("@/components/magic/LightRays"));
 const LazySideRays = lazy(() => import("@/components/magic/SideRays"));
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 import { MarketingNavbar } from "@/components/MarketingNavbar";
 import { MarketingFooter } from "@/components/MarketingFooter";
+import PixelCard from "@/components/magic/PixelCard";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,7 +29,7 @@ function Landing() {
       <MarketingNavbar />
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-24 min-h-[90vh] flex flex-col justify-center bg-background z-0">
+      <section className="relative overflow-hidden pt-24 min-h-[90vh] flex flex-col justify-center bg-[#050c0d] z-0">
         
         {/* Background gradient image — full width at the bottom of hero */}
         <div className="absolute inset-x-0 bottom-0 z-0 w-full pointer-events-none select-none flex items-end opacity-80">
@@ -39,6 +40,9 @@ function Landing() {
             draggable={false}
           />
         </div>
+
+        {/* Bottom smooth fade to eliminate any scroll flash */}
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#050c0d] via-[#050c0d]/80 to-transparent z-10 pointer-events-none" />
 
         {/* Top Light Rays */}
         <div className="absolute inset-0 z-[5] pointer-events-none mix-blend-screen">
@@ -65,11 +69,13 @@ function Landing() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-            className="p-[1px] rounded-full bg-gradient-to-bl from-emerald-500/50 to-white/5 mb-8 inline-flex"
+            className="mb-8 inline-flex"
           >
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#050a0a]/80 backdrop-blur-md px-4 py-1.5 text-xs text-white/70 shadow-[2px_-2px_20px_rgba(52,211,153,0.15)] cursor-default">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-              Now with multi-planner workspaces
+            <div className="p-[1px] rounded-full bg-[linear-gradient(to_bottom,rgba(61,220,151,0.65)_0%,rgba(16,185,129,0.25)_30%,transparent_75%)] inline-flex shadow-[0_0_20px_rgba(61,220,151,0.15)]">
+              <div className="inline-flex items-center gap-2.5 rounded-full bg-[#050e0c]/90 backdrop-blur-md px-4 py-1.5 text-xs font-medium text-white/80 cursor-default">
+                <Zap className="h-3.5 w-3.5 text-[#3DDC97]" />
+                <span>Now with multi-planner workspaces</span>
+              </div>
             </div>
           </motion.div>
           <motion.h1
@@ -131,17 +137,21 @@ function Landing() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 1.3, ease: "easeOut" }}
-            className="mt-10 flex flex-wrap gap-3 justify-center"
+            className="mt-10 flex flex-wrap gap-4 justify-center"
           >
             <Link to="/auth">
-              <Button size="lg" className="h-12 px-8 glow-emerald hover:scale-105 hover:bg-primary/90 transition-all duration-300">
-                Enroll Beta<ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <div className="p-[1px] rounded-full bg-[linear-gradient(to_top,rgba(167,243,208,0.9)_0%,rgba(61,220,151,0.6)_35%,transparent_80%)] inline-flex shadow-[0_4px_20px_rgba(61,220,151,0.25)]">
+                <Button size="lg" className="h-12 px-8 rounded-full bg-[#3DDC97] text-black font-['Samsung_Sharp_Sans',_sans-serif] font-bold hover:bg-[#3DDC97]/90 hover:scale-[1.02] transition-all duration-300">
+                  Enroll Beta <ArrowRight className="ml-2 h-4 w-4 stroke-[2.5]" />
+                </Button>
+              </div>
             </Link>
             <a href="#features">
-              <Button size="lg" variant="outline" className="h-12 px-8 border-white/10 bg-white/5 backdrop-blur-sm hover:border-primary/30 hover:bg-primary/10 hover:text-primary hover:scale-105 transition-all duration-300">
-                Learn More
-              </Button>
+              <div className="p-[1px] rounded-full bg-[linear-gradient(to_top,rgba(61,220,151,0.65)_0%,rgba(16,185,129,0.25)_30%,transparent_75%)] inline-flex">
+                <Button size="lg" variant="outline" className="h-12 px-8 rounded-full border-0 bg-white/[0.04] text-white font-['Samsung_Sharp_Sans',_sans-serif] font-semibold hover:bg-white/[0.08] hover:scale-[1.02] transition-all duration-300 backdrop-blur-sm">
+                  Learn More
+                </Button>
+              </div>
             </a>
           </motion.div>
 
@@ -206,12 +216,22 @@ function Landing() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="text-center max-w-2xl mx-auto mb-16"
+              className="text-center max-w-3xl mx-auto mb-16"
             >
-              <h2 className="text-4xl font-display tracking-tight">Everything. <span className="text-primary">One Workspace.</span></h2>
-              <p className="mt-4 text-muted-foreground leading-relaxed">Manage every aspect of your financial life from one unified platform. Whether you're budgeting your personal finances, running a freelance business, managing client projects, or operating an entire company, Capient keeps everything connected, organized, and always within reach.</p>
+              <div className="flex justify-center mb-6">
+                <div className="p-[1px] rounded-full bg-[linear-gradient(to_top,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.12)_25%,transparent_60%)] inline-flex">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-[#121417] px-4 py-1.5 text-xs font-semibold text-white">
+                    <LayoutGrid className="h-3.5 w-3.5 text-[#3DDC97]" />
+                    <span>Features</span>
+                  </div>
+                </div>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-display tracking-tight leading-tight text-white">
+                Everything. <span className="bg-[radial-gradient(ellipse_at_center,#3DDC97_0%,#10B981_55%,#047857_100%)] bg-clip-text text-transparent">One Workspace.</span>
+              </h2>
+              <p className="mt-6 text-muted-foreground text-sm md:text-base leading-relaxed max-w-2xl mx-auto">Manage every aspect of your financial life from one unified platform. Whether you're budgeting your personal finances, running a freelance business, managing client projects, or operating an entire company, Capient keeps everything connected, organized, and always within reach.</p>
             </motion.div>
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-3 relative">
               {[
                 { icon: LayoutGrid, title: "Multi-planner workspace", desc: "Separate books for personal, agency, side project. Zero data crossover." },
                 { icon: LineChart, title: "Live cash flow", desc: "Daily, weekly, monthly, yearly cuts of income vs expenses." },
@@ -225,14 +245,26 @@ function Landing() {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
-                  className="rounded-2xl border border-hairline bg-card/10 backdrop-blur-sm p-6 hover:bg-card/40 hover:border-primary/15 hover:shadow-[0_0_30px_-10px_oklch(0.82_0.17_160_/_0.15)] hover:-translate-y-1 transition-all duration-300 group"
+                  transition={{ duration: 0.5, delay: i * 0.08, ease: "easeOut" }}
+                  className="h-full"
                 >
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
-                    <f.icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="font-display text-lg font-medium text-foreground/90 group-hover:text-foreground transition-colors">{f.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+                  <PixelCard
+                    variant="green"
+                    className={cn(
+                      "p-8 bg-card/5 transition-all duration-300 group relative overflow-hidden h-full rounded-none border-0",
+                      i % 3 !== 2 && "md:border-r md:border-white/10",
+                      i < 3 && "border-b border-white/10",
+                      i >= 3 && "border-t border-white/10"
+                    )}
+                  >
+                    <div className="relative z-10">
+                      <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-5 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
+                        <f.icon className="h-5 w-5" />
+                      </div>
+                      <h3 className="font-display text-lg font-medium text-foreground/90 group-hover:text-foreground transition-colors">{f.title}</h3>
+                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+                    </div>
+                  </PixelCard>
                 </motion.div>
               ))}
             </div>
@@ -249,9 +281,19 @@ function Landing() {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.7, ease: "easeOut" }}
               >
-                <h2 className="text-4xl font-display tracking-tight">Designed Around How You <span className="text-primary">Actually Work</span></h2>
-                <p className="mt-4 text-muted-foreground leading-relaxed">Most financial tools solve one problem. <span className="text-foreground/90 font-medium">Capient brings them together.</span></p>
-                <p className="mt-4 text-muted-foreground leading-relaxed text-sm">Track income and expenses, forecast future cash flow, manage clients, generate invoices, monitor project profitability, organize financial documents, collaborate with your team, and gain a complete picture of your finances—all from one beautifully designed workspace.</p>
+                <div className="mb-6 inline-flex">
+                  <div className="p-[1px] rounded-full bg-[linear-gradient(to_top,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.12)_25%,transparent_60%)] inline-flex">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-[#121417] px-4 py-1.5 text-xs font-semibold text-white">
+                      <Briefcase className="h-3.5 w-3.5 text-[#3DDC97]" />
+                      <span>Modules</span>
+                    </div>
+                  </div>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-display tracking-tight leading-tight text-white">
+                  Designed Around How You <span className="bg-[radial-gradient(ellipse_at_center,#3DDC97_0%,#10B981_55%,#047857_100%)] bg-clip-text text-transparent">Actually Work</span>
+                </h2>
+                <p className="mt-6 text-muted-foreground text-lg leading-relaxed">Most financial tools solve one problem. <span className="text-foreground/90 font-medium">Capient brings them together.</span></p>
+                <p className="mt-4 text-muted-foreground leading-relaxed">Track income and expenses, forecast future cash flow, manage clients, generate invoices, monitor project profitability, organize financial documents, collaborate with your team, and gain a complete picture of your finances—all from one beautifully designed workspace.</p>
                 <div className="mt-8">
                   <Link to="/auth">
                     <Button size="lg" className="glow-emerald hover:scale-105 transition-transform duration-300">
@@ -301,9 +343,20 @@ function Landing() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="text-center max-w-2xl mx-auto mb-16"
+              className="text-center max-w-3xl mx-auto mb-16"
             >
-              <h2 className="text-4xl font-display tracking-tight">Built for <span className="text-primary">Every Stage</span></h2>
+              <div className="flex justify-center mb-6">
+                <div className="p-[1px] rounded-full bg-[linear-gradient(to_top,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.12)_25%,transparent_60%)] inline-flex">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-[#121417] px-4 py-1.5 text-xs font-semibold text-white">
+                    <Users className="h-3.5 w-3.5 text-[#3DDC97]" />
+                    <span>Use Cases</span>
+                  </div>
+                </div>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-display tracking-tight leading-tight text-white">
+                Built for <span className="bg-[radial-gradient(ellipse_at_center,#3DDC97_0%,#10B981_55%,#047857_100%)] bg-clip-text text-transparent">Every Stage</span>
+              </h2>
+              <p className="mt-6 text-muted-foreground text-lg leading-relaxed">Designed to scale with you, from solo endeavors to growing companies.</p>
             </motion.div>
             <div className="grid md:grid-cols-3 gap-6">
               {[
@@ -335,62 +388,66 @@ function Landing() {
           </div>
         </section>
 
-        {/* CTA */}
-        <section id="pricing" className="relative z-20 px-4 md:px-8 max-w-5xl mx-auto w-full pt-8">
-          <div className="rounded-3xl border border-white/5 bg-background shadow-[0_0_80px_-20px_rgba(16,185,129,0.15)] relative overflow-hidden pt-10 pb-8 translate-y-1/2">
-            {/* Background gradient image — bottom */}
-            <div className="absolute inset-x-0 bottom-0 z-0 w-full pointer-events-none select-none flex items-end opacity-100 translate-y-[20%]">
-              <img
-                src="/bg-gradient.png"
-                alt=""
-                className="w-full h-auto object-cover opacity-100"
-                draggable={false}
-                loading="lazy"
-              />
+        {/* CTA Section */}
+        <section id="pricing" className="relative z-20 min-h-[70vh] py-24 px-6 flex flex-col justify-center items-center overflow-hidden bg-[#050c0d]">
+          {/* Full-bleed seamless bottom radial glow without hard box boundaries */}
+          <div 
+            className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[140vw] md:w-[120vw] h-[380px] pointer-events-none z-0 opacity-35 blur-[70px]"
+            style={{
+              background: "radial-gradient(ellipse 65% 100% at 50% 100%, #3DDC97 0%, #10B981 40%, transparent 75%)"
+            }}
+          />
+
+          <div className="max-w-4xl mx-auto text-center relative z-10 my-auto">
+            {/* Badge */}
+            <div className="flex justify-center mb-6">
+              <div className="p-[1px] rounded-full bg-[linear-gradient(to_top,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.12)_25%,transparent_60%)] inline-flex">
+                <div className="inline-flex items-center gap-2 rounded-full bg-[#121417] px-4 py-1.5 text-xs font-semibold text-white">
+                  <Target className="h-3.5 w-3.5 text-[#3DDC97]" />
+                  <span>Get Started</span>
+                </div>
+              </div>
             </div>
-            {/* Blending overlay to merge the top edge of the image */}
-            <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-background/80 to-transparent z-0 pointer-events-none" />
-            
-            <div className="absolute inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/10 rounded-full blur-[100px]" />
-            </div>
-            
+
+            {/* Title */}
+            <h2 className="text-4xl md:text-5xl font-display tracking-tight leading-tight text-white">
+              Start with your <span className="bg-[radial-gradient(ellipse_at_center,#3DDC97_0%,#10B981_55%,#047857_100%)] bg-clip-text text-transparent">first planner</span>.
+            </h2>
+
+            {/* Subtitle */}
+            <p className="mt-6 text-muted-foreground text-lg max-w-xl mx-auto leading-relaxed">
+              Join entrepreneurs and agencies who have brought calm and clarity to their finances. Free while in preview. No credit card required.
+            </p>
+
+            {/* Actions & Raw Avatars (No rectangle container!) */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="relative z-10 max-w-3xl mx-auto px-6 text-center"
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-6"
             >
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-display tracking-tight leading-tight drop-shadow-md">
-                Start with your <span className="text-primary font-medium">first planner</span>.
-              </h2>
-              <p className="mt-3 text-foreground/80 font-medium text-sm max-w-md mx-auto leading-relaxed drop-shadow-md">
-                Join entrepreneurs and agencies who have brought calm and clarity to their finances. Free while in preview. No credit card required.
-              </p>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4"
-              >
-                <Link to="/auth">
-                  <Button variant="outline" className="h-12 px-8 text-base rounded-full bg-card border-white/10 text-foreground hover:bg-white/5 transition-all font-medium">
-                    Join Beta <ArrowRight className="ml-2 h-4 w-4" />
+              <Link to="/auth">
+                <div className="p-[1px] rounded-full bg-[linear-gradient(to_top,rgba(167,243,208,0.9)_0%,rgba(61,220,151,0.6)_35%,transparent_80%)] inline-flex shadow-[0_0_30px_rgba(61,220,151,0.35)]">
+                  <Button size="lg" className="h-12 px-8 rounded-full bg-[#3DDC97] text-black font-['Samsung_Sharp_Sans',_sans-serif] font-bold hover:bg-[#3DDC97]/90 hover:scale-[1.02] transition-all duration-300">
+                    Enroll Beta <ArrowRight className="ml-2 h-4 w-4 stroke-[2.5]" />
                   </Button>
-                </Link>
-                <div className="flex -space-x-3 ml-2">
+                </div>
+              </Link>
+
+              {/* Raw Avatars stack without rectangle box container */}
+              <div className="flex items-center gap-3">
+                <div className="flex -space-x-3">
                   {[...Array(4)].map((_, i) => (
-                    <div key={i} className="w-10 h-10 rounded-full border-2 border-background bg-background flex items-center justify-center relative overflow-hidden shadow-md transition-transform hover:scale-110 hover:z-10">
+                    <div key={i} className="w-9 h-9 rounded-full border-2 border-[#050c0d] bg-background flex items-center justify-center relative overflow-hidden shadow-md transition-transform hover:scale-110 hover:z-10">
                       <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=user${i + 42}`} alt="" className="w-8 h-8 object-contain" />
                     </div>
                   ))}
-                  <div className="w-10 h-10 rounded-full border-2 border-background bg-elevated flex items-center justify-center text-[10px] font-medium text-muted-foreground shadow-md z-10">
+                  <div className="w-9 h-9 rounded-full border-2 border-[#050c0d] bg-[#121417] flex items-center justify-center text-[10px] font-bold text-[#3DDC97] shadow-md z-10">
                     +1k
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </motion.div>
           </div>
         </section>

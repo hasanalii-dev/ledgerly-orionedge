@@ -22,7 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Plus, Settings, LogOut, ChevronDown, LayoutDashboard, TrendingUp, TrendingDown, LineChart, 
   Wallet, Users, FolderKanban, FileText, CandlestickChart, Target, ArrowLeftRight, FileBarChart, 
-  PieChart, Calendar, CalendarCheck, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles, Calculator, SlidersHorizontal, Check, Dices,
+  PieChart, Calendar, CalendarCheck, Activity, StickyNote, Files, Copy, Pencil, Trash2, User, Book, UserPlus, Search, Hexagon, Sparkles, Calculator, SlidersHorizontal, Check, Dices, Scale,
   Building, Briefcase, Rocket, Video, GraduationCap, Store, Landmark, Palette, Code, Plane, Camera, Gamepad, Utensils, Music, Laptop
 } from "lucide-react";
 import { InviteDialog } from "./invite-dialog";
@@ -319,6 +319,7 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
     loans: Landmark,
     timeline: Activity,
     notes: StickyNote,
+    taxes: Scale,
   };
 
   const items = plannerId
@@ -563,6 +564,11 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
                       >
                         <item.icon className={`h-[16px] w-[16px] transition-colors ${isActive ? "text-primary drop-shadow-[0_0_8px_rgba(61,220,151,0.5)]" : "text-muted-foreground group-hover:text-foreground"}`} />
                         <span className="text-[13px] group-data-[collapsible=icon]:hidden">{item.title}</span>
+                        {item.title === "Taxes" && (
+                          <span className="ml-auto text-[9px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-1.5 py-0.5 rounded-md group-data-[collapsible=icon]:hidden border border-primary/20">
+                            Beta
+                          </span>
+                        )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

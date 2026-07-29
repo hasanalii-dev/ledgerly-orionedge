@@ -28,6 +28,7 @@ import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAppPPlannerIdRouteImport } from './routes/_authenticated.app.p.$plannerId'
 import { Route as AuthenticatedAppPPlannerIdVaultRouteImport } from './routes/_authenticated.app.p.$plannerId.vault'
 import { Route as AuthenticatedAppPPlannerIdTimelineRouteImport } from './routes/_authenticated.app.p.$plannerId.timeline'
+import { Route as AuthenticatedAppPPlannerIdTaxesRouteImport } from './routes/_authenticated.app.p.$plannerId.taxes'
 import { Route as AuthenticatedAppPPlannerIdReportsRouteImport } from './routes/_authenticated.app.p.$plannerId.reports'
 import { Route as AuthenticatedAppPPlannerIdProjectsRouteImport } from './routes/_authenticated.app.p.$plannerId.projects'
 import { Route as AuthenticatedAppPPlannerIdNotificationsRouteImport } from './routes/_authenticated.app.p.$plannerId.notifications'
@@ -144,6 +145,12 @@ const AuthenticatedAppPPlannerIdTimelineRoute =
   AuthenticatedAppPPlannerIdTimelineRouteImport.update({
     id: '/timeline',
     path: '/timeline',
+    getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
+  } as any)
+const AuthenticatedAppPPlannerIdTaxesRoute =
+  AuthenticatedAppPPlannerIdTaxesRouteImport.update({
+    id: '/taxes',
+    path: '/taxes',
     getParentRoute: () => AuthenticatedAppPPlannerIdRoute,
   } as any)
 const AuthenticatedAppPPlannerIdReportsRoute =
@@ -297,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/app/p/$plannerId/notifications': typeof AuthenticatedAppPPlannerIdNotificationsRoute
   '/app/p/$plannerId/projects': typeof AuthenticatedAppPPlannerIdProjectsRoute
   '/app/p/$plannerId/reports': typeof AuthenticatedAppPPlannerIdReportsRoute
+  '/app/p/$plannerId/taxes': typeof AuthenticatedAppPPlannerIdTaxesRoute
   '/app/p/$plannerId/timeline': typeof AuthenticatedAppPPlannerIdTimelineRoute
   '/app/p/$plannerId/vault': typeof AuthenticatedAppPPlannerIdVaultRoute
 }
@@ -336,6 +344,7 @@ export interface FileRoutesByTo {
   '/app/p/$plannerId/notifications': typeof AuthenticatedAppPPlannerIdNotificationsRoute
   '/app/p/$plannerId/projects': typeof AuthenticatedAppPPlannerIdProjectsRoute
   '/app/p/$plannerId/reports': typeof AuthenticatedAppPPlannerIdReportsRoute
+  '/app/p/$plannerId/taxes': typeof AuthenticatedAppPPlannerIdTaxesRoute
   '/app/p/$plannerId/timeline': typeof AuthenticatedAppPPlannerIdTimelineRoute
   '/app/p/$plannerId/vault': typeof AuthenticatedAppPPlannerIdVaultRoute
 }
@@ -377,6 +386,7 @@ export interface FileRoutesById {
   '/_authenticated/app/p/$plannerId/notifications': typeof AuthenticatedAppPPlannerIdNotificationsRoute
   '/_authenticated/app/p/$plannerId/projects': typeof AuthenticatedAppPPlannerIdProjectsRoute
   '/_authenticated/app/p/$plannerId/reports': typeof AuthenticatedAppPPlannerIdReportsRoute
+  '/_authenticated/app/p/$plannerId/taxes': typeof AuthenticatedAppPPlannerIdTaxesRoute
   '/_authenticated/app/p/$plannerId/timeline': typeof AuthenticatedAppPPlannerIdTimelineRoute
   '/_authenticated/app/p/$plannerId/vault': typeof AuthenticatedAppPPlannerIdVaultRoute
 }
@@ -418,6 +428,7 @@ export interface FileRouteTypes {
     | '/app/p/$plannerId/notifications'
     | '/app/p/$plannerId/projects'
     | '/app/p/$plannerId/reports'
+    | '/app/p/$plannerId/taxes'
     | '/app/p/$plannerId/timeline'
     | '/app/p/$plannerId/vault'
   fileRoutesByTo: FileRoutesByTo
@@ -457,6 +468,7 @@ export interface FileRouteTypes {
     | '/app/p/$plannerId/notifications'
     | '/app/p/$plannerId/projects'
     | '/app/p/$plannerId/reports'
+    | '/app/p/$plannerId/taxes'
     | '/app/p/$plannerId/timeline'
     | '/app/p/$plannerId/vault'
   id:
@@ -497,6 +509,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/p/$plannerId/notifications'
     | '/_authenticated/app/p/$plannerId/projects'
     | '/_authenticated/app/p/$plannerId/reports'
+    | '/_authenticated/app/p/$plannerId/taxes'
     | '/_authenticated/app/p/$plannerId/timeline'
     | '/_authenticated/app/p/$plannerId/vault'
   fileRoutesById: FileRoutesById
@@ -649,6 +662,13 @@ declare module '@tanstack/react-router' {
       path: '/timeline'
       fullPath: '/app/p/$plannerId/timeline'
       preLoaderRoute: typeof AuthenticatedAppPPlannerIdTimelineRouteImport
+      parentRoute: typeof AuthenticatedAppPPlannerIdRoute
+    }
+    '/_authenticated/app/p/$plannerId/taxes': {
+      id: '/_authenticated/app/p/$plannerId/taxes'
+      path: '/taxes'
+      fullPath: '/app/p/$plannerId/taxes'
+      preLoaderRoute: typeof AuthenticatedAppPPlannerIdTaxesRouteImport
       parentRoute: typeof AuthenticatedAppPPlannerIdRoute
     }
     '/_authenticated/app/p/$plannerId/reports': {
@@ -807,6 +827,7 @@ interface AuthenticatedAppPPlannerIdRouteChildren {
   AuthenticatedAppPPlannerIdNotificationsRoute: typeof AuthenticatedAppPPlannerIdNotificationsRoute
   AuthenticatedAppPPlannerIdProjectsRoute: typeof AuthenticatedAppPPlannerIdProjectsRoute
   AuthenticatedAppPPlannerIdReportsRoute: typeof AuthenticatedAppPPlannerIdReportsRoute
+  AuthenticatedAppPPlannerIdTaxesRoute: typeof AuthenticatedAppPPlannerIdTaxesRoute
   AuthenticatedAppPPlannerIdTimelineRoute: typeof AuthenticatedAppPPlannerIdTimelineRoute
   AuthenticatedAppPPlannerIdVaultRoute: typeof AuthenticatedAppPPlannerIdVaultRoute
 }
@@ -848,6 +869,7 @@ const AuthenticatedAppPPlannerIdRouteChildren: AuthenticatedAppPPlannerIdRouteCh
       AuthenticatedAppPPlannerIdProjectsRoute,
     AuthenticatedAppPPlannerIdReportsRoute:
       AuthenticatedAppPPlannerIdReportsRoute,
+    AuthenticatedAppPPlannerIdTaxesRoute: AuthenticatedAppPPlannerIdTaxesRoute,
     AuthenticatedAppPPlannerIdTimelineRoute:
       AuthenticatedAppPPlannerIdTimelineRoute,
     AuthenticatedAppPPlannerIdVaultRoute: AuthenticatedAppPPlannerIdVaultRoute,

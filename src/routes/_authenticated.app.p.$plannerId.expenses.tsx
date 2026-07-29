@@ -20,7 +20,7 @@ type Row = {
   notes: string | null;
 };
 
-export function ExpensesPage() {
+function ExpensesPage() {
   const { plannerId } = Route.useParams();
   const [uid, setUid] = useState<string>("");
   const currency = usePlannerCurrency(plannerId);

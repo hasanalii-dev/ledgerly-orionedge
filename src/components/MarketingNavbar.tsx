@@ -90,7 +90,7 @@ export function MarketingNavbar() {
           
           <div className="flex items-center gap-2">
             <Link to="/auth"><Button variant="ghost" size="sm" className="hidden md:inline-flex text-muted-foreground hover:text-white font-['Samsung_Sharp_Sans',_sans-serif] font-bold">Sign in</Button></Link>
-            <Link to="/auth"><Button size="sm" className="hidden md:inline-flex rounded-full bg-[#3DDC97] text-black font-['Samsung_Sharp_Sans',_sans-serif] font-bold hover:bg-[#3DDC97]/90 shadow-[0_0_15px_rgba(61,220,151,0.25)]">Join Beta</Button></Link>
+            <Link to="/auth"><Button size="sm" className="hidden md:inline-flex rounded-full bg-[#3DDC97] text-black font-['Samsung_Sharp_Sans',_sans-serif] font-bold hover:bg-[#3DDC97]/90 transition-all">Join Beta</Button></Link>
             
             {/* Mobile Hamburger Button */}
             <Button 

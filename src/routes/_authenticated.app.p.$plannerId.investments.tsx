@@ -58,7 +58,7 @@ const PRESETS = [
 
 const PIE_COLORS = ["#3DDC97", "#F59E0B", "#06B6D4", "#8B5CF6", "#EC4899", "#3B82F6", "#EAB308", "#F43F5E"];
 
-export function InvestmentsPage() {
+function InvestmentsPage() {
   const { plannerId } = Route.useParams();
   const currency = usePlannerCurrency(plannerId);
   const qc = useQueryClient();

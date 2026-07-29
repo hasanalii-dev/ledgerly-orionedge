@@ -146,6 +146,8 @@ export interface CategoryPreset {
   name: string;
   color: string;
   type: "income" | "expense";
+  tax_regime?: "NTR" | "FTR" | "MTR" | "Exempt";
+  is_it_export?: boolean;
 }
 
 export function getCategoryPresets(workspaceType: WorkspaceType): CategoryPreset[] {
@@ -165,14 +167,16 @@ export function getCategoryPresets(workspaceType: WorkspaceType): CategoryPreset
     case "agency":
     case "freelancer":
       return [
-        { name: "Client Retainers", color: "#3DDC97", type: "income" },
-        { name: "Project Milestones", color: "#38BDF8", type: "income" },
-        { name: "Consulting Fees", color: "#A855F7", type: "income" },
+        { name: "Client Retainers", color: "#3DDC97", type: "income", tax_regime: "NTR" },
+        { name: "Project Milestones", color: "#38BDF8", type: "income", tax_regime: "NTR" },
+        { name: "Consulting Fees", color: "#A855F7", type: "income", tax_regime: "NTR" },
+        { name: "IT Export Revenue", color: "#3B82F6", type: "income", tax_regime: "FTR", is_it_export: true },
         { name: "Software & Tools (Figma/Adobe)", color: "#F43F5E", type: "expense" },
         { name: "Hosting & Cloud Infra", color: "#FB923C", type: "expense" },
         { name: "Subcontractors & Payroll", color: "#EAB308", type: "expense" },
         { name: "Marketing & Ads", color: "#EC4899", type: "expense" },
         { name: "Office & Operations", color: "#64748B", type: "expense" },
+        { name: "Tax & Withholding", color: "#ef4444", type: "expense" },
       ];
 
     case "business":
@@ -335,6 +339,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
         { id: "timeline", title: "Timeline", routeKey: "timeline", group: "insights" },
         { id: "notes", title: "Notes", routeKey: "notes", group: "insights" },
+        { id: "taxes", title: "Taxes", routeKey: "taxes", group: "insights" },
       ],
     };
   }
@@ -363,6 +368,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
         { id: "timeline", title: "Timeline", routeKey: "timeline", group: "insights" },
         { id: "notes", title: "Notes", routeKey: "notes", group: "insights" },
+        { id: "taxes", title: "Taxes", routeKey: "taxes", group: "insights" },
       ],
     };
   }
@@ -391,6 +397,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
         { id: "timeline", title: "Timeline", routeKey: "timeline", group: "insights" },
         { id: "notes", title: "Notes", routeKey: "notes", group: "insights" },
+        { id: "taxes", title: "Taxes", routeKey: "taxes", group: "insights" },
       ],
     };
   }
@@ -420,6 +427,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
       { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
       { id: "timeline", title: "Timeline", routeKey: "timeline", group: "insights" },
       { id: "notes", title: "Notes", routeKey: "notes", group: "insights" },
+      { id: "taxes", title: "Taxes", routeKey: "taxes", group: "insights" },
     ],
   };
 }

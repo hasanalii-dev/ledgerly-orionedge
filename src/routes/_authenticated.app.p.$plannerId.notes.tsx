@@ -12,7 +12,7 @@ import { toast } from "sonner";
 
 type Note = { id: string; title: string | null; content: string | null; updated_at: string; planner_id?: string; user_id?: string };
 
-export function NotesPage() {
+function NotesPage() {
   const { plannerId } = Route.useParams();
   const qc = useQueryClient();
   const [saveStatus, setSaveStatus] = useState<"synced" | "saving" | "offline">("synced");

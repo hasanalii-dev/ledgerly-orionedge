@@ -28,7 +28,7 @@ type Loan = {
   created_at: string;
 };
 
-export function LoansPage() {
+function LoansPage() {
   const { plannerId } = Route.useParams();
   const currency = usePlannerCurrency(plannerId);
   const qc = useQueryClient();

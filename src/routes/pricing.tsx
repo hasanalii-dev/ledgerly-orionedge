@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MarketingNavbar } from "@/components/MarketingNavbar";
-import { Check, CheckCircle2, Sparkles, ArrowRight, Plus, Minus, Info } from "lucide-react";
+import { Check, CheckCircle2, Sparkles, ArrowRight, Plus, Minus, Info, Zap, DollarSign } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -40,47 +40,55 @@ function PricingPage() {
   const [isYearly, setIsYearly] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0b0e0c] text-foreground overflow-x-hidden font-sans">
+    <div className="min-h-screen bg-[#0b0e0c] text-foreground overflow-x-hidden font-sans relative">
       <MarketingNavbar />
       
-      {/* Subtle ambient center glow */}
-      <div className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center">
-        <div className="w-[80vw] h-[50vh] bg-primary/5 blur-[120px] rounded-full" />
+      {/* Full-bleed MagicRings Background Element */}
+      <div className="absolute top-[280px] md:top-[320px] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] md:w-[1600px] h-[900px] pointer-events-none z-0 opacity-35 mix-blend-screen">
+        <MagicRings
+          color="#3DDC97"
+          colorTwo="#10B981"
+          ringCount={6}
+          speed={0.5}
+          attenuation={8}
+          lineThickness={1.5}
+          baseRadius={0.18}
+          radiusStep={0.14}
+          scaleRate={0.08}
+          opacity={0.6}
+          blur={2}
+          noiseAmount={0.05}
+          rotation={0}
+          ringGap={1.2}
+          fadeIn={0.5}
+          fadeOut={0.7}
+          followMouse={true}
+          mouseInfluence={0.15}
+          hoverScale={1.1}
+          parallax={0.08}
+        />
       </div>
+
+      {/* Subtle ambient hero glow */}
+      <div className="absolute top-0 inset-x-0 h-[600px] pointer-events-none z-0 flex items-center justify-center overflow-hidden">
+        <div className="w-[80vw] max-w-4xl h-[400px] bg-[#3DDC97]/15 blur-[120px] rounded-full" />
+      </div>
+
+      {/* Hero Bottom Fade Mask — fades at sides */}
+      <div 
+        className="absolute top-[380px] md:top-[420px] inset-x-0 h-56 bg-gradient-to-b from-transparent via-[#0b0e0c]/85 to-[#0b0e0c] z-0 pointer-events-none"
+        style={{ maskImage: "linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%)" }}
+      />
 
       <main className="relative z-10 pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center min-h-[90vh]">
         
         {/* HERO SECTION */}
         <div className="relative text-center mb-16 max-w-4xl flex flex-col items-center w-full">
-          {/* MagicRings Background */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[55%] w-[800px] h-[600px] scale-[1.2] lg:scale-[1.5] pointer-events-none z-[-1] opacity-40 mix-blend-screen">
-            <MagicRings
-              color="#3DDC97"
-              colorTwo="#1e8c56"
-              ringCount={5}
-              speed={0.5}
-              attenuation={8}
-              lineThickness={1.5}
-              baseRadius={0.2}
-              radiusStep={0.15}
-              scaleRate={0.08}
-              opacity={0.8}
-              blur={2}
-              noiseAmount={0.05}
-              rotation={0}
-              ringGap={1.2}
-              fadeIn={0.5}
-              fadeOut={0.7}
-              followMouse={true}
-              mouseInfluence={0.15}
-              hoverScale={1.1}
-              parallax={0.08}
-            />
-          </div>
-
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8 relative z-10">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#3DDC97]" />
-            <span className="text-xs font-medium text-white tracking-wide">Pricing</span>
+          <div className="p-[1px] rounded-full bg-[linear-gradient(to_top,rgba(61,220,151,0.65)_0%,rgba(16,185,129,0.25)_30%,transparent_75%)] inline-flex shadow-[0_0_20px_rgba(61,220,151,0.15)] mb-8 relative z-10">
+            <div className="inline-flex items-center gap-2.5 rounded-full bg-[#050e0c]/90 backdrop-blur-md px-4 py-1.5 text-xs font-medium text-white/80 cursor-default">
+              <DollarSign className="h-3.5 w-3.5 text-[#3DDC97]" />
+              <span>Pricing</span>
+            </div>
           </div>
 
           <h1 className="text-5xl md:text-6xl lg:text-[72px] leading-[1.1] font-display font-bold tracking-tighter text-white mb-6 relative z-10 drop-shadow-2xl">
