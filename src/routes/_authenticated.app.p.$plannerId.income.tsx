@@ -205,7 +205,7 @@ function IncomePage() {
         <DialogContent className="bg-[#0b0e0c] border border-white/10 text-white max-w-xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold flex items-center gap-2 text-white">
-              <Import className="h-5 w-5 text-white" /> Import Income from Monthly Tracking
+              <Import className="h-5 w-5 text-[#3DDC97]" /> Import Income from Monthly Tracking
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Select monthly income allocations to import into your main Income Registry.
@@ -237,7 +237,7 @@ function IncomePage() {
                       onClick={() => toggleAllocSelection(alloc.id)}
                       className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
                         selectedAllocIds.includes(alloc.id) 
-                          ? 'bg-white/15 border-white/30' 
+                          ? 'bg-[#3DDC97]/15 border-[#3DDC97]/40' 
                           : 'bg-white/5 border-white/10 hover:bg-white/10'
                       }`}
                     >
@@ -270,7 +270,7 @@ function IncomePage() {
             <Button 
               onClick={handleImportSelected} 
               disabled={isImporting || selectedAllocIds.length === 0} 
-              className="bg-white text-black hover:bg-white/90 font-bold"
+              className="glow-emerald bg-[#3DDC97] hover:bg-[#3DDC97]/90 text-black font-bold"
             >
               {isImporting ? "Importing..." : `Import Selected (${selectedAllocIds.length})`}
             </Button>
