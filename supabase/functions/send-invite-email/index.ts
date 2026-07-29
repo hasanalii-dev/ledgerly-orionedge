@@ -27,7 +27,7 @@ serve(async (req) => {
     const SMTP_PORT = Deno.env.get("SMTP_PORT") || "465";
     const SMTP_USER = Deno.env.get("SMTP_USER");
     const SMTP_PASS = Deno.env.get("SMTP_PASS");
-    const SMTP_FROM = Deno.env.get("SMTP_FROM") || "Lumen <invites@orionedgedigital.com>";
+    const SMTP_FROM = Deno.env.get("SMTP_FROM") || "Capient <invites@orionedgedigital.com>";
 
     if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
       console.warn("SMTP credentials are not set. Email not sent.");
@@ -53,14 +53,14 @@ serve(async (req) => {
     const info = await transporter.sendMail({
       from: SMTP_FROM,
       to: inviteeEmail,
-      subject: "You've been invited to collaborate on a Lumen Planner",
+      subject: "You've been invited to collaborate on a Capient Planner",
       html: `
         <!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Lumen Invitation</title>
+          <title>Capient Invitation</title>
         </head>
         <body style="margin: 0; padding: 0; background-color: #050505; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
           <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color: #050505; padding: 40px 20px;">
@@ -69,7 +69,7 @@ serve(async (req) => {
                 <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 600px; background-color: #0f0f11; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; overflow: hidden;">
                   <tr>
                     <td style="padding: 40px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-                      <h1 style="margin: 0; color: #10b981; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Lumen</h1>
+                      <h1 style="margin: 0; color: #10b981; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Capient</h1>
                       <p style="margin: 5px 0 0; color: #a1a1aa; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">by Orion Edge Digital</p>
                     </td>
                   </tr>
@@ -77,15 +77,15 @@ serve(async (req) => {
                     <td style="padding: 40px 30px;">
                       <h2 style="margin: 0 0 20px; font-size: 22px; font-weight: 600; color: #ffffff;">You've been invited!</h2>
                       <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; color: #a1a1aa;">
-                        You have been invited to collaborate on a Lumen planner as an <strong><span style="color: #10b981; text-transform: capitalize;">${role}</span></strong>. 
+                        You have been invited to collaborate on a Capient planner as an <strong><span style="color: #10b981; text-transform: capitalize;">${role}</span></strong>. 
                       </p>
                       <p style="margin: 0 0 32px; font-size: 16px; line-height: 1.6; color: #a1a1aa;">
-                        Log in to your Lumen account with this email address to accept or decline the invitation and view the planner dashboard.
+                        Log in to your Capient account with this email address to accept or decline the invitation and view the planner dashboard.
                       </p>
                       <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
                         <tr>
                           <td align="center">
-                            <a href="https://venture-ledger-pro.vercel.app/auth" style="display: inline-block; padding: 14px 28px; background-color: #10b981; color: #000000; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 8px; text-align: center;">Go to Lumen Dashboard</a>
+                            <a href="https://venture-ledger-pro.vercel.app/auth" style="display: inline-block; padding: 14px 28px; background-color: #10b981; color: #000000; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 8px; text-align: center;">Go to Capient Dashboard</a>
                           </td>
                         </tr>
                       </table>
