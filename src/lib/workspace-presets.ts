@@ -331,6 +331,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "investments", title: "Investments", routeKey: "investments", group: "workspace" },
       ],
       insights: [
+        { id: "taxes", title: "Taxes", routeKey: "taxes", group: "insights" },
         { id: "budget", title: "Budget", routeKey: "budget", group: "insights" },
         { id: "goals", title: "Goals", routeKey: "goals", group: "insights" },
         { id: "reports", title: "Reports", routeKey: "reports", group: "insights" },
@@ -339,7 +340,6 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
         { id: "timeline", title: "Timeline", routeKey: "timeline", group: "insights" },
         { id: "notes", title: "Notes", routeKey: "notes", group: "insights" },
-        { id: "taxes", title: "Taxes", routeKey: "taxes", group: "insights" },
       ],
     };
   }
@@ -361,6 +361,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "investments", title: "Investments", routeKey: "investments", group: "workspace" },
       ],
       insights: [
+        { id: "taxes", title: "Taxes", routeKey: "taxes", group: "insights" },
         { id: "budget", title: "Budget", routeKey: "budget", group: "insights" },
         { id: "goals", title: "Goals", routeKey: "goals", group: "insights" },
         { id: "reports", title: "Reports", routeKey: "reports", group: "insights" },
@@ -368,7 +369,6 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
         { id: "timeline", title: "Timeline", routeKey: "timeline", group: "insights" },
         { id: "notes", title: "Notes", routeKey: "notes", group: "insights" },
-        { id: "taxes", title: "Taxes", routeKey: "taxes", group: "insights" },
       ],
     };
   }
@@ -390,6 +390,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "investments", title: "Investments", routeKey: "investments", group: "workspace" },
       ],
       insights: [
+        { id: "taxes", title: "Taxes", routeKey: "taxes", group: "insights" },
         { id: "budget", title: "Budgets", routeKey: "budget", group: "insights" },
         { id: "goals", title: "Goals", routeKey: "goals", group: "insights" },
         { id: "reports", title: "Reports", routeKey: "reports", group: "insights" },
@@ -397,7 +398,6 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
         { id: "timeline", title: "Timeline", routeKey: "timeline", group: "insights" },
         { id: "notes", title: "Notes", routeKey: "notes", group: "insights" },
-        { id: "taxes", title: "Taxes", routeKey: "taxes", group: "insights" },
       ],
     };
   }
@@ -419,6 +419,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
       { id: "investments", title: "Investments", routeKey: "investments", group: "workspace" },
     ],
     insights: [
+      { id: "taxes", title: "Taxes", routeKey: "taxes", group: "insights" },
       { id: "reports", title: "Reports", routeKey: "reports", group: "insights" },
       { id: "calculator", title: "Calculator", routeKey: "calculator", group: "insights" },
       { id: "budget", title: "Budget", routeKey: "budget", group: "insights" },
@@ -427,7 +428,6 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
       { id: "vault", title: "Vault", routeKey: "vault", group: "insights" },
       { id: "timeline", title: "Timeline", routeKey: "timeline", group: "insights" },
       { id: "notes", title: "Notes", routeKey: "notes", group: "insights" },
-      { id: "taxes", title: "Taxes", routeKey: "taxes", group: "insights" },
     ],
   };
 }

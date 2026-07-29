@@ -175,8 +175,8 @@ function TaxesPage() {
   const result = calculatePakistanTax(taxProfile, transactions, closingWealth);
 
   return (
-    <div className="flex-1 p-4 md:p-8 w-full pb-24 md:pb-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="flex-1 p-4 md:p-8 w-full pb-24 md:pb-8 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
         
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
@@ -206,12 +206,17 @@ function TaxesPage() {
            </div>
         </div>
 
-        <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl">
-            <TabsTrigger value="dashboard" className="rounded-lg data-[state=active]:bg-[#3DDC97] data-[state=active]:text-black transition-all">Overview</TabsTrigger>
-            <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-[#3DDC97] data-[state=active]:text-black transition-all">Tax Profile</TabsTrigger>
-            <TabsTrigger value="reconciliation" className="rounded-lg data-[state=active]:bg-[#3DDC97] data-[state=active]:text-black transition-all">Wealth Reconciliation</TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="dashboard" className="w-full space-y-6">
+          <div className="flex justify-start w-full">
+            <TabsList className="grid grid-cols-3 w-full sm:w-auto sm:inline-flex h-auto p-1 bg-white/5 border border-white/10 rounded-xl gap-1">
+              <TabsTrigger value="dashboard" className="rounded-lg data-[state=active]:bg-[#3DDC97] data-[state=active]:text-black transition-all text-xs sm:text-sm py-2 px-3 sm:px-5 text-center justify-center font-medium">Overview</TabsTrigger>
+              <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-[#3DDC97] data-[state=active]:text-black transition-all text-xs sm:text-sm py-2 px-3 sm:px-5 text-center justify-center font-medium">Tax Profile</TabsTrigger>
+              <TabsTrigger value="reconciliation" className="rounded-lg data-[state=active]:bg-[#3DDC97] data-[state=active]:text-black transition-all text-xs sm:text-sm py-2 px-3 sm:px-5 text-center justify-center font-medium">
+                <span className="sm:hidden">Reconciliation</span>
+                <span className="hidden sm:inline">Wealth Reconciliation</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="dashboard" className="mt-6 space-y-6">
             {/* Liability Overview */}

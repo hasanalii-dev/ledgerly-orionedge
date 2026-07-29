@@ -17,6 +17,7 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { WorkspaceType } from "@/lib/workspace-presets";
 import PixelCard from "@/components/magic/PixelCard";
+import { AdSlot } from "@/components/ad-slot";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/dashboard")({
   component: DashboardPage,
@@ -200,7 +201,7 @@ function DashboardPage() {
   const totalIncome = income.reduce((s, r) => s + Number(r.amount || 0), 0);
   const totalExpenses = expenses.reduce((s, r) => s + Number(r.amount || 0), 0);
   const net = totalIncome - totalExpenses;
-  const balance = accounts.reduce((s, a) => s + Number(a.opening_balance || 0), 0) + net;
+  const balance = totalIncome - totalExpenses;
 
   const yearStart = startOfYear(new Date());
   const monthsSinceYear = Math.max(1, new Date().getMonth() + 1);
@@ -384,6 +385,11 @@ function DashboardPage() {
             label={labels.topCat} 
             value={isPersonalOrStudent ? (topCat ? topCat[0] : "None") : String(pendingInvoiceCount)} 
           />
+        </div>
+
+        {/* Promotional Ad Space (Controlled via Admin Panel) */}
+        <div className="px-4 md:px-0">
+          <AdSlot placementId="dashboard_banner" />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-4 px-4 md:px-0">
