@@ -222,7 +222,7 @@ export function CellInput({ value, onChange, type = "text", className = "" }: { 
       onBlur={() => { if (local !== value) onChange(local); }}
       onKeyDown={(e) => { if (e.key === "Enter") { e.currentTarget.blur(); } }}
       step={type === "number" ? "any" : undefined}
-      className={`w-full bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-elevated rounded-md focus:ring-1 focus:ring-primary/40 focus:min-w-[200px] focus:z-10 relative transition-all duration-200 ${className}`}
+      className={`w-full bg-transparent px-1.5 py-1 text-xs sm:text-sm outline-none focus:bg-elevated rounded-md focus:ring-1 focus:ring-primary/40 transition-all duration-200 ${className}`}
     />
   );
 }
@@ -237,7 +237,7 @@ export function CellSelect({ value, onChange, options }: { value: string; onChan
 
   return (
     <Select value={value || undefined} onValueChange={onChange}>
-      <SelectTrigger className="h-8 border-0 bg-transparent hover:bg-elevated px-2 focus:ring-1 focus:ring-primary/40"><SelectValue placeholder="—" /></SelectTrigger>
+      <SelectTrigger className="h-7 border-0 bg-transparent hover:bg-elevated px-1 text-xs sm:text-sm focus:ring-1 focus:ring-primary/40"><SelectValue placeholder="—" /></SelectTrigger>
       <SelectContent>{normOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
     </Select>
   );
