@@ -65,7 +65,7 @@ function ExpensesPage() {
     queryFn: async () => (await supabase.from("accounts").select("id, name").eq("planner_id", plannerId)).data ?? [],
   });
 
-  // Fetch monthly allocations for importing expenses (all non-income allocations)
+  // Fetch monthly allocations for importing expenses (exclude earning and income types)
   const { data: monthlyAllocations = [] } = useQuery({
     queryKey: ["monthly_allocations_expenses", plannerId],
     queryFn: async () => {
@@ -73,7 +73,7 @@ function ExpensesPage() {
         .from("monthly_allocations")
         .select("*")
         .eq("planner_id", plannerId)
-        .neq("allocation_type", "income")
+        .not("allocation_type", "in", '("earning","income")')
         .order("month_year", { ascending: false });
       if (error) throw error;
       return (data ?? []) as MonthlyAllocation[];
@@ -155,16 +155,16 @@ function ExpensesPage() {
           <Button
             variant="outline"
             onClick={() => setIsImportOpen(true)}
-            className="bg-[#FF5F56]/10 border-[#FF5F56]/30 hover:bg-[#FF5F56]/20 text-[#FF5F56] font-sans text-xs gap-2"
+            className="bg-white/5 border-white/10 hover:bg-white/10 text-white font-sans text-xs gap-2"
           >
-            <Import className="h-4 w-4" /> Import from Monthly
+            <Import className="h-4 w-4 text-white" /> Import from Monthly
           </Button>
           <Button
             variant="outline"
             onClick={handleExport}
             className="bg-white/5 border-white/10 hover:bg-white/10 text-white font-sans text-xs gap-2"
           >
-            <Download className="h-4 w-4 text-[#FF5F56]" /> Export Excel
+            <Download className="h-4 w-4 text-white" /> Export Excel
           </Button>
         </div>
       </div>
@@ -194,8 +194,8 @@ function ExpensesPage() {
       <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
         <DialogContent className="bg-[#0b0e0c] border border-white/10 text-white max-w-xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold flex items-center gap-2">
-              <Import className="h-5 w-5 text-[#FF5F56]" /> Import Expenses from Monthly Tracking
+            <DialogTitle className="text-xl font-bold flex items-center gap-2 text-white">
+              <Import className="h-5 w-5 text-white" /> Import Expenses from Monthly Tracking
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Select monthly expense & allocation items to import into your main Expense Registry.
@@ -227,7 +227,7 @@ function ExpensesPage() {
                       onClick={() => toggleAllocSelection(alloc.id)}
                       className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
                         selectedAllocIds.includes(alloc.id) 
-                          ? 'bg-[#FF5F56]/15 border-[#FF5F56]/40' 
+                          ? 'bg-white/15 border-white/30' 
                           : 'bg-white/5 border-white/10 hover:bg-white/10'
                       }`}
                     >
@@ -238,12 +238,12 @@ function ExpensesPage() {
                           {alloc.description && (
                             <div className="text-xs text-muted-foreground">{alloc.description}</div>
                           )}
-                          <div className="text-[11px] text-[#FF5F56] flex items-center gap-1 mt-0.5">
-                            <Calendar className="w-3 h-3" /> {alloc.month_year} ({alloc.allocation_type})
+                          <div className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5 font-['Questrial',_sans-serif]">
+                            <Calendar className="w-3 h-3 text-muted-foreground" /> {alloc.month_year} ({alloc.allocation_type})
                           </div>
                         </div>
                       </div>
-                      <div className="font-mono font-bold text-sm text-[#FF5F56]">
+                      <div className="font-['Questrial',_sans-serif] font-bold text-sm text-white">
                         {formatMoney(alloc.amount, currency)}
                       </div>
                     </div>
@@ -260,7 +260,7 @@ function ExpensesPage() {
             <Button 
               onClick={handleImportSelected} 
               disabled={isImporting || selectedAllocIds.length === 0} 
-              className="bg-[#FF5F56] hover:bg-[#FF5F56]/90 text-white font-bold"
+              className="bg-white text-black hover:bg-white/90 font-bold"
             >
               {isImporting ? "Importing..." : `Import Selected (${selectedAllocIds.length})`}
             </Button>

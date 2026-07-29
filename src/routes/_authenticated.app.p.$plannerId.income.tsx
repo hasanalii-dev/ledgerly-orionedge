@@ -72,7 +72,7 @@ function IncomePage() {
     queryFn: async () => (await supabase.from("accounts").select("id, name").eq("planner_id", plannerId)).data ?? [],
   });
 
-  // Fetch monthly allocations for importing income
+  // Fetch monthly allocations for importing income (earning / income allocation types)
   const { data: monthlyAllocations = [] } = useQuery({
     queryKey: ["monthly_allocations_income", plannerId],
     queryFn: async () => {
@@ -80,7 +80,7 @@ function IncomePage() {
         .from("monthly_allocations")
         .select("*")
         .eq("planner_id", plannerId)
-        .eq("allocation_type", "income")
+        .in("allocation_type", ["earning", "income"])
         .order("month_year", { ascending: false });
       if (error) throw error;
       return (data ?? []) as MonthlyAllocation[];
@@ -164,16 +164,16 @@ function IncomePage() {
           <Button
             variant="outline"
             onClick={() => setIsImportOpen(true)}
-            className="bg-[#3DDC97]/10 border-[#3DDC97]/30 hover:bg-[#3DDC97]/20 text-[#3DDC97] font-sans text-xs gap-2"
+            className="bg-white/5 border-white/10 hover:bg-white/10 text-white font-sans text-xs gap-2"
           >
-            <Import className="h-4 w-4" /> Import from Monthly
+            <Import className="h-4 w-4 text-white" /> Import from Monthly
           </Button>
           <Button
             variant="outline"
             onClick={handleExport}
             className="bg-white/5 border-white/10 hover:bg-white/10 text-white font-sans text-xs gap-2"
           >
-            <Download className="h-4 w-4 text-[#3DDC97]" /> Export Excel
+            <Download className="h-4 w-4 text-white" /> Export Excel
           </Button>
         </div>
       </div>
@@ -204,8 +204,8 @@ function IncomePage() {
       <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
         <DialogContent className="bg-[#0b0e0c] border border-white/10 text-white max-w-xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold flex items-center gap-2">
-              <Import className="h-5 w-5 text-[#3DDC97]" /> Import Income from Monthly Tracking
+            <DialogTitle className="text-xl font-bold flex items-center gap-2 text-white">
+              <Import className="h-5 w-5 text-white" /> Import Income from Monthly Tracking
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Select monthly income allocations to import into your main Income Registry.
@@ -237,7 +237,7 @@ function IncomePage() {
                       onClick={() => toggleAllocSelection(alloc.id)}
                       className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
                         selectedAllocIds.includes(alloc.id) 
-                          ? 'bg-[#3DDC97]/15 border-[#3DDC97]/40' 
+                          ? 'bg-white/15 border-white/30' 
                           : 'bg-white/5 border-white/10 hover:bg-white/10'
                       }`}
                     >
@@ -248,12 +248,12 @@ function IncomePage() {
                           {alloc.description && (
                             <div className="text-xs text-muted-foreground">{alloc.description}</div>
                           )}
-                          <div className="text-[11px] text-[#3DDC97] flex items-center gap-1 mt-0.5">
-                            <Calendar className="w-3 h-3" /> {alloc.month_year}
+                          <div className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5 font-['Questrial',_sans-serif]">
+                            <Calendar className="w-3 h-3 text-muted-foreground" /> {alloc.month_year}
                           </div>
                         </div>
                       </div>
-                      <div className="font-mono font-bold text-sm text-[#3DDC97]">
+                      <div className="font-['Questrial',_sans-serif] font-bold text-sm text-white">
                         {formatMoney(alloc.amount, currency)}
                       </div>
                     </div>
@@ -270,7 +270,7 @@ function IncomePage() {
             <Button 
               onClick={handleImportSelected} 
               disabled={isImporting || selectedAllocIds.length === 0} 
-              className="bg-[#3DDC97] hover:bg-[#3DDC97]/90 text-black font-bold"
+              className="bg-white text-black hover:bg-white/90 font-bold"
             >
               {isImporting ? "Importing..." : `Import Selected (${selectedAllocIds.length})`}
             </Button>
