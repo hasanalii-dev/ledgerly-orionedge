@@ -31,7 +31,7 @@ export function AdSlot({ placementId, className = "" }: AdSlotProps) {
   if (config.type === "html" && config.customCode) {
     return (
       <div 
-        className={`w-full rounded-2xl overflow-hidden transition-all duration-300 ${className}`}
+        className={`w-full transition-all duration-300 ${className}`}
         dangerouslySetInnerHTML={{ __html: config.customCode }}
       />
     );
