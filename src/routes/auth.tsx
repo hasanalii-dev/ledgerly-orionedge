@@ -40,10 +40,6 @@ function AuthBetaPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [resendTimer, setResendTimer] = useState(60);
 
-  // Google OAuth Popup & Branded Modal State
-  const [googleModalOpen, setGoogleModalOpen] = useState(false);
-  const [popupUrl, setPopupUrl] = useState<string | null>(null);
-
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (mode === "signup" && step === 3 && resendTimer > 0) {
@@ -54,64 +50,51 @@ function AuthBetaPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setGoogleModalOpen(false);
-        navigate({ to: "/app" });
-      }
+      if (session) navigate({ to: "/app" });
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) {
-        setGoogleModalOpen(false);
-        navigate({ to: "/app" });
-      }
+      if (session) navigate({ to: "/app" });
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const openGooglePopup = (url: string) => {
-    const width = 500;
-    const height = 650;
-    const left = window.screenX + (window.outerWidth - width) / 2;
-    const top = window.screenY + (window.outerHeight - height) / 2;
-    return window.open(
-      url,
-      "Capient_Google_Auth",
-      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`
-    );
-  };
-
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
-      localStorage.setItem("force_onboarding", "true");
+      localStorage.removeItem("force_onboarding");
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { 
+          redirectTo: `${window.location.origin}/app`,
+          queryParams: {
+            prompt: 'select_account'
+          }
+        },
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      toast.error(err.message);
+      setLoading(false);
+    }
+  };
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
+  const handleGoogleSignUp = async () => {
+    try {
+      setLoading(true);
+      localStorage.setItem("force_onboarding", "true");
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { 
           redirectTo: `${window.location.origin}/app?setup=true`,
           queryParams: {
             prompt: 'select_account'
-          },
-          skipBrowserRedirect: true,
+          }
         },
       });
-
       if (error) throw error;
-
-      if (data?.url) {
-        setPopupUrl(data.url);
-        setGoogleModalOpen(true);
-        const popup = openGooglePopup(data.url);
-        if (!popup || popup.closed || typeof popup.closed === "undefined") {
-          toast.info("Please allow pop-ups for Capient to complete Google Sign In");
-        }
-      } else {
-        window.location.href = `${window.location.origin}/app?setup=true`;
-      }
     } catch (err: any) {
-      toast.error(err.message || "Failed to start Google sign-in");
+      toast.error(err.message);
       setLoading(false);
-      setGoogleModalOpen(false);
     }
   };
 
@@ -127,6 +110,7 @@ function AuthBetaPage() {
   const handleLoginSubmit = async () => {
     try {
       setLoading(true);
+      localStorage.removeItem("force_onboarding");
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       toast.success("Welcome back!");
@@ -171,20 +155,25 @@ function AuthBetaPage() {
       if (data.user && data.user.identities && data.user.identities.length === 0) {
         throw new Error("This email is already registered. Please sign in instead.");
       }
-
-      setStep(3); // Move to OTP confirmation step
-      setResendTimer(60);
-      toast.success("Account created! Check your email for OTP.");
+      
+      if (data.session) {
+        toast.success("Welcome aboard! (Auto-login: Email confirmation is disabled in Supabase)");
+        // The onAuthStateChange listener will automatically redirect to /app
+      } else {
+        toast.success("Code sent to your email!");
+        setStep(3);
+        setResendTimer(60);
+      }
     } catch (err: any) {
-      toast.error(err.message);
+      toast.error(err.message || err.errors[0].message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerifyOtp = async () => {
+  const handleOtpSubmit = async () => {
     try {
-      if (otp.length < 6) return toast.error("Enter the 6-digit OTP code");
+      if (otp.length < 6) return toast.error("Enter a valid verification code");
       setLoading(true);
       const { error } = await supabase.auth.verifyOtp({
         email,
@@ -192,7 +181,7 @@ function AuthBetaPage() {
         type: "signup",
       });
       if (error) throw error;
-      toast.success("Email verified successfully!");
+      toast.success("Beta enrollment complete! Welcome aboard.");
       navigate({ to: "/app" });
     } catch (err: any) {
       toast.error(err.message);
@@ -200,56 +189,85 @@ function AuthBetaPage() {
     }
   };
 
-  const handleResendOtp = async () => {
+  const handleResendCode = async () => {
     try {
-      if (resendTimer > 0) return;
+      setLoading(true);
       const { error } = await supabase.auth.resend({
-        type: "signup",
+        type: 'signup',
         email,
       });
       if (error) throw error;
-      toast.success("New OTP code sent!");
+      toast.success("Verification code resent!");
       setResendTimer(60);
     } catch (err: any) {
       toast.error(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const isStrong = password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password);
 
-  const containerVariants = {
+  const containerVariants: any = {
     hidden: { opacity: 0, x: 20 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } },
-    exit: { opacity: 0, x: -20, transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] } },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
+    exit: { opacity: 0, x: -20, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } },
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#020505] relative overflow-hidden text-white p-4 font-['Questrial',_sans-serif]">
-      {/* Background Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 blur-[140px] rounded-full pointer-events-none" />
-      <div className="absolute inset-0 bg-[url('/bg-gradient.png')] bg-cover opacity-15 mix-blend-screen pointer-events-none" />
+    <div className="min-h-screen w-full flex flex-col bg-[#020505] relative overflow-x-hidden text-foreground">
       
-      {/* Side Ambient Rays */}
-      <SideRays />
+      {/* Background Image Setup */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="/bg-gradient.png" 
+          alt="Background" 
+          className="w-full h-full object-cover opacity-[0.85]"
+        />
+      </div>
 
-      {/* Top Left Navigation Header */}
-      <div className="absolute top-6 left-6 z-20">
+      {/* SideRays Magic Component */}
+      <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen">
+         <SideRays 
+            speed={2.0}
+            rayColor1="#10B981" 
+            rayColor2="#34D399" 
+            intensity={1.2}
+            spread={1.8}
+            origin="top-right"
+            tilt={-15}
+            saturation={1.2}
+            blend={0.5}
+            opacity={0.6}
+         />
+      </div>
+
+      {/* Header with Return to Home */}
+      <div className="relative z-20 w-full p-4 sm:p-8 flex-none">
         <Link 
           to="/" 
-          className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-white transition-colors bg-white/5 border border-white/10 px-3.5 py-2 rounded-full backdrop-blur-md hover:bg-white/10 shadow-lg"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-white transition-colors duration-300"
         >
-          <Home className="h-3.5 w-3.5 text-emerald-400" /> Back to Home
+          <div className="h-10 w-10 shrink-0 rounded-full bg-white/5 border border-white/5 flex items-center justify-center backdrop-blur-md">
+            <Home className="h-4 w-4" />
+          </div>
+          <span className="text-sm font-medium hidden sm:inline">Return to Home</span>
         </Link>
       </div>
 
-      <div className="relative w-full max-w-[440px]">
-        {/* Main Card */}
+      {/* Main Content Area */}
+      <div className="flex-1 flex items-center justify-center p-4 sm:px-8 pb-12 z-10">
         <motion.div 
-          initial={{ opacity: 0, y: 20, scale: 0.98 }}
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="relative w-full rounded-[32px] p-[1px] shadow-2xl overflow-hidden"
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="relative w-full max-w-[420px]"
         >
+        {/* Glow behind the card top-right corner */}
+        <div className="absolute -top-12 -right-12 w-64 h-64 bg-emerald-500/20 blur-[80px] rounded-full pointer-events-none" />
+
+        {/* Outer wrapper for the gradient border */}
+        <div className="relative w-full rounded-[32px] p-[1px] overflow-hidden shadow-2xl">
           {/* Top-Right heavy gradient border */}
           <div className="absolute inset-0 bg-gradient-to-tr from-white/5 via-white/5 to-emerald-400/70" />
           
@@ -366,7 +384,7 @@ function AuthBetaPage() {
                 {/* --- SIGNUP FLOW --- */}
                 {mode === "signup" && step === 0 && (
                   <motion.div key="signup-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
-                    <Button variant="outline" className="w-full h-14 bg-[#0a1212] border-white/5 hover:bg-white/5 text-white/90 rounded-2xl font-medium transition-all" onClick={handleGoogleSignIn} disabled={loading}>
+                    <Button variant="outline" className="w-full h-14 bg-[#0a1212] border-white/5 hover:bg-white/5 text-white/90 rounded-2xl font-medium transition-all" onClick={handleGoogleSignUp} disabled={loading}>
                       <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
                       Sign up with Google
                     </Button>
@@ -452,175 +470,69 @@ function AuthBetaPage() {
                       <div className="absolute inset-0 bg-emerald-500/10 animate-pulse" />
                       <Mail className="h-8 w-8 text-emerald-400 relative z-10" />
                     </div>
-                    <h3 className="text-xl font-bold text-white">Check your email</h3>
-                    <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                      We sent a 6-digit confirmation code to <span className="text-white font-medium">{email}</span>.
-                    </p>
-
-                    <div className="space-y-4 pt-4">
-                      <Input
-                        type="text"
-                        maxLength={6}
-                        placeholder="Enter 6-digit code"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                        className="h-14 text-center text-xl font-mono tracking-[0.5em] bg-[#030606] border-white/10 text-white placeholder:text-muted-foreground/30 placeholder:tracking-normal focus-visible:ring-emerald-500/30 rounded-2xl transition-all"
-                        onKeyDown={(e) => e.key === 'Enter' && handleVerifyOtp()}
-                        autoFocus
-                      />
-
-                      <Button
-                        className="w-full h-14 bg-gradient-to-b from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 text-[#030808] font-semibold text-base rounded-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_0_20px_rgba(52,211,153,0.3)] border border-emerald-300/50"
-                        onClick={handleVerifyOtp}
-                        disabled={loading || otp.length < 6}
+                    <p className="text-sm text-white/80 mb-6 leading-relaxed">We sent an 8-digit verification code to <br/><strong className="text-emerald-400">{email}</strong>.</p>
+                    <Input type="text" placeholder="• • • • • • • •" value={otp} onChange={e => setOtp(e.target.value)} className="h-16 text-center text-2xl tracking-[0.5em] font-mono bg-[#030606] border-white/5 text-white placeholder:text-muted-foreground/30 focus-visible:ring-emerald-500/30 rounded-2xl transition-all" maxLength={8} onKeyDown={e => e.key === 'Enter' && handleOtpSubmit()} autoFocus />
+                    <Button className="w-full h-14 bg-gradient-to-b from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 text-[#030808] font-semibold text-base rounded-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_0_20px_rgba(52,211,153,0.3)] border border-emerald-300/50 mt-6 group" onClick={handleOtpSubmit} disabled={loading || otp.length < 6}>
+                      {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify Code"}
+                    </Button>
+                    <div className="mt-4 flex justify-center">
+                      <button
+                        className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={handleResendCode}
+                        disabled={loading || resendTimer > 0}
                       >
-                        {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify Email & Continue"}
-                      </Button>
-
-                      <div className="flex items-center justify-between text-xs text-muted-foreground px-1 pt-2">
-                        <span>Didn't receive a code?</span>
-                        <button
-                          onClick={handleResendOtp}
-                          disabled={resendTimer > 0}
-                          className={`font-semibold transition-colors ${resendTimer > 0 ? 'text-muted-foreground/50 cursor-not-allowed' : 'text-emerald-400 hover:text-emerald-300'}`}
-                        >
-                          {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Resend OTP"}
-                        </button>
-                      </div>
+                        {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Resend code"}
+                      </button>
                     </div>
                   </motion.div>
                 )}
 
               </AnimatePresence>
-
-              {/* Mode Toggle Footer */}
-              {step === 0 && (
-                <div className="mt-8 pt-6 border-t border-white/5 text-center text-xs">
-                  {mode === "login" ? (
-                    <>
-                      <span className="text-muted-foreground/70">Don't Have An Account? </span>
-                      <button 
-                        className="ml-1 text-emerald-400 font-medium hover:text-emerald-300 transition-colors"
-                        onClick={() => {
-                          setMode("signup");
-                          setStep(0);
-                          setEmail("");
-                          setPassword("");
-                        }}
-                      >
-                        Enroll in Beta
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-muted-foreground/70">Already Have An Account? </span>
-                      <button 
-                        className="ml-1 text-emerald-400 font-medium hover:text-emerald-300 transition-colors"
-                        onClick={() => {
-                          setMode("login");
-                          setStep(0);
-                          setEmail("");
-                          setPassword("");
-                          setConfirmPassword("");
-                          setUsername("");
-                        }}
-                      >
-                        Sign in
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
-              
             </div>
-          </div>
-        </motion.div>
-      </div>
 
-      {/* --- CAPIENT GOOGLE AUTH BRANDED MODAL --- */}
-      <AnimatePresence>
-        {googleModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl font-['Questrial',_sans-serif]"
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 10 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="relative w-full max-w-md bg-[#050a0a] border border-emerald-500/30 rounded-[32px] p-6 sm:p-8 shadow-[0_0_50px_rgba(16,185,129,0.2)] text-center overflow-hidden"
-            >
-              {/* Glow backdrop inside modal */}
-              <div className="absolute -top-20 -left-20 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none" />
-
-              {/* Branding header with connecting nodes */}
-              <div className="relative flex items-center justify-center gap-6 my-4">
-                {/* Capient Logo */}
-                <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-                  <img src="/side-bar-logo.png" alt="Capient" className="h-7 w-auto object-contain" />
-                </div>
-
-                {/* Animated Connecting Pulse Line */}
-                <div className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span className="w-8 h-[2px] bg-gradient-to-r from-emerald-400 via-blue-500 to-emerald-400 animate-pulse" />
-                  <span className="w-2 h-2 rounded-full bg-blue-400 animate-ping" />
-                </div>
-
-                {/* Google Logo Container */}
-                <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 border border-white/10 shadow-lg">
-                  <svg className="w-7 h-7" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                  </svg>
-                </div>
-              </div>
-
-              {/* Modal Info */}
-              <h3 className="font-display font-semibold text-xl text-white mt-4">Connecting with Google</h3>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                Please complete sign-in in the Google pop-up window. Your Capient workspace will initialize automatically once authenticated.
-              </p>
-
-              {/* Spinner & Progress */}
-              <div className="flex items-center justify-center gap-3 my-6 text-emerald-400 text-xs font-semibold uppercase tracking-wider bg-emerald-500/10 py-2.5 px-4 rounded-xl border border-emerald-500/20">
-                <Loader2 className="h-4 w-4 animate-spin text-emerald-400" />
-                Awaiting Google Authorization...
-              </div>
-
-              {/* Action Buttons */}
-              <div className="space-y-2.5 pt-2">
-                {popupUrl && (
-                  <Button
-                    variant="outline"
-                    onClick={() => openGooglePopup(popupUrl)}
-                    className="w-full h-11 bg-white/5 border-white/10 hover:bg-white/10 text-white rounded-xl text-xs font-semibold"
-                  >
-                    Re-open Pop-up Window
-                  </Button>
+            {/* Link at the bottom */}
+            {step === 0 && (
+              <div className="mt-8 flex justify-center items-center text-sm">
+                {mode === "login" ? (
+                  <>
+                    <span className="text-muted-foreground/70">Don't Have An Account? </span>
+                    <button 
+                      className="ml-1 text-emerald-400 font-medium hover:text-emerald-300 transition-colors"
+                      onClick={() => {
+                        setMode("signup");
+                        setStep(0);
+                        setEmail("");
+                        setPassword("");
+                      }}
+                    >
+                      Enroll in Beta
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-muted-foreground/70">Already Have An Account? </span>
+                    <button 
+                      className="ml-1 text-emerald-400 font-medium hover:text-emerald-300 transition-colors"
+                      onClick={() => {
+                        setMode("login");
+                        setStep(0);
+                        setEmail("");
+                        setPassword("");
+                        setConfirmPassword("");
+                        setUsername("");
+                      }}
+                    >
+                      Sign in
+                    </button>
+                  </>
                 )}
-
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setGoogleModalOpen(false);
-                    setLoading(false);
-                  }}
-                  className="w-full text-xs text-muted-foreground hover:text-white"
-                >
-                  Cancel Authentication
-                </Button>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            )}
+            
+          </div>
+        </div>
+      </motion.div>
+      </div>
     </div>
   );
 }

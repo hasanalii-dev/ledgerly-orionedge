@@ -175,7 +175,7 @@ function ReportsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `capient-report-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.download = `lumen-report-${format(new Date(), "yyyy-MM-dd")}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
