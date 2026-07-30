@@ -31,12 +31,34 @@ function AdminPanel() {
   const [userChartType, setUserChartType] = useState<"bar" | "line">("bar");
   const [visitorChartType, setVisitorChartType] = useState<"bar" | "line">("line");
 
-  const [adConfigs, setAdConfigs] = useState<Record<string, AdSlotConfig>>(() => getAdConfigs());
-  const [selectedPlacementId, setSelectedPlacementId] = useState<string>("dashboard_banner");
-  const [editingSlot, setEditingSlot] = useState<AdSlotConfig>(() => {
-    const current = getAdConfigs();
-    return current["dashboard_banner"] || DEFAULT_AD_SLOTS[0];
+  const { data: dbAdSlots, refetch: refetchDbAds } = useQuery({
+    queryKey: ["admin_ad_slots"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).from("ad_slots").select("*");
+      if (error) {
+        console.warn("Could not fetch ad_slots from DB:", error);
+        return getAdConfigs();
+      }
+      const record: Record<string, AdSlotConfig> = { ...getAdConfigs() };
+      (data || []).forEach((row: any) => {
+        record[row.id] = {
+          id: row.id,
+          page: row.page,
+          title: row.title,
+          enabled: row.enabled,
+          type: row.type,
+          imageUrl: row.image_url ?? undefined,
+          targetUrl: row.target_url ?? undefined,
+          altText: row.alt_text ?? undefined,
+          customCode: row.custom_code ?? undefined,
+          badgeText: row.badge_text ?? undefined,
+        };
+      });
+      return record;
+    },
   });
+
+  const adConfigs = dbAdSlots || getAdConfigs();
 
   const handleSelectPlacement = (placementId: string) => {
     setSelectedPlacementId(placementId);
@@ -45,10 +67,33 @@ function AdminPanel() {
     }
   };
 
-  const handleSaveAd = () => {
-    saveAdConfig(editingSlot);
-    setAdConfigs(getAdConfigs());
-    toast.success(`Ad placement "${editingSlot.title}" saved successfully!`);
+  const handleSaveAd = async () => {
+    try {
+      const payload = {
+        id: editingSlot.id,
+        page: editingSlot.page,
+        title: editingSlot.title,
+        enabled: editingSlot.enabled,
+        type: editingSlot.type,
+        image_url: editingSlot.imageUrl || null,
+        target_url: editingSlot.targetUrl || null,
+        alt_text: editingSlot.altText || null,
+        custom_code: editingSlot.customCode || null,
+        badge_text: editingSlot.badgeText || null,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = await (supabase as any).from("ad_slots").upsert(payload);
+      if (error) throw error;
+
+      saveAdConfig(editingSlot); // local cache fallback
+      qc.invalidateQueries({ queryKey: ["ad_slot"] });
+      qc.invalidateQueries({ queryKey: ["admin_ad_slots"] });
+      refetchDbAds();
+      toast.success(`Ad placement "${editingSlot.title}" saved universally to database!`);
+    } catch (err: any) {
+      toast.error("Failed to save ad to database: " + err.message);
+    }
   };
 
   const { data: profile, isLoading: profileLoading } = useQuery({

@@ -1,4 +1,4 @@
-create table public.user_onboarding (
+create table if not exists public.user_onboarding (
   id uuid primary key references auth.users(id) on delete cascade,
   country text,
   purpose text,
@@ -8,7 +8,9 @@ create table public.user_onboarding (
   created_at timestamptz not null default now()
 );
 alter table public.user_onboarding enable row level security;
+drop policy if exists "admin can view onboarding" on public.user_onboarding;
 create policy "admin can view onboarding" on public.user_onboarding for select using ((select email from auth.users where id = auth.uid()) = 'hasanalijaffe@gmail.com');
+drop policy if exists "users can insert own onboarding" on public.user_onboarding;
 create policy "users can insert own onboarding" on public.user_onboarding for insert with check (auth.uid() = id);
 
 grant select, insert, update, delete on public.user_onboarding to authenticated;

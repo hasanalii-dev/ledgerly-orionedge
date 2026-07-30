@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
-import { getAdForPlacement, AdSlotConfig } from "@/lib/ad-config";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { DEFAULT_AD_SLOTS, getAdForPlacement, AdSlotConfig } from "@/lib/ad-config";
 import { ExternalLink, Sparkles } from "lucide-react";
+import { useEffect } from "react";
 
 interface AdSlotProps {
   placementId: string;
@@ -8,11 +10,47 @@ interface AdSlotProps {
 }
 
 export function AdSlot({ placementId, className = "" }: AdSlotProps) {
-  const [config, setConfig] = useState<AdSlotConfig | null>(() => getAdForPlacement(placementId));
+  const { data: config, refetch } = useQuery<AdSlotConfig | null>({
+    queryKey: ["ad_slot", placementId],
+    queryFn: async () => {
+      try {
+        const { data, error } = await (supabase as any)
+          .from("ad_slots")
+          .select("*")
+          .eq("id", placementId)
+          .maybeSingle();
+
+        if (error) {
+          console.warn("Supabase ad_slots query warning:", error.message);
+        }
+
+        if (data) {
+          return {
+            id: data.id,
+            page: data.page,
+            title: data.title,
+            enabled: data.enabled,
+            type: data.type,
+            imageUrl: data.image_url ?? undefined,
+            targetUrl: data.target_url ?? undefined,
+            altText: data.alt_text ?? undefined,
+            customCode: data.custom_code ?? undefined,
+            badgeText: data.badge_text ?? undefined,
+          };
+        }
+      } catch (err) {
+        console.warn("Error fetching ad slot from database:", err);
+      }
+
+      // Fallback to local storage or DEFAULT_AD_SLOTS
+      return getAdForPlacement(placementId) || DEFAULT_AD_SLOTS.find(s => s.id === placementId) || null;
+    },
+    staleTime: 1000 * 30, // Refetch every 30s
+  });
 
   useEffect(() => {
     const handleUpdate = () => {
-      setConfig(getAdForPlacement(placementId));
+      refetch();
     };
 
     window.addEventListener("capient_ad_configs_updated", handleUpdate);
@@ -22,7 +60,7 @@ export function AdSlot({ placementId, className = "" }: AdSlotProps) {
       window.removeEventListener("capient_ad_configs_updated", handleUpdate);
       window.removeEventListener("storage", handleUpdate);
     };
-  }, [placementId]);
+  }, [refetch]);
 
   if (!config || !config.enabled) {
     return null;
