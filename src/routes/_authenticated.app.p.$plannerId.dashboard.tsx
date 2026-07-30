@@ -236,6 +236,38 @@ function DashboardPage() {
     enabled: !!profile?.email,
   });
 
+  const { data: urgentRemindersCount = 0 } = useQuery({
+    queryKey: ["urgent_calendar_reminders_count", plannerId],
+    queryFn: async () => {
+      const [{ data: invoices }, { data: loans }] = await Promise.all([
+        supabase.from("invoices").select("due_date, status").eq("planner_id", plannerId),
+        supabase.from("loans" as any).select("due_date, remaining_amount").eq("planner_id", plannerId),
+      ]);
+      let count = 0;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      (invoices ?? []).forEach((inv: any) => {
+        if (inv.status !== "paid" && inv.due_date) {
+          const dt = new Date(inv.due_date);
+          dt.setHours(0, 0, 0, 0);
+          if (dt.getTime() <= today.getTime() + 7 * 86400000) count++;
+        }
+      });
+      (loans ?? []).forEach((l: any) => {
+        if (l.due_date && Number(l.remaining_amount || 0) > 0) {
+          const dt = new Date(l.due_date);
+          dt.setHours(0, 0, 0, 0);
+          if (dt.getTime() <= today.getTime() + 7 * 86400000) count++;
+        }
+      });
+      return count;
+    },
+    enabled: !!plannerId,
+  });
+
+  const totalNotificationBadgeCount = pendingInvites.length + urgentRemindersCount;
+
   const handleInviteAction = async (inviteId: string, action: 'accepted' | 'declined') => {
     const { error } = await supabase.from("planner_invites").update({ status: action }).eq("id", inviteId);
     if (error) {
@@ -340,9 +372,9 @@ function DashboardPage() {
                 >
                   <Bell className="h-4 w-4 text-white" />
                 </motion.div>
-                {pendingInvites.length > 0 && (
+                {totalNotificationBadgeCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-[#3DDC97]/90 text-white text-[9px] font-bold rounded-full border border-white/20 flex items-center justify-center shadow-[0_0_8px_#3DDC97] animate-pulse">
-                    {pendingInvites.length}
+                    {totalNotificationBadgeCount}
                   </span>
                 )}
               </Link>
@@ -391,9 +423,9 @@ function DashboardPage() {
                 >
                   <Bell className="h-4 w-4 text-white" />
                 </motion.div>
-                {pendingInvites.length > 0 && (
+                {totalNotificationBadgeCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-[#3DDC97]/90 text-white text-[9px] font-bold rounded-full border border-white/20 flex items-center justify-center shadow-[0_0_8px_#3DDC97] animate-pulse">
-                    {pendingInvites.length}
+                    {totalNotificationBadgeCount}
                   </span>
                 )}
               </Link>
