@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -6,7 +6,8 @@ import { formatMoney, formatDate } from "@/lib/format";
 import { usePlannerCurrency } from "@/hooks/use-planner-currency";
 import {
   Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock,
-  FileText, TrendingUp, TrendingDown, Target, Landmark, ShieldCheck, AlertCircle, Download
+  FileText, TrendingUp, TrendingDown, Target, Landmark, ShieldCheck, AlertCircle, Download,
+  Pencil, Trash2, ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ import { exportToExcel } from "@/lib/export-excel";
 
 type CalendarEvent = {
   id: string;
+  rawId?: string;
   title: string;
   date: string; // YYYY-MM-DD
   amount?: number | null;
@@ -43,17 +45,27 @@ function FinancialCalendarPage() {
   const { plannerId } = Route.useParams();
   const currency = usePlannerCurrency(plannerId);
   const qc = useQueryClient();
+  const navigate = useNavigate();
 
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
+  
+  // Add Modal State
   const [addOpen, setAddOpen] = useState(false);
-
-  // Form State for custom financial event
   const [eventTitle, setEventTitle] = useState("");
   const [eventDate, setEventDate] = useState(new Date().toISOString().split("T")[0]);
   const [eventAmount, setEventAmount] = useState("");
   const [eventKind, setEventKind] = useState<any>("tax");
   const [eventSubtitle, setEventSubtitle] = useState("");
+
+  // Edit Modal State
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editAmount, setEditAmount] = useState("");
+  const [editKind, setEditKind] = useState<any>("custom");
+  const [editSubtitle, setEditSubtitle] = useState("");
+  const [editDate, setEditDate] = useState("");
 
   // Aggregate all planner events across modules
   const { data: events = [] } = useQuery({
@@ -81,6 +93,7 @@ function FinancialCalendarPage() {
         if (i.date) {
           allEvents.push({
             id: `inc_${i.id}`,
+            rawId: i.id,
             title: i.description || "Income Payout",
             date: i.date,
             amount: Number(i.amount || 0),
@@ -94,6 +107,7 @@ function FinancialCalendarPage() {
         if (e.date) {
           allEvents.push({
             id: `exp_${e.id}`,
+            rawId: e.id,
             title: e.description || e.vendor || "Expense Bill",
             date: e.date,
             amount: Number(e.amount || 0),
@@ -107,6 +121,7 @@ function FinancialCalendarPage() {
         if (l.due_date) {
           allEvents.push({
             id: `loan_${l.id}`,
+            rawId: l.id,
             title: `Loan Due: ${l.name}`,
             date: l.due_date,
             amount: Number(l.monthly_payment || l.remaining_amount || 0),
@@ -121,6 +136,7 @@ function FinancialCalendarPage() {
           const dt = (inv.due_date || inv.issue_date || inv.created_at).split("T")[0];
           allEvents.push({
             id: `inv_${inv.id}`,
+            rawId: inv.id,
             title: `Invoice #${inv.number}`,
             date: dt,
             amount: Number(inv.total_amount || 0),
@@ -134,6 +150,7 @@ function FinancialCalendarPage() {
         if (g.target_date) {
           allEvents.push({
             id: `goal_${g.id}`,
+            rawId: g.id,
             title: `Goal Target: ${g.name}`,
             date: g.target_date,
             amount: Number(g.target_amount || 0),
@@ -144,10 +161,11 @@ function FinancialCalendarPage() {
       });
 
       (activityEvents ?? []).forEach((a: any) => {
-        if (a.kind === "tax" || a.kind === "subscription" || a.kind === "custom") {
+        if (a.kind === "tax" || a.kind === "subscription" || a.kind === "custom" || a.kind === "reminder") {
           const dt = (a.created_at || new Date().toISOString()).split("T")[0];
           allEvents.push({
             id: `act_${a.id}`,
+            rawId: a.id,
             title: a.title,
             date: dt,
             kind: (a.kind as any) || "custom",
@@ -184,9 +202,68 @@ function FinancialCalendarPage() {
       setEventAmount("");
       setEventSubtitle("");
       qc.invalidateQueries({ queryKey: ["financial_calendar_events", plannerId] });
+      qc.invalidateQueries({ queryKey: ["calendar_notifications", plannerId] });
     },
     onError: (err: any) => toast.error(err.message),
   });
+
+  // Update activity event mutation
+  const updateEventMutation = useMutation({
+    mutationFn: async () => {
+      if (!editingId) return;
+      const { error } = await supabase
+        .from("activity_events")
+        .update({
+          title: editTitle,
+          kind: editKind,
+          subtitle: editSubtitle ? `${editSubtitle} (${editAmount ? formatMoney(parseFloat(editAmount), currency) : ""})` : null,
+        })
+        .eq("id", editingId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Event updated successfully!");
+      setEditOpen(false);
+      qc.invalidateQueries({ queryKey: ["financial_calendar_events", plannerId] });
+      qc.invalidateQueries({ queryKey: ["calendar_notifications", plannerId] });
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  // Delete activity event mutation
+  const deleteEventMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("activity_events").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Event deleted from Calendar!");
+      setEditOpen(false);
+      qc.invalidateQueries({ queryKey: ["financial_calendar_events", plannerId] });
+      qc.invalidateQueries({ queryKey: ["calendar_notifications", plannerId] });
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const handleOpenEdit = (ev: CalendarEvent) => {
+    if (ev.id.startsWith("act_") && ev.rawId) {
+      setEditingId(ev.rawId);
+      setEditTitle(ev.title);
+      setEditKind(ev.kind);
+      setEditSubtitle(ev.subtitle || "");
+      setEditDate(ev.date);
+      setEditOpen(true);
+    } else if (ev.id.startsWith("inc_") || ev.id.startsWith("exp_")) {
+      navigate({ to: `/app/p/${plannerId}/monthly`, params: { plannerId } });
+    } else if (ev.id.startsWith("loan_")) {
+      navigate({ to: `/app/p/${plannerId}/loans`, params: { plannerId } });
+    } else if (ev.id.startsWith("inv_")) {
+      navigate({ to: `/app/p/${plannerId}/invoices`, params: { plannerId } });
+    } else if (ev.id.startsWith("goal_")) {
+      navigate({ to: `/app/p/${plannerId}/goals`, params: { plannerId } });
+    }
+  };
 
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
   const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
@@ -251,7 +328,7 @@ function FinancialCalendarPage() {
       </div>
 
       {/* Main Grid: Calendar + Selected Day Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6 font-sans">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6 font-sans items-start">
         {/* Calendar View (3 Columns) */}
         <div className="lg:col-span-3 rounded-2xl border border-white/10 bg-[#0c100e] p-3 sm:p-5 shadow-xl flex flex-col justify-between font-sans">
           {/* Controls Bar */}
@@ -285,8 +362,8 @@ function FinancialCalendarPage() {
 
           {/* Weekday Labels Header */}
           <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-center text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 sm:mb-2 font-sans">
-            {["S", "M", "T", "W", "T", "F", "S"].map((dayName, i) => (
-              <div key={i} className="py-0.5 sm:py-1 hidden sm:block">{["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i]}</div>
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((dayName, i) => (
+              <div key={i} className="py-0.5 sm:py-1 hidden sm:block">{dayName}</div>
             ))}
             {["S", "M", "T", "W", "T", "F", "S"].map((dayName, i) => (
               <div key={`m${i}`} className="py-0.5 sm:hidden">{dayName}</div>
@@ -336,7 +413,7 @@ function FinancialCalendarPage() {
                     )}
                   </div>
 
-                  {/* Day Badges - hidden on small mobile, visible sm+ */}
+                  {/* Day Badges */}
                   <div className="hidden sm:block space-y-1 mt-1 overflow-hidden font-sans">
                     {dayEvents.slice(0, 2).map((ev) => {
                       const color = EVENT_COLORS[ev.kind] || EVENT_COLORS.custom;
@@ -355,7 +432,7 @@ function FinancialCalendarPage() {
                       </div>
                     )}
                   </div>
-                  {/* Mobile: show colored dots instead of full badges */}
+                  {/* Mobile Dots */}
                   <div className="flex gap-0.5 mt-1 sm:hidden flex-wrap">
                     {dayEvents.slice(0, 3).map((ev) => {
                       const color = EVENT_COLORS[ev.kind] || EVENT_COLORS.custom;
@@ -370,10 +447,10 @@ function FinancialCalendarPage() {
           </div>
         </div>
 
-        {/* Day Agenda Sidebar */}
-        <div className="rounded-2xl border border-white/10 bg-[#0c100e] p-5 shadow-xl flex flex-col justify-between font-sans">
-          <div>
-            <div className="border-b border-white/10 pb-3 mb-4">
+        {/* Day Agenda Sidebar with Clean Layout & Edit Action */}
+        <div className="rounded-2xl border border-white/10 bg-[#0c100e] p-4 sm:p-5 shadow-xl flex flex-col justify-between font-sans min-h-[460px] h-full relative overflow-hidden">
+          <div className="flex flex-col h-full flex-1 overflow-hidden">
+            <div className="border-b border-white/10 pb-3 mb-3 shrink-0">
               <h3 className="text-lg font-bold font-display text-white">
                 {format(selectedDate, "EEE, MMM d, yyyy")}
               </h3>
@@ -382,7 +459,8 @@ function FinancialCalendarPage() {
               </p>
             </div>
 
-            <div className="space-y-3 max-h-[460px] overflow-y-auto custom-scrollbar pr-1 font-sans">
+            {/* Scrollable Event List */}
+            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 font-sans max-h-[380px]">
               {selectedDayEvents.length === 0 ? (
                 <div className="py-12 text-center text-xs text-muted-foreground font-sans">
                   <CalendarIcon className="h-8 w-8 mx-auto mb-2 opacity-30 text-white" />
@@ -391,24 +469,47 @@ function FinancialCalendarPage() {
               ) : (
                 selectedDayEvents.map((ev) => {
                   const color = EVENT_COLORS[ev.kind] || EVENT_COLORS.custom;
+                  const isActivityEvent = ev.id.startsWith("act_");
+
                   return (
                     <div
                       key={ev.id}
-                      className={`p-3 rounded-xl border font-sans ${color.bg} ${color.border} space-y-1`}
+                      onClick={() => handleOpenEdit(ev)}
+                      className={`p-3 rounded-xl border font-sans ${color.bg} ${color.border} space-y-1.5 cursor-pointer hover:border-white/40 transition-all group relative`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${color.bg} ${color.text} border ${color.border}`}>
+                        <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${color.bg} ${color.text} border ${color.border}`}>
                           {ev.kind}
                         </span>
-                        {ev.amount !== undefined && ev.amount !== null && (
-                          <span className={`font-display font-bold text-sm ${color.text}`}>
-                            {formatMoney(ev.amount, currency)}
-                          </span>
-                        )}
+
+                        <div className="flex items-center gap-1.5">
+                          {ev.amount !== undefined && ev.amount !== null && ev.amount > 0 && (
+                            <span className={`font-display font-bold text-xs ${color.text}`}>
+                              {formatMoney(ev.amount, currency)}
+                            </span>
+                          )}
+
+                          {isActivityEvent ? (
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              className="h-6 w-6 text-muted-foreground hover:text-white hover:bg-white/10 rounded-lg p-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenEdit(ev);
+                              }}
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                          ) : (
+                            <ExternalLink className="h-3 w-3 text-muted-foreground opacity-60 group-hover:opacity-100 transition-opacity" />
+                          )}
+                        </div>
                       </div>
-                      <h4 className="text-sm font-bold text-white font-sans">{ev.title}</h4>
+
+                      <h4 className="text-xs font-bold text-white font-sans line-clamp-1">{ev.title}</h4>
                       {ev.subtitle && (
-                        <p className="text-xs text-muted-foreground font-sans">{ev.subtitle}</p>
+                        <p className="text-[11px] text-muted-foreground font-sans line-clamp-1">{ev.subtitle}</p>
                       )}
                     </div>
                   );
@@ -422,7 +523,7 @@ function FinancialCalendarPage() {
               setEventDate(format(selectedDate, "yyyy-MM-dd"));
               setAddOpen(true);
             }}
-            className="mt-4 w-full gap-2 bg-white/10 hover:bg-white/15 text-white border border-white/10 text-xs font-semibold font-sans"
+            className="mt-3 w-full gap-2 bg-white/10 hover:bg-white/15 text-white border border-white/10 text-xs font-semibold font-sans shrink-0 rounded-xl h-9"
           >
             <Plus className="h-3.5 w-3.5 text-[#3DDC97]" /> Add Deadline on {format(selectedDate, "MMM d")}
           </Button>
@@ -431,7 +532,7 @@ function FinancialCalendarPage() {
 
       {/* Add Custom Event Modal */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="sm:max-w-md bg-[#0c100e] border-white/10 text-white font-sans">
+        <DialogContent className="sm:max-w-md bg-[#0c100e] border-white/10 text-white font-sans rounded-3xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 font-display text-xl">
               <CalendarIcon className="h-5 w-5 text-[#3DDC97]" /> Add Financial Event / Deadline
@@ -444,7 +545,7 @@ function FinancialCalendarPage() {
                 placeholder="e.g. Q3 Tax Payment, Netflix Subscription, Payday"
                 value={eventTitle}
                 onChange={(e) => setEventTitle(e.target.value)}
-                className="bg-white/5 border-white/10 font-sans"
+                className="bg-white/5 border-white/10 font-sans text-xs rounded-xl"
               />
             </div>
 
@@ -452,10 +553,10 @@ function FinancialCalendarPage() {
               <div className="space-y-1.5">
                 <label className="text-xs text-muted-foreground font-medium font-sans">Event Category</label>
                 <Select value={eventKind} onValueChange={(v: any) => setEventKind(v)}>
-                  <SelectTrigger className="bg-white/5 border-white/10 font-sans">
+                  <SelectTrigger className="bg-white/5 border-white/10 font-sans text-xs rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0c100e] border-white/10 text-white font-sans">
+                  <SelectContent className="bg-[#0c100e] border-white/10 text-white font-sans rounded-xl">
                     <SelectItem value="tax">Tax Deadline</SelectItem>
                     <SelectItem value="expense">Bill Due</SelectItem>
                     <SelectItem value="income">Payday / Income</SelectItem>
@@ -474,7 +575,7 @@ function FinancialCalendarPage() {
                   type="date"
                   value={eventDate}
                   onChange={(e) => setEventDate(e.target.value)}
-                  className="bg-white/5 border-white/10 font-sans"
+                  className="bg-white/5 border-white/10 font-sans text-xs rounded-xl"
                 />
               </div>
             </div>
@@ -487,7 +588,7 @@ function FinancialCalendarPage() {
                   placeholder="e.g. 500"
                   value={eventAmount}
                   onChange={(e) => setEventAmount(e.target.value)}
-                  className="bg-white/5 border-white/10 font-sans"
+                  className="bg-white/5 border-white/10 font-sans text-xs rounded-xl"
                 />
               </div>
 
@@ -497,16 +598,85 @@ function FinancialCalendarPage() {
                   placeholder="e.g. Auto-debit from Chase"
                   value={eventSubtitle}
                   onChange={(e) => setEventSubtitle(e.target.value)}
-                  className="bg-white/5 border-white/10 font-sans"
+                  className="bg-white/5 border-white/10 font-sans text-xs rounded-xl"
                 />
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setAddOpen(false)} className="font-sans">Cancel</Button>
-            <Button onClick={() => createCustomEventMutation.mutate()} className="glow-emerald bg-[#3DDC97] hover:bg-[#3DDC97]/90 text-black font-semibold font-sans">
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" onClick={() => setAddOpen(false)} className="font-sans text-xs rounded-xl">Cancel</Button>
+            <Button onClick={() => createCustomEventMutation.mutate()} className="glow-emerald bg-[#3DDC97] hover:bg-[#3DDC97]/90 text-black font-semibold font-sans text-xs rounded-xl">
               Save Deadline
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Custom Event Modal */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-md bg-[#0c100e] border-white/10 text-white font-sans rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-display text-xl">
+              <Pencil className="h-5 w-5 text-[#3DDC97]" /> Edit Calendar Event
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-3 font-sans">
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground font-medium font-sans">Event Title</label>
+              <Input
+                placeholder="Event Title"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="bg-white/5 border-white/10 font-sans text-xs rounded-xl"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 font-sans">
+              <div className="space-y-1.5">
+                <label className="text-xs text-muted-foreground font-medium font-sans">Event Category</label>
+                <Select value={editKind} onValueChange={(v: any) => setEditKind(v)}>
+                  <SelectTrigger className="bg-white/5 border-white/10 font-sans text-xs rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#0c100e] border-white/10 text-white font-sans rounded-xl">
+                    <SelectItem value="tax">Tax Deadline</SelectItem>
+                    <SelectItem value="subscription">Subscription Renewal</SelectItem>
+                    <SelectItem value="custom">Custom Reminder</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs text-muted-foreground font-medium font-sans">Notes / Details</label>
+                <Input
+                  placeholder="Notes"
+                  value={editSubtitle}
+                  onChange={(e) => setEditSubtitle(e.target.value)}
+                  className="bg-white/5 border-white/10 font-sans text-xs rounded-xl"
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex items-center justify-between sm:justify-between gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-red-400 hover:bg-red-500/10 text-xs rounded-xl"
+              onClick={() => {
+                if (editingId) deleteEventMutation.mutate(editingId);
+              }}
+            >
+              <Trash2 className="h-4 w-4 mr-1" /> Delete
+            </Button>
+
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" onClick={() => setEditOpen(false)} className="font-sans text-xs rounded-xl">Cancel</Button>
+              <Button onClick={() => updateEventMutation.mutate()} className="bg-[#3DDC97] hover:bg-[#3DDC97]/90 text-black font-semibold font-sans text-xs rounded-xl">
+                Update Event
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

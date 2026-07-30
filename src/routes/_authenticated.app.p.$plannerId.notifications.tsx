@@ -4,17 +4,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { 
   Bell, ArrowLeft, Calendar as CalendarIcon, Clock, AlertTriangle, 
   CheckCircle2, Plus, Filter, Trash2, FileText, Landmark, Target, 
-  ShieldCheck, AlertCircle, UserPlus, ArrowUpRight, Sparkles, ExternalLink
+  ShieldCheck, AlertCircle, UserPlus, ExternalLink, Moon, RotateCcw,
+  CheckSquare, Square, X, CalendarDays, Zap
 } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { formatMoney } from "@/lib/format";
 import { usePlannerCurrency } from "@/hooks/use-planner-currency";
+import { addDays, format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/app/p/$plannerId/notifications")({
   component: NotificationsPage,
@@ -22,6 +28,7 @@ export const Route = createFileRoute("/_authenticated/app/p/$plannerId/notificat
 
 export type CalendarNotificationItem = {
   id: string;
+  rawId?: string;
   type: 'invoice' | 'loan' | 'goal' | 'tax' | 'subscription' | 'custom' | 'invite';
   title: string;
   subtitle: string;
@@ -32,13 +39,22 @@ export type CalendarNotificationItem = {
   inviteData?: any;
 };
 
+function parseLocalDate(dateStr: string): Date {
+  const clean = dateStr.split("T")[0];
+  const parts = clean.split("-");
+  if (parts.length === 3) {
+    return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  }
+  return new Date(dateStr);
+}
+
 function calculateUrgency(dateStr?: string): { urgency: 'overdue' | 'today' | 'this_week' | 'upcoming'; daysDiff: number } {
   if (!dateStr) return { urgency: 'upcoming', daysDiff: 99 };
   
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const target = new Date(dateStr);
+  const target = parseLocalDate(dateStr);
   target.setHours(0, 0, 0, 0);
 
   const diffTime = target.getTime() - today.getTime();
@@ -56,15 +72,9 @@ function NotificationsPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
 
-  const [tab, setTab] = useState<'all' | 'deadlines' | 'invites'>('all');
+  const [tab, setTab] = useState<'active' | 'deadlines' | 'invites' | 'snoozed'>('active');
   const [urgencyFilter, setUrgencyFilter] = useState<'all' | 'overdue' | 'today' | 'this_week'>('all');
-  const [dismissedIds, setDismissedIds] = useState<string[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem("capient_dismissed_notifications") || "[]");
-    } catch {
-      return [];
-    }
-  });
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // Modal State for Adding Custom Reminder / Deadline
   const [addOpen, setAddOpen] = useState(false);
@@ -73,6 +83,11 @@ function NotificationsPage() {
   const [eventAmount, setEventAmount] = useState("");
   const [eventKind, setEventKind] = useState<"tax" | "subscription" | "custom">("tax");
   const [eventSubtitle, setEventSubtitle] = useState("");
+
+  // Custom Snooze Date Modal
+  const [customSnoozeOpen, setCustomSnoozeOpen] = useState(false);
+  const [customSnoozeDate, setCustomSnoozeDate] = useState(format(addDays(new Date(), 2), "yyyy-MM-dd"));
+  const [targetSnoozeIds, setTargetSnoozeIds] = useState<string[]>([]);
 
   const { data: profile } = useQuery({
     queryKey: ["profile"],
@@ -84,7 +99,28 @@ function NotificationsPage() {
     },
   });
 
-  // 1. Fetch Pending Planner Invites
+  // 1. Fetch Backend Notification States (Snoozed & Dismissed Persisted in Supabase DB)
+  const { data: backendStates = [] } = useQuery({
+    queryKey: ["backend_notification_states", plannerId],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from("activity_events")
+        .select("*")
+        .eq("planner_id", plannerId)
+        .eq("kind", "notification_state");
+
+      if (error) {
+        console.error("Error fetching notification states:", error);
+        return [];
+      }
+      return data ?? [];
+    },
+  });
+
+  // 2. Fetch Pending Planner Invites
   const { data: pendingInvites = [] } = useQuery({
     queryKey: ["pending_invites_notifications", profile?.email],
     queryFn: async () => {
@@ -99,8 +135,8 @@ function NotificationsPage() {
     enabled: !!profile?.email,
   });
 
-  // 2. Aggregate All Calendar Deadlines & Reminders Across Planner Modules
-  const { data: calendarNotifications = [] } = useQuery({
+  // 3. Aggregate All Calendar Deadlines & Reminders Across Planner Modules
+  const { data: rawCalendarNotifications = [] } = useQuery({
     queryKey: ["calendar_notifications", plannerId],
     queryFn: async () => {
       const [
@@ -119,11 +155,12 @@ function NotificationsPage() {
 
       // Invoices Due / Overdue
       (invoices ?? []).forEach((inv: any) => {
-        if (inv.status !== "paid" && (inv.due_date || inv.issue_date || inv.created_at)) {
-          const dt = (inv.due_date || inv.issue_date || inv.created_at).split("T")[0];
+        if (inv.status !== "paid" && (inv.due_date || inv.issue_date)) {
+          const dt = (inv.due_date || inv.issue_date).split("T")[0];
           const { urgency, daysDiff } = calculateUrgency(dt);
           items.push({
             id: `inv_${inv.id}`,
+            rawId: inv.id,
             type: "invoice",
             title: `Invoice #${inv.number} Due`,
             subtitle: `Client payment ${urgency === 'overdue' ? 'overdue' : 'pending'} (${inv.status.toUpperCase()})`,
@@ -141,6 +178,7 @@ function NotificationsPage() {
           const { urgency, daysDiff } = calculateUrgency(l.due_date);
           items.push({
             id: `loan_${l.id}`,
+            rawId: l.id,
             type: "loan",
             title: `Loan Payment Due: ${l.name}`,
             subtitle: `Counterparty: ${l.counterparty || "Lender"}`,
@@ -158,6 +196,7 @@ function NotificationsPage() {
           const { urgency, daysDiff } = calculateUrgency(g.target_date);
           items.push({
             id: `goal_${g.id}`,
+            rawId: g.id,
             type: "goal",
             title: `Goal Target Deadline: ${g.name}`,
             subtitle: `Target savings milestone date`,
@@ -171,26 +210,184 @@ function NotificationsPage() {
 
       // Custom Calendar Activity Events (Tax, Subscriptions, Deadlines)
       (activityEvents ?? []).forEach((a: any) => {
-        const dt = (a.created_at || new Date().toISOString()).split("T")[0];
-        const { urgency, daysDiff } = calculateUrgency(dt);
-        items.push({
-          id: `act_${a.id}`,
-          type: (a.kind as any) || "custom",
-          title: a.title,
-          subtitle: a.subtitle || "Scheduled calendar deadline",
-          date: dt,
-          urgency,
-          daysDiff,
-        });
+        if (a.kind === "tax" || a.kind === "subscription" || a.kind === "custom" || a.kind === "reminder") {
+          const dt = (a.created_at || new Date().toISOString()).split("T")[0];
+          const { urgency, daysDiff } = calculateUrgency(dt);
+          items.push({
+            id: `act_${a.id}`,
+            rawId: a.id,
+            type: (a.kind as any) || "custom",
+            title: a.title,
+            subtitle: a.subtitle || "Scheduled calendar deadline",
+            date: dt,
+            urgency,
+            daysDiff,
+          });
+        }
       });
 
-      // Sort by urgency: Overdue first, then Today, then This Week, then Upcoming
       const priorityMap = { overdue: 0, today: 1, this_week: 2, upcoming: 3 };
       items.sort((a, b) => priorityMap[a.urgency] - priorityMap[b.urgency] || a.daysDiff - b.daysDiff);
 
       return items;
     },
     enabled: !!plannerId,
+  });
+
+  // Evaluate Snoozed & Dismissed Items from Backend States
+  const todayStr = format(new Date(), "yyyy-MM-dd");
+
+  const dismissedSet = new Set<string>();
+  const snoozedMap = new Map<string, string>(); // id -> snooze_until
+
+  backendStates.forEach((st: any) => {
+    const meta = (st.meta as any) || {};
+    const refId = st.ref_id;
+    if (!refId) return;
+
+    if (meta.status === "dismissed") {
+      dismissedSet.add(refId);
+    } else if (meta.status === "snoozed" && meta.snooze_until) {
+      if (meta.snooze_until > todayStr) {
+        snoozedMap.set(refId, meta.snooze_until);
+      }
+    }
+  });
+
+  // Categorize Items into Active vs Snoozed
+  const activeCalendarItems = rawCalendarNotifications.filter(
+    (item) => !dismissedSet.has(item.id) && !snoozedMap.has(item.id)
+  );
+
+  const snoozedCalendarItems = rawCalendarNotifications.filter(
+    (item) => !dismissedSet.has(item.id) && snoozedMap.has(item.id)
+  ).map((item) => ({
+    ...item,
+    snoozeUntil: snoozedMap.get(item.id),
+  }));
+
+  const activeInvites = pendingInvites.filter((inv: any) => {
+    const invId = `inv_pkg_${inv.id}`;
+    return !dismissedSet.has(invId) && !snoozedMap.has(invId);
+  });
+
+  // KPI Metrics
+  const overdueCount = activeCalendarItems.filter(i => i.urgency === 'overdue').length;
+  const todayCount = activeCalendarItems.filter(i => i.urgency === 'today').length;
+  const thisWeekCount = activeCalendarItems.filter(i => i.urgency === 'this_week').length;
+  const totalActiveNotificationsCount = activeCalendarItems.length + activeInvites.length;
+
+  // Filter Active Feed Items
+  const filteredCalendarItems = activeCalendarItems.filter(i => {
+    if (urgencyFilter === 'overdue') return i.urgency === 'overdue';
+    if (urgencyFilter === 'today') return i.urgency === 'today';
+    if (urgencyFilter === 'this_week') return i.urgency === 'this_week' || i.urgency === 'today' || i.urgency === 'overdue';
+    return true;
+  });
+
+  // --- MUTATIONS WITH BACKEND PERSISTENCE ---
+
+  // 1. Backend Snooze Mutation
+  const snoozeBackendMutation = useMutation({
+    mutationFn: async ({ ids, untilDate }: { ids: string[]; untilDate: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      // Delete existing notification_state records for these ids
+      await supabase
+        .from("activity_events")
+        .delete()
+        .eq("planner_id", plannerId)
+        .eq("kind", "notification_state")
+        .in("ref_id", ids);
+
+      // Insert new snoozed state records
+      const insertRows = ids.map((id) => ({
+        planner_id: plannerId,
+        user_id: user.id,
+        kind: "notification_state",
+        ref_id: id,
+        title: "Notification Snoozed",
+        meta: { status: "snoozed", snooze_until: untilDate },
+      }));
+
+      const { error } = await supabase.from("activity_events").insert(insertRows);
+      if (error) throw error;
+    },
+    onSuccess: (_, { ids, untilDate }) => {
+      toast.success(`Snoozed ${ids.length} notification${ids.length > 1 ? 's' : ''} until ${untilDate}`);
+      setSelectedIds([]);
+      setCustomSnoozeOpen(false);
+      qc.invalidateQueries({ queryKey: ["backend_notification_states", plannerId] });
+      qc.invalidateQueries({ queryKey: ["urgent_calendar_reminders_count", plannerId] });
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  // 2. Backend Dismiss / Delete Mutation
+  const dismissBackendMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      // Delete existing notification_state records for these ids
+      await supabase
+        .from("activity_events")
+        .delete()
+        .eq("planner_id", plannerId)
+        .eq("kind", "notification_state")
+        .in("ref_id", ids);
+
+      // Insert dismissed state records
+      const insertRows = ids.map((id) => ({
+        planner_id: plannerId,
+        user_id: user.id,
+        kind: "notification_state",
+        ref_id: id,
+        title: "Notification Dismissed",
+        meta: { status: "dismissed" },
+      }));
+
+      await supabase.from("activity_events").insert(insertRows);
+
+      // If any of the IDs are custom activity events (`act_...`), delete the original activity event from DB
+      const customRawIds = ids
+        .filter((id) => id.startsWith("act_"))
+        .map((id) => id.replace("act_", ""));
+
+      if (customRawIds.length > 0) {
+        await supabase.from("activity_events").delete().in("id", customRawIds);
+      }
+    },
+    onSuccess: (_, ids) => {
+      toast.success(`Dismissed ${ids.length} notification${ids.length > 1 ? 's' : ''}`);
+      setSelectedIds([]);
+      qc.invalidateQueries({ queryKey: ["backend_notification_states", plannerId] });
+      qc.invalidateQueries({ queryKey: ["calendar_notifications", plannerId] });
+      qc.invalidateQueries({ queryKey: ["urgent_calendar_reminders_count", plannerId] });
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  // 3. Backend Un-Snooze / Restore Mutation
+  const unSnoozeBackendMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase
+        .from("activity_events")
+        .delete()
+        .eq("planner_id", plannerId)
+        .eq("kind", "notification_state")
+        .in("ref_id", ids);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, ids) => {
+      toast.success(`Restored ${ids.length} notification${ids.length > 1 ? 's' : ''} to active feed`);
+      setSelectedIds([]);
+      qc.invalidateQueries({ queryKey: ["backend_notification_states", plannerId] });
+      qc.invalidateQueries({ queryKey: ["urgent_calendar_reminders_count", plannerId] });
+    },
+    onError: (err: any) => toast.error(err.message),
   });
 
   // Create Custom Calendar Reminder Mutation
@@ -233,39 +430,45 @@ function NotificationsPage() {
     qc.invalidateQueries({ queryKey: ["planners"] });
   };
 
-  const handleDismiss = (id: string) => {
-    const updated = [...dismissedIds, id];
-    setDismissedIds(updated);
-    localStorage.setItem("capient_dismissed_notifications", JSON.stringify(updated));
-    toast.success("Notification dismissed");
+  // Checkbox Selection Handling
+  const handleToggleSelect = (id: string) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter((item) => item !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
   };
 
-  const handleClearAllDismissed = () => {
-    setDismissedIds([]);
-    localStorage.removeItem("capient_dismissed_notifications");
-    toast.success("Notification history restored");
+  const handleSelectAllVisible = () => {
+    const visibleIds = [
+      ...(tab === 'active' || tab === 'invites' ? activeInvites.map((i: any) => `inv_pkg_${i.id}`) : []),
+      ...(tab === 'active' || tab === 'deadlines' ? filteredCalendarItems.map((i) => i.id) : []),
+      ...(tab === 'snoozed' ? snoozedCalendarItems.map((i) => i.id) : []),
+    ];
+
+    const allSelected = visibleIds.every((id) => selectedIds.includes(id));
+    if (allSelected) {
+      setSelectedIds(selectedIds.filter((id) => !visibleIds.includes(id)));
+    } else {
+      setSelectedIds(Array.from(new Set([...selectedIds, ...visibleIds])));
+    }
   };
 
-  // Filter Active Items
-  const activeCalendarItems = calendarNotifications.filter(i => !dismissedIds.includes(i.id));
-  const activeInvites = pendingInvites.filter((inv: any) => !dismissedIds.includes(`inv_pkg_${inv.id}`));
+  const handleSnoozePreset = (days: number, targetIds = selectedIds) => {
+    if (targetIds.length === 0) return;
+    const untilDate = format(addDays(new Date(), days), "yyyy-MM-dd");
+    snoozeBackendMutation.mutate({ ids: targetIds, untilDate });
+  };
 
-  const overdueCount = activeCalendarItems.filter(i => i.urgency === 'overdue').length;
-  const todayCount = activeCalendarItems.filter(i => i.urgency === 'today').length;
-  const thisWeekCount = activeCalendarItems.filter(i => i.urgency === 'this_week').length;
-
-  const filteredCalendarItems = activeCalendarItems.filter(i => {
-    if (urgencyFilter === 'overdue') return i.urgency === 'overdue';
-    if (urgencyFilter === 'today') return i.urgency === 'today';
-    if (urgencyFilter === 'this_week') return i.urgency === 'this_week' || i.urgency === 'today' || i.urgency === 'overdue';
-    return true;
-  });
-
-  const totalActiveNotificationsCount = activeCalendarItems.length + activeInvites.length;
+  const handleOpenCustomSnooze = (targetIds = selectedIds) => {
+    if (targetIds.length === 0) return;
+    setTargetSnoozeIds(targetIds);
+    setCustomSnoozeOpen(true);
+  };
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] font-['Questrial',_sans-serif]">
-      <div className="relative z-10 space-y-6 max-w-5xl mx-auto pb-20 pt-6 px-4 sm:px-0">
+      <div className="relative z-10 space-y-6 max-w-5xl mx-auto pb-32 pt-6 px-4 sm:px-0">
         
         {/* Top Navigation Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-6">
@@ -278,10 +481,10 @@ function NotificationsPage() {
             <div>
               <h1 className="text-2xl sm:text-3xl font-['Samsung_Sharp_Sans',_sans-serif] font-bold tracking-tight text-white flex items-center gap-2.5">
                 <Bell className="h-7 w-7 text-[#3DDC97]" />
-                Notifications & Calendar Reminders
+                Notifications
               </h1>
               <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-                Upcoming deadlines, bills, loan payments, tax dates & planner invitations.
+                Manage your invitations, calendar deadlines, and snooze alerts.
               </p>
             </div>
           </div>
@@ -308,7 +511,18 @@ function NotificationsPage() {
 
         {/* Overview KPI Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-4 rounded-2xl bg-[#111312] border border-white/5 flex flex-col justify-between">
+          <div className="relative p-4 rounded-2xl bg-[#111312] border border-white/10 flex flex-col justify-between shadow-sm">
+            <svg className="absolute -inset-[1px] w-[calc(100%+2px)] h-[calc(100%+2px)] pointer-events-none overflow-visible">
+              <defs>
+                <linearGradient id="kpi-glow-active" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3DDC97" stopOpacity="0.85" />
+                  <stop offset="12%" stopColor="#3DDC97" stopOpacity="0.7" />
+                  <stop offset="25%" stopColor="#3DDC97" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <rect x="0.5" y="0.5" width="calc(100% - 1px)" height="calc(100% - 1px)" rx="16" fill="none" stroke="url(#kpi-glow-active)" strokeWidth="1" />
+            </svg>
+
             <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
               <span>Total Active</span>
               <Bell className="h-4 w-4 text-[#3DDC97]" />
@@ -318,7 +532,18 @@ function NotificationsPage() {
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#111312] border border-red-500/20 flex flex-col justify-between">
+          <div className="relative p-4 rounded-2xl bg-[#111312] border border-white/10 flex flex-col justify-between shadow-sm">
+            <svg className="absolute -inset-[1px] w-[calc(100%+2px)] h-[calc(100%+2px)] pointer-events-none overflow-visible">
+              <defs>
+                <linearGradient id="kpi-glow-overdue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#FF3366" stopOpacity="0.85" />
+                  <stop offset="12%" stopColor="#FF3366" stopOpacity="0.7" />
+                  <stop offset="25%" stopColor="#FF3366" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <rect x="0.5" y="0.5" width="calc(100% - 1px)" height="calc(100% - 1px)" rx="16" fill="none" stroke="url(#kpi-glow-overdue)" strokeWidth="1" />
+            </svg>
+
             <div className="flex items-center justify-between text-xs text-red-400 font-medium">
               <span>Overdue</span>
               <AlertCircle className="h-4 w-4 text-red-400" />
@@ -328,7 +553,18 @@ function NotificationsPage() {
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#111312] border border-yellow-500/20 flex flex-col justify-between">
+          <div className="relative p-4 rounded-2xl bg-[#111312] border border-white/10 flex flex-col justify-between shadow-sm">
+            <svg className="absolute -inset-[1px] w-[calc(100%+2px)] h-[calc(100%+2px)] pointer-events-none overflow-visible">
+              <defs>
+                <linearGradient id="kpi-glow-thisweek" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#EAB308" stopOpacity="0.85" />
+                  <stop offset="12%" stopColor="#EAB308" stopOpacity="0.7" />
+                  <stop offset="25%" stopColor="#EAB308" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <rect x="0.5" y="0.5" width="calc(100% - 1px)" height="calc(100% - 1px)" rx="16" fill="none" stroke="url(#kpi-glow-thisweek)" strokeWidth="1" />
+            </svg>
+
             <div className="flex items-center justify-between text-xs text-yellow-400 font-medium">
               <span>Due This Week</span>
               <Clock className="h-4 w-4 text-yellow-400" />
@@ -338,29 +574,40 @@ function NotificationsPage() {
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#111312] border border-emerald-500/20 flex flex-col justify-between">
-            <div className="flex items-center justify-between text-xs text-[#3DDC97] font-medium">
-              <span>Invites</span>
-              <UserPlus className="h-4 w-4 text-[#3DDC97]" />
+          <div className="relative p-4 rounded-2xl bg-[#111312] border border-white/10 flex flex-col justify-between shadow-sm">
+            <svg className="absolute -inset-[1px] w-[calc(100%+2px)] h-[calc(100%+2px)] pointer-events-none overflow-visible">
+              <defs>
+                <linearGradient id="kpi-glow-snoozed" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.85" />
+                  <stop offset="12%" stopColor="#3B82F6" stopOpacity="0.7" />
+                  <stop offset="25%" stopColor="#3B82F6" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <rect x="0.5" y="0.5" width="calc(100% - 1px)" height="calc(100% - 1px)" rx="16" fill="none" stroke="url(#kpi-glow-snoozed)" strokeWidth="1" />
+            </svg>
+
+            <div className="flex items-center justify-between text-xs text-blue-400 font-medium">
+              <span>Snoozed</span>
+              <Moon className="h-4 w-4 text-blue-400" />
             </div>
-            <div className="text-2xl sm:text-3xl font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-[#3DDC97] mt-2">
-              {activeInvites.length}
+            <div className="text-2xl sm:text-3xl font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-blue-400 mt-2">
+              {snoozedCalendarItems.length}
             </div>
           </div>
         </div>
 
-        {/* Tab Filters & Urgency Selector */}
+        {/* Tab Filters & Selection Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/5 border border-white/5 self-start">
+          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/5 border border-white/5 self-start overflow-x-auto max-w-full">
             <button
-              onClick={() => setTab('all')}
+              onClick={() => setTab('active')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all ${
-                tab === 'all'
+                tab === 'active'
                   ? "bg-[#3DDC97] text-black shadow-md"
                   : "text-muted-foreground hover:text-white"
               }`}
             >
-              All ({totalActiveNotificationsCount})
+              Active ({totalActiveNotificationsCount})
             </button>
             <button
               onClick={() => setTab('deadlines')}
@@ -370,7 +617,7 @@ function NotificationsPage() {
                   : "text-muted-foreground hover:text-white"
               }`}
             >
-              Deadlines & Reminders ({activeCalendarItems.length})
+              Deadlines ({activeCalendarItems.length})
             </button>
             <button
               onClick={() => setTab('invites')}
@@ -380,18 +627,35 @@ function NotificationsPage() {
                   : "text-muted-foreground hover:text-white"
               }`}
             >
-              Invitations ({activeInvites.length})
+              Invites ({activeInvites.length})
+            </button>
+            <button
+              onClick={() => setTab('snoozed')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold transition-all ${
+                tab === 'snoozed'
+                  ? "bg-blue-500 text-white shadow-md"
+                  : "text-muted-foreground hover:text-white"
+              }`}
+            >
+              Snoozed ({snoozedCalendarItems.length})
             </button>
           </div>
 
-          {(tab === 'all' || tab === 'deadlines') && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-                <Filter className="h-3.5 w-3.5" /> Filter:
-              </span>
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSelectAllVisible}
+              className="bg-white/5 border-white/10 hover:bg-white/10 text-white rounded-xl text-xs h-8 gap-1.5"
+            >
+              <CheckSquare className="h-3.5 w-3.5 text-[#3DDC97]" />
+              Toggle Select All
+            </Button>
+
+            {(tab === 'active' || tab === 'deadlines') && (
               <Select value={urgencyFilter} onValueChange={(v: any) => setUrgencyFilter(v)}>
                 <SelectTrigger className="w-[140px] bg-black/60 border-white/10 text-white rounded-xl h-8 text-xs">
-                  <SelectValue placeholder="Filter severity..." />
+                  <SelectValue placeholder="Filter..." />
                 </SelectTrigger>
                 <SelectContent className="bg-[#0c100e] border-white/10 text-white rounded-xl">
                   <SelectItem value="all">All Reminders</SelectItem>
@@ -400,24 +664,12 @@ function NotificationsPage() {
                   <SelectItem value="this_week">Due Within 7 Days</SelectItem>
                 </SelectContent>
               </Select>
-
-              {dismissedIds.length > 0 && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleClearAllDismissed}
-                  className="text-xs text-muted-foreground hover:text-white h-8 px-2"
-                  title="Restore dismissed notifications"
-                >
-                  Clear Dismissed ({dismissedIds.length})
-                </Button>
-              )}
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Notification Feed */}
-        {totalActiveNotificationsCount === 0 ? (
+        {tab !== 'snoozed' && totalActiveNotificationsCount === 0 ? (
           <div className="rounded-3xl border border-white/5 bg-[#111312] p-12 text-center flex flex-col items-center justify-center my-6">
             <div className="h-16 w-16 bg-[#3DDC97]/10 rounded-full flex items-center justify-center mb-4">
               <CheckCircle2 className="h-8 w-8 text-[#3DDC97]" />
@@ -427,47 +679,75 @@ function NotificationsPage() {
               No pending invitations or urgent calendar deadlines at the moment.
             </p>
           </div>
+        ) : tab === 'snoozed' && snoozedCalendarItems.length === 0 ? (
+          <div className="rounded-3xl border border-white/5 bg-[#111312] p-12 text-center flex flex-col items-center justify-center my-6">
+            <div className="h-16 w-16 bg-blue-500/10 rounded-full flex items-center justify-center mb-4">
+              <Moon className="h-8 w-8 text-blue-400" />
+            </div>
+            <h3 className="font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-lg text-white">No Snoozed Notifications</h3>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-1 max-w-md">
+              When you snooze a notification, it will appear here until its snooze date expires.
+            </p>
+          </div>
         ) : (
           <div className="space-y-3 pt-1">
 
-            {/* Render Invitations */}
-            {(tab === 'all' || tab === 'invites') && activeInvites.map((inv: any) => (
-              <div 
-                key={inv.id} 
-                className="bg-[#111312] border border-white/10 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-[#3DDC97]/40"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="h-11 w-11 bg-[#3DDC97]/10 rounded-2xl flex items-center justify-center shrink-0 mt-0.5 border border-[#3DDC97]/20">
-                    <UserPlus className="h-5 w-5 text-[#3DDC97]" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#3DDC97]/20 text-[#3DDC97] border border-[#3DDC97]/30">
-                        Planner Invitation
-                      </span>
+            {/* Active Planner Invitations */}
+            {(tab === 'active' || tab === 'invites') && activeInvites.map((inv: any) => {
+              const invId = `inv_pkg_${inv.id}`;
+              const isSelected = selectedIds.includes(invId);
+
+              return (
+                <div 
+                  key={inv.id} 
+                  className={`relative overflow-hidden bg-[#111312] border rounded-2xl py-3 px-4 sm:py-4 sm:px-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${
+                    isSelected ? "border-[#3DDC97] bg-[#3DDC97]/[0.05]" : "border-white/10 hover:border-[#3DDC97]/40"
+                  }`}
+                >
+                  <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-[#3DDC97]/80 to-transparent pointer-events-none" />
+                  <div className="absolute top-0 left-0 w-[1px] h-[15%] bg-gradient-to-b from-[#3DDC97]/80 to-transparent pointer-events-none" />
+                  <div className="absolute top-0 right-0 w-[1px] h-[15%] bg-gradient-to-b from-[#3DDC97]/80 to-transparent pointer-events-none" />
+
+                  <div className="flex items-start gap-4">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => handleToggleSelect(invId)}
+                      className="mt-1 border-white/30 data-[state=checked]:bg-[#3DDC97] data-[state=checked]:text-black"
+                    />
+
+                    <div className="h-11 w-11 bg-[#3DDC97]/10 rounded-2xl flex items-center justify-center shrink-0 mt-0.5 border border-[#3DDC97]/20">
+                      <UserPlus className="h-5 w-5 text-[#3DDC97]" />
                     </div>
-                    <h3 className="font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-base text-white mt-1">
-                      Collaboration Request for <span className="text-[#3DDC97]">{inv.planner_name}</span>
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      <strong className="text-white">{inv.inviter_email}</strong> invited you to collaborate on their planner workspace.
-                    </p>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#3DDC97]/20 text-[#3DDC97] border border-[#3DDC97]/30">
+                          Planner Invitation
+                        </span>
+                      </div>
+                      <h3 className="font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-base text-white mt-1">
+                        Collaboration Request for <span className="text-[#3DDC97]">{inv.planner_name}</span>
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        <strong className="text-white">{inv.inviter_email}</strong> invited you to collaborate on their planner workspace.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                    <Button size="sm" className="glow-emerald bg-[#3DDC97] hover:bg-[#3DDC97]/90 text-black font-['Samsung_Sharp_Sans',_sans-serif] font-bold rounded-xl text-xs" onClick={() => handleInviteAction(inv.id, 'accepted')}>
+                      Accept
+                    </Button>
+                    <Button size="sm" variant="ghost" className="text-red-400 hover:bg-red-500/10 rounded-xl text-xs" onClick={() => handleInviteAction(inv.id, 'declined')}>
+                      Decline
+                    </Button>
                   </div>
                 </div>
+              );
+            })}
 
-                <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                  <Button size="sm" className="glow-emerald bg-[#3DDC97] hover:bg-[#3DDC97]/90 text-black font-['Samsung_Sharp_Sans',_sans-serif] font-bold rounded-xl text-xs" onClick={() => handleInviteAction(inv.id, 'accepted')}>
-                    Accept
-                  </Button>
-                  <Button size="sm" variant="ghost" className="text-red-400 hover:bg-red-500/10 rounded-xl text-xs" onClick={() => handleInviteAction(inv.id, 'declined')}>
-                    Decline
-                  </Button>
-                </div>
-              </div>
-            ))}
-
-            {/* Render Calendar Reminders & Deadlines */}
-            {(tab === 'all' || tab === 'deadlines') && filteredCalendarItems.map((item) => {
+            {/* Active Calendar Reminders & Deadlines */}
+            {(tab === 'active' || tab === 'deadlines') && filteredCalendarItems.map((item) => {
+              const isSelected = selectedIds.includes(item.id);
               const isOverdue = item.urgency === 'overdue';
               const isToday = item.urgency === 'today';
               const isThisWeek = item.urgency === 'this_week';
@@ -479,20 +759,47 @@ function NotificationsPage() {
                 item.type === 'tax' ? AlertCircle :
                 item.type === 'subscription' ? Clock : ShieldCheck;
 
+              const gradientColor = isOverdue
+                ? "via-red-500/80"
+                : isToday
+                  ? "via-orange-500/80"
+                  : isThisWeek
+                    ? "via-yellow-400/80"
+                    : "via-[#3DDC97]/80";
+
+              const sideGradientColor = isOverdue
+                ? "from-red-500/80"
+                : isToday
+                  ? "from-orange-500/80"
+                  : isThisWeek
+                    ? "from-yellow-400/80"
+                    : "from-[#3DDC97]/80";
+
               return (
                 <div 
                   key={item.id} 
-                  className={`bg-[#111312] border rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${
-                    isOverdue 
-                      ? "border-red-500/40 bg-red-500/[0.03]" 
-                      : isToday 
-                        ? "border-orange-500/40 bg-orange-500/[0.03]" 
-                        : isThisWeek 
-                          ? "border-yellow-500/30 bg-yellow-500/[0.02]" 
-                          : "border-white/10 hover:border-white/20"
+                  className={`relative overflow-hidden bg-[#111312] border rounded-2xl py-3 px-4 sm:py-4 sm:px-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${
+                    isSelected
+                      ? "border-[#3DDC97] bg-[#3DDC97]/[0.05]"
+                      : isOverdue 
+                        ? "border-red-500/40 bg-red-500/[0.03]" 
+                        : isToday 
+                          ? "border-orange-500/40 bg-orange-500/[0.03]" 
+                          : isThisWeek 
+                            ? "border-yellow-500/30 bg-yellow-500/[0.02]" 
+                            : "border-white/10 hover:border-white/20"
                   }`}
                 >
+                  <div className={`absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent ${gradientColor} to-transparent pointer-events-none`} />
+                  <div className={`absolute top-0 left-0 w-[1px] h-[15%] bg-gradient-to-b ${sideGradientColor} to-transparent pointer-events-none`} />
+                  <div className={`absolute top-0 right-0 w-[1px] h-[15%] bg-gradient-to-b ${sideGradientColor} to-transparent pointer-events-none`} />
                   <div className="flex items-start gap-4">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => handleToggleSelect(item.id)}
+                      className="mt-1.5 border-white/30 data-[state=checked]:bg-[#3DDC97] data-[state=checked]:text-black"
+                    />
+
                     <div className={`h-11 w-11 rounded-2xl flex items-center justify-center shrink-0 mt-0.5 border ${
                       isOverdue 
                         ? "bg-red-500/15 border-red-500/30 text-red-400" 
@@ -538,7 +845,7 @@ function NotificationsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                  <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center">
                     {item.amount !== undefined && item.amount > 0 && (
                       <div className="text-right hidden sm:block mr-2">
                         <span className="text-[10px] text-muted-foreground font-medium block">Amount</span>
@@ -557,14 +864,98 @@ function NotificationsPage() {
                       <ExternalLink className="h-3.5 w-3.5 text-[#3DDC97]" /> Calendar
                     </Button>
 
+                    {/* Single Item Snooze Menu */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="text-muted-foreground hover:text-white hover:bg-white/5 rounded-xl text-xs h-8 px-2"
+                          title="Snooze reminder"
+                        >
+                          <Moon className="h-3.5 w-3.5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-[#0c100e] border-white/10 text-white rounded-xl">
+                        <DropdownMenuItem onClick={() => handleSnoozePreset(1, [item.id])} className="text-xs gap-2 cursor-pointer">
+                          <Clock className="h-3.5 w-3.5 text-blue-400" /> Snooze 1 Day (Tomorrow)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleSnoozePreset(3, [item.id])} className="text-xs gap-2 cursor-pointer">
+                          <Clock className="h-3.5 w-3.5 text-blue-400" /> Snooze 3 Days
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleSnoozePreset(7, [item.id])} className="text-xs gap-2 cursor-pointer">
+                          <Clock className="h-3.5 w-3.5 text-blue-400" /> Snooze 1 Week
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleOpenCustomSnooze([item.id])} className="text-xs gap-2 cursor-pointer">
+                          <CalendarDays className="h-3.5 w-3.5 text-[#3DDC97]" /> Choose Custom Date...
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    {/* Single Item Dismiss/Delete */}
                     <Button 
                       size="sm" 
                       variant="ghost"
-                      onClick={() => handleDismiss(item.id)}
-                      className="text-muted-foreground hover:text-white hover:bg-white/5 rounded-xl text-xs h-8 px-2"
+                      onClick={() => dismissBackendMutation.mutate([item.id])}
+                      className="text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-xl text-xs h-8 px-2"
                       title="Dismiss notification"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Snoozed Items View */}
+            {tab === 'snoozed' && snoozedCalendarItems.map((item: any) => {
+              const isSelected = selectedIds.includes(item.id);
+
+              return (
+                <div 
+                  key={item.id} 
+                  className={`relative overflow-hidden bg-[#111312] border rounded-2xl py-3 px-4 sm:py-4 sm:px-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${
+                    isSelected ? "border-[#3DDC97] bg-[#3DDC97]/[0.05]" : "border-white/10 hover:border-blue-400/40"
+                  }`}
+                >
+                  <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-blue-400/80 to-transparent pointer-events-none" />
+                  <div className="absolute top-0 left-0 w-[1px] h-[15%] bg-gradient-to-b from-blue-400/80 to-transparent pointer-events-none" />
+                  <div className="absolute top-0 right-0 w-[1px] h-[15%] bg-gradient-to-b from-blue-400/80 to-transparent pointer-events-none" />
+                  <div className="flex items-start gap-4">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => handleToggleSelect(item.id)}
+                      className="mt-1.5 border-white/30 data-[state=checked]:bg-[#3DDC97] data-[state=checked]:text-black"
+                    />
+
+                    <div className="h-11 w-11 rounded-2xl flex items-center justify-center shrink-0 mt-0.5 border bg-blue-500/15 border-blue-500/30 text-blue-400">
+                      <Moon className="h-5 w-5" />
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border bg-blue-500/20 text-blue-400 border-blue-500/30">
+                          Snoozed until {item.snoozeUntil}
+                        </span>
+                      </div>
+
+                      <h3 className="font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-base text-white">
+                        {item.title}
+                      </h3>
+
+                      <p className="text-xs text-muted-foreground">
+                        {item.subtitle}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                    <Button 
+                      size="sm" 
+                      onClick={() => unSnoozeBackendMutation.mutate([item.id])}
+                      className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs gap-1.5 h-8 font-bold"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" /> Wake Up Now
                     </Button>
                   </div>
                 </div>
@@ -575,6 +966,110 @@ function NotificationsPage() {
         )}
 
       </div>
+
+      {/* Floating Bulk Actions Bar (Appears when 1+ Notifications are Checked) */}
+      {selectedIds.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0c100e]/95 backdrop-blur-xl border border-white/20 p-3 sm:p-4 rounded-3xl shadow-2xl flex items-center gap-3 sm:gap-4 max-w-[95vw] sm:max-w-xl animate-in slide-in-from-bottom-5">
+          <div className="flex items-center gap-2 text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-white px-2">
+            <span className="h-6 w-6 rounded-full bg-[#3DDC97] text-black flex items-center justify-center text-xs">
+              {selectedIds.length}
+            </span>
+            <span>Selected</span>
+          </div>
+
+          <div className="h-4 w-px bg-white/10" />
+
+          {/* Bulk Snooze Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" variant="outline" className="bg-white/5 border-white/10 hover:bg-white/10 text-white rounded-xl text-xs gap-1.5 h-9">
+                <Moon className="h-4 w-4 text-blue-400" /> Snooze
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="bg-[#0c100e] border-white/10 text-white rounded-xl">
+              <DropdownMenuItem onClick={() => handleSnoozePreset(1)} className="text-xs gap-2 cursor-pointer">
+                <Clock className="h-3.5 w-3.5 text-blue-400" /> Snooze 1 Day (Tomorrow)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleSnoozePreset(3)} className="text-xs gap-2 cursor-pointer">
+                <Clock className="h-3.5 w-3.5 text-blue-400" /> Snooze 3 Days
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleSnoozePreset(7)} className="text-xs gap-2 cursor-pointer">
+                <Clock className="h-3.5 w-3.5 text-blue-400" /> Snooze 1 Week
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleOpenCustomSnooze()} className="text-xs gap-2 cursor-pointer">
+                <CalendarDays className="h-3.5 w-3.5 text-[#3DDC97]" /> Choose Custom Date...
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Bulk Dismiss / Delete */}
+          {tab === 'snoozed' ? (
+            <Button
+              size="sm"
+              onClick={() => unSnoozeBackendMutation.mutate(selectedIds)}
+              className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs gap-1.5 h-9 font-bold"
+            >
+              <RotateCcw className="h-4 w-4" /> Wake Up
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={() => dismissBackendMutation.mutate(selectedIds)}
+              className="bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs gap-1.5 h-9 font-bold"
+            >
+              <Trash2 className="h-4 w-4" /> Dismiss / Delete
+            </Button>
+          )}
+
+          {/* Clear Selection */}
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setSelectedIds([])}
+            className="text-muted-foreground hover:text-white rounded-xl text-xs h-9 px-2"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {/* Custom Snooze Date Dialog */}
+      <Dialog open={customSnoozeOpen} onOpenChange={setCustomSnoozeOpen}>
+        <DialogContent className="bg-[#0c100e] border-white/10 text-white rounded-3xl font-['Questrial',_sans-serif]">
+          <DialogHeader>
+            <DialogTitle className="font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-lg text-white flex items-center gap-2">
+              <Moon className="h-5 w-5 text-blue-400" /> Snooze Notification Until Date
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-white/80 block mb-1.5">
+                Snooze Until Date (Backend Persisted)
+              </label>
+              <Input 
+                type="date"
+                value={customSnoozeDate} 
+                onChange={(e) => setCustomSnoozeDate(e.target.value)} 
+                className="bg-black/60 border-white/10 text-white rounded-xl focus:border-[#3DDC97] text-xs" 
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Notifications will remain hidden across all your devices until the chosen date.
+            </p>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" onClick={() => setCustomSnoozeOpen(false)} className="rounded-xl text-xs font-bold text-muted-foreground hover:text-white">Cancel</Button>
+            <Button 
+              onClick={() => snoozeBackendMutation.mutate({ ids: targetSnoozeIds, untilDate: customSnoozeDate })} 
+              className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold"
+            >
+              Confirm Snooze
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Add Custom Calendar Reminder Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>

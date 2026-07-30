@@ -93,7 +93,7 @@ function Landing() {
             {["The", "Financial"].map((word, i) => (
               <motion.span
                 key={`a-${i}`}
-                className="bg-gradient-to-bl from-emerald-200 via-white/90 to-white/40 bg-clip-text text-transparent inline-block pb-2"
+                className="bg-gradient-to-b from-[#a7f3d0] to-white bg-clip-text text-transparent inline-block pb-2"
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
@@ -103,7 +103,7 @@ function Landing() {
               </motion.span>
             ))}
             <motion.span
-              className="bg-gradient-to-bl from-emerald-300 via-emerald-400 to-emerald-600 bg-clip-text text-transparent inline-block pb-2"
+              className="bg-gradient-to-b from-[#a7f3d0] to-[#3DDC97] bg-clip-text text-transparent inline-block pb-2"
               variants={{
                 hidden: { opacity: 0, y: 20 },
                 visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
@@ -115,7 +115,7 @@ function Landing() {
             {["for", "Modern", "Professionals."].map((word, i) => (
               <motion.span
                 key={`b-${i}`}
-                className="bg-gradient-to-bl from-emerald-200 via-white/90 to-white/40 bg-clip-text text-transparent inline-block pb-2"
+                className="bg-gradient-to-b from-[#a7f3d0] to-white bg-clip-text text-transparent inline-block pb-2"
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
