@@ -60,6 +60,19 @@ function AdminPanel() {
 
   const adConfigs = dbAdSlots || getAdConfigs();
 
+  const [selectedPlacementId, setSelectedPlacementId] = useState<string>("dashboard_banner");
+  const [editingSlot, setEditingSlot] = useState<AdSlotConfig>(() => {
+    const current = getAdConfigs();
+    return current["dashboard_banner"] || DEFAULT_AD_SLOTS[0];
+  });
+
+  // Sync editingSlot when DB data loads
+  useEffect(() => {
+    if (dbAdSlots && dbAdSlots[selectedPlacementId]) {
+      setEditingSlot({ ...dbAdSlots[selectedPlacementId] });
+    }
+  }, [dbAdSlots]);
+
   const handleSelectPlacement = (placementId: string) => {
     setSelectedPlacementId(placementId);
     if (adConfigs[placementId]) {
@@ -222,18 +235,18 @@ function AdminPanel() {
             </div>
 
             <Tabs defaultValue="analytics" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 max-w-2xl bg-white/5 border border-hairline p-1">
-                <TabsTrigger value="analytics" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">
-                  <LineChartIcon className="h-4 w-4 mr-2" /> Analytics
+              <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto max-w-2xl bg-white/5 border border-hairline p-1 gap-1">
+                <TabsTrigger value="analytics" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 text-xs sm:text-sm py-2">
+                  <LineChartIcon className="h-4 w-4 mr-1.5 shrink-0" /> Analytics
                 </TabsTrigger>
-                <TabsTrigger value="users" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">
-                  <Users className="h-4 w-4 mr-2" /> Users
+                <TabsTrigger value="users" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 text-xs sm:text-sm py-2">
+                  <Users className="h-4 w-4 mr-1.5 shrink-0" /> Users
                 </TabsTrigger>
-                <TabsTrigger value="bugs" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">
-                  <Bug className="h-4 w-4 mr-2" /> Bugs
+                <TabsTrigger value="bugs" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 text-xs sm:text-sm py-2">
+                  <Bug className="h-4 w-4 mr-1.5 shrink-0" /> Bugs
                 </TabsTrigger>
-                <TabsTrigger value="ads" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">
-                  <Megaphone className="h-4 w-4 mr-2" /> Ads & Monetization
+                <TabsTrigger value="ads" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 text-xs sm:text-sm py-2">
+                  <Megaphone className="h-4 w-4 mr-1.5 shrink-0" /> Ads
                 </TabsTrigger>
               </TabsList>
 
