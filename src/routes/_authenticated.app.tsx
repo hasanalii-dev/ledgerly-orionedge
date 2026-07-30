@@ -10,7 +10,7 @@ import { COUNTRIES, CURRENCIES } from "@/lib/format";
 import { 
   User, Dice5, Globe, ArrowRight, ArrowLeft, Building2, Briefcase, 
   Sparkles, GraduationCap, Megaphone, Rocket, HeartHandshake, LayoutGrid,
-  Check, Search, ShieldCheck, ChevronRight
+  Check, Search, ShieldCheck, ChevronRight, Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -40,7 +40,7 @@ function OnboardingWizard() {
   const [loading, setLoading] = useState(false);
   
   // Check existing planners
-  const { data: existingPlanners } = useQuery({
+  const { data: existingPlanners, isLoading: plannersLoading } = useQuery({
     queryKey: ["planners_check_onboarding"],
     queryFn: async () => {
       const { data, error } = await supabase.from("planners").select("id").limit(1);
@@ -49,13 +49,36 @@ function OnboardingWizard() {
     }
   });
 
+  // Database-driven onboarding check: query user_onboarding to see if user already completed setup
+  const { data: onboardingRecord, isLoading: onboardingCheckLoading } = useQuery({
+    queryKey: ["onboarding_completed_check"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase.from("user_onboarding").select("id").eq("id", user.id).maybeSingle();
+      return data;
+    }
+  });
+
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const isForceSetup = searchParams.get("setup") === "true" || localStorage.getItem("force_onboarding") === "true";
-    if (existingPlanners && existingPlanners.length > 0 && !isForceSetup) {
+    // If user already has planners, redirect to dashboard (they've completed onboarding before)
+    if (existingPlanners && existingPlanners.length > 0) {
       router.navigate({ to: `/app/p/${existingPlanners[0].id}/dashboard` as any, replace: true });
+      return;
     }
   }, [existingPlanners, router]);
+
+  const isCheckingAccount = plannersLoading || onboardingCheckLoading;
+  const hasExistingPlanners = existingPlanners && existingPlanners.length > 0;
+
+  if (isCheckingAccount || hasExistingPlanners) {
+    return (
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#020505] text-white p-4 font-['Questrial',_sans-serif]">
+        <Loader2 className="w-8 h-8 animate-spin text-[#3DDC97] mb-3" />
+        <p className="text-sm text-muted-foreground font-medium">Loading your workspace...</p>
+      </div>
+    );
+  }
 
   // Onboarding Form States
   const [displayName, setDisplayName] = useState("");
@@ -218,7 +241,6 @@ function OnboardingWizard() {
       }
 
       toast.success("Workspace initialized!");
-      localStorage.removeItem("force_onboarding");
       if (newPlanner?.id) {
         router.navigate({ to: `/app/p/${newPlanner.id}/dashboard` as any, replace: true });
       } else {

@@ -58,10 +58,9 @@ function AuthBetaPage() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleAuth = async () => {
     try {
       setLoading(true);
-      localStorage.removeItem("force_onboarding");
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { 
@@ -78,25 +77,8 @@ function AuthBetaPage() {
     }
   };
 
-  const handleGoogleSignUp = async () => {
-    try {
-      setLoading(true);
-      localStorage.setItem("force_onboarding", "true");
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { 
-          redirectTo: `${window.location.origin}/app?setup=true`,
-          queryParams: {
-            prompt: 'select_account'
-          }
-        },
-      });
-      if (error) throw error;
-    } catch (err: any) {
-      toast.error(err.message);
-      setLoading(false);
-    }
-  };
+  const handleGoogleSignIn = handleGoogleAuth;
+  const handleGoogleSignUp = handleGoogleAuth;
 
   const handleNextLogin = () => {
     try {
@@ -110,7 +92,6 @@ function AuthBetaPage() {
   const handleLoginSubmit = async () => {
     try {
       setLoading(true);
-      localStorage.removeItem("force_onboarding");
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       toast.success("Welcome back!");
@@ -149,7 +130,6 @@ function AuthBetaPage() {
       });
       
       if (error) throw error;
-      localStorage.setItem("force_onboarding", "true");
       
       // Supabase returns an empty identities array if the user already exists (to prevent enumeration, but we want to tell the user)
       if (data.user && data.user.identities && data.user.identities.length === 0) {
