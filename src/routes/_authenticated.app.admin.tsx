@@ -522,18 +522,18 @@ function AdminPanel() {
                           <Button
                             type="button"
                             variant={editingSlot.type === "image" ? "default" : "outline"}
-                            className={editingSlot.type === "image" ? "bg-emerald-500 text-black font-bold" : "border-hairline text-white"}
+                            className={`text-xs sm:text-sm ${editingSlot.type === "image" ? "bg-emerald-500 text-black font-bold" : "border-hairline text-white"}`}
                             onClick={() => setEditingSlot(s => ({ ...s, type: "image" }))}
                           >
-                            <ImageIcon className="h-4 w-4 mr-2" /> Image + Link
+                            <ImageIcon className="h-4 w-4 mr-1.5 shrink-0" /> <span className="truncate">Image + Link</span>
                           </Button>
                           <Button
                             type="button"
                             variant={editingSlot.type === "html" ? "default" : "outline"}
-                            className={editingSlot.type === "html" ? "bg-emerald-500 text-black font-bold" : "border-hairline text-white"}
+                            className={`text-xs sm:text-sm ${editingSlot.type === "html" ? "bg-emerald-500 text-black font-bold" : "border-hairline text-white"}`}
                             onClick={() => setEditingSlot(s => ({ ...s, type: "html" }))}
                           >
-                            <Code className="h-4 w-4 mr-2" /> Custom Code / HTML
+                            <Code className="h-4 w-4 mr-1.5 shrink-0" /> <span className="truncate">Custom HTML</span>
                           </Button>
                         </div>
                       </div>
