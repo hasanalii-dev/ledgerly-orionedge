@@ -36,10 +36,14 @@ function PlannerLayout() {
       if (error) throw error;
       if (!data) return null;
       const localConfigs = JSON.parse(localStorage.getItem("capient_planner_configs") || "{}");
+      const type = data.workspace_type || localConfigs[data.id]?.workspace_type || "personal";
+      if (!data.workspace_type && type) {
+        supabase.from("planners").update({ workspace_type: type }).eq("id", plannerId).then();
+      }
       return {
         ...data,
-        workspace_type: localConfigs[data.id]?.workspace_type || data.workspace_type || "personal",
-        custom_config: localConfigs[data.id]?.custom_config || data.custom_config || {}
+        workspace_type: type,
+        custom_config: data.custom_config || localConfigs[data.id]?.custom_config || {}
       };
     },
   });

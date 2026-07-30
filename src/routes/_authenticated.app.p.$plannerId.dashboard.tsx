@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,23 +24,68 @@ export const Route = createFileRoute("/_authenticated/app/p/$plannerId/dashboard
   component: DashboardPage,
 });
 
-const renderCustomizedLabel = (props: any) => {
+const renderFinancialPieLabel = (props: any) => {
   const { cx, cy, midAngle, innerRadius, outerRadius, fill, name } = props;
   const radius = innerRadius + (outerRadius - innerRadius) / 2;
   const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
   const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
-  
-  const initial = name ? name.charAt(0).toUpperCase() : "O";
+
+  const isIncome = name === "Income";
 
   return (
     <g transform={`translate(${x}, ${y})`} style={{ pointerEvents: 'none' }}>
-      <circle cx="0" cy="0" r="14" fill="#030808" stroke={fill} strokeWidth="3" />
-      <text x="0" y="0" dy="4" textAnchor="middle" fill={fill} fontSize="12" fontWeight="900" fontFamily="sans-serif">
-        {initial}
-      </text>
+      <circle cx="0" cy="0" r="13" fill="#050a0a" stroke={fill} strokeWidth="2.5" />
+      {isIncome ? (
+        <path 
+          d="M-3 3 L3 -3 M-0.5 -3 L3 -3 M3 -3 L3 0.5" 
+          stroke={fill} 
+          strokeWidth="2" 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          fill="none"
+        />
+      ) : (
+        <path 
+          d="M3 -3 L-3 3 M0.5 3 L-3 3 M-3 3 L-3 -0.5" 
+          stroke={fill} 
+          strokeWidth="2" 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          fill="none"
+        />
+      )}
     </g>
   );
 };
+
+function TopGlowBorder({ color = "#ffffff", glowColor = "#ffffff" }: { color?: string; glowColor?: string }) {
+  const id = useId();
+  return (
+    <div className="absolute inset-0 pointer-events-none z-10 rounded-[inherit] overflow-hidden">
+      <svg className="w-full h-full block">
+        <defs>
+          <linearGradient id={id} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor={glowColor} stopOpacity="0.9" />
+            <stop offset="8%" stopColor={color} stopOpacity="0.4" />
+            <stop offset="18%" stopColor={color} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <rect
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          fill="none"
+          stroke={`url(#${id})`}
+          strokeWidth="2"
+          rx="24"
+          ry="24"
+          className="rounded-[inherit]"
+        />
+      </svg>
+    </div>
+  );
+}
 
 function KpiCard({ icon: Icon, label, value, compactValue, sub, variant = 'default' }: { icon: React.ElementType; label: string; value: string; compactValue?: string; sub?: string; variant?: 'default' | 'green' | 'red' }) {
   const isGreen = variant === 'green';
@@ -54,18 +100,18 @@ function KpiCard({ icon: Icon, label, value, compactValue, sub, variant = 'defau
         isRed ? 'bg-[linear-gradient(rgba(255,51,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,51,102,0.05)_1px,transparent_1px)]' : 
         'bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)]'}`} />
       
+      {/* Top Border Fade (covers top edge, top corners & 15% down left/right sides) */}
+      <TopGlowBorder 
+        color={isGreen ? "#3DDC97" : isRed ? "#FF3366" : "rgba(255,255,255,0.4)"} 
+        glowColor={isGreen ? "#3DDC97" : isRed ? "#FF3366" : "rgba(255,255,255,0.6)"} 
+      />
+
       {/* Glow & Gradients */}
       {isGreen && (
-        <>
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[1px] bg-gradient-to-r from-transparent via-[#3DDC97]/30 to-transparent z-0 hidden md:block" />
-          <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-32 bg-[#3DDC97]/20 blur-[50px] rounded-full pointer-events-none z-0 hidden md:block" />
-        </>
+        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-32 bg-[#3DDC97]/20 blur-[50px] rounded-full pointer-events-none z-0 hidden md:block" />
       )}
       {isRed && (
-        <>
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[1px] bg-gradient-to-r from-transparent via-[#FF3366]/30 to-transparent z-0 hidden md:block" />
-          <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-32 bg-[#FF3366]/20 blur-[50px] rounded-full pointer-events-none z-0 hidden md:block" />
-        </>
+        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-32 bg-[#FF3366]/20 blur-[50px] rounded-full pointer-events-none z-0 hidden md:block" />
       )}
       
       <div className="flex items-start justify-between mb-4 md:mb-4 relative z-10">
@@ -108,10 +154,23 @@ function DashboardPage() {
       const { data } = await supabase.from("planners").select("*").eq("id", plannerId).single();
       if (!data) return null;
       const localConfigs = JSON.parse(localStorage.getItem("capient_planner_configs") || "{}");
+      
+      // Prioritize DB stored workspace_type, fallback to local storage or personal
+      let effectiveType = data.workspace_type || localConfigs[data.id]?.workspace_type;
+      if (!effectiveType) {
+        const { data: onboarding } = await supabase.from("user_onboarding").select("workspace_type").eq("id", data.user_id).maybeSingle();
+        effectiveType = onboarding?.workspace_type || "personal";
+      }
+
+      // Auto-sync missing workspace_type directly into Supabase planners DB table
+      if (!data.workspace_type && effectiveType) {
+        supabase.from("planners").update({ workspace_type: effectiveType }).eq("id", plannerId).then();
+      }
+
       return {
         ...data,
-        workspace_type: localConfigs[data.id]?.workspace_type || data.workspace_type || "personal",
-        custom_config: localConfigs[data.id]?.custom_config || data.custom_config || {}
+        workspace_type: effectiveType,
+        custom_config: data.custom_config || localConfigs[data.id]?.custom_config || {}
       };
     },
   });
@@ -403,6 +462,8 @@ function DashboardPage() {
 
         <div className="grid lg:grid-cols-3 gap-4 px-4 md:px-0">
           <div className="lg:col-span-2 rounded-[24px] border border-white/5 bg-[#111312] p-5 shadow-lg relative overflow-hidden group">
+            {/* Top Border Fade (covers top edge, top corners & 15% down left/right sides) */}
+            <TopGlowBorder color="#3DDC97" glowColor="#3DDC97" />
             <div className="flex items-center justify-between mb-2">
               <div>
                 <h3 className="font-display font-bold text-white text-lg tracking-wide">HYPER CHARTS</h3>
@@ -444,7 +505,9 @@ function DashboardPage() {
               </div>
           </div>
 
-          <div className="rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-5 hover:bg-card/60 transition-colors duration-300 shadow-sm flex flex-col justify-between">
+          <div className="rounded-[24px] border border-white/5 bg-card/40 backdrop-blur-xl p-5 hover:bg-card/60 transition-colors duration-300 shadow-sm flex flex-col justify-between relative overflow-hidden group">
+            {/* Top Border Fade (covers top edge, top corners & 15% down left/right sides) */}
+            <TopGlowBorder color="#3DDC97" glowColor="#3DDC97" />
             <div>
               <div className="flex items-center justify-between mb-1">
                 <h3 className="font-display text-lg">Income vs Expenses</h3>
@@ -495,6 +558,8 @@ function DashboardPage() {
                           cornerRadius={10} 
                           stroke="none" 
                           filter="url(#pieGlowDashboard)"
+                          labelLine={false}
+                          label={renderFinancialPieLabel}
                         >
                           {overviewPie.map((entry, i) => (
                             <Cell key={i} fill={entry.color} />
@@ -514,32 +579,36 @@ function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Legend displaying both Amount and Percentage */}
-                <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/5">
-                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#3DDC97] shadow-[0_0_8px_#3DDC97]" />
-                      <div>
-                        <div className="text-[10px] font-medium text-muted-foreground">Income</div>
-                        <div className="text-xs font-bold text-white">{formatMoney(totalIncome, currency, true)}</div>
+                {/* Legend displaying both Amount and Percentage without overflow */}
+                <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-white/5">
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col justify-between gap-1 overflow-hidden">
+                    <div className="flex items-center justify-between w-full min-w-0">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <div className="w-2 h-2 rounded-full bg-[#3DDC97] shadow-[0_0_8px_#3DDC97] shrink-0" />
+                        <span className="text-xs font-medium text-muted-foreground truncate">Income</span>
                       </div>
+                      <span className="text-[11px] font-bold text-[#3DDC97] bg-[#3DDC97]/10 px-1.5 py-0.5 rounded border border-[#3DDC97]/20 shrink-0 ml-1">
+                        {incomePercent}%
+                      </span>
                     </div>
-                    <span className="text-xs font-bold text-[#3DDC97] bg-[#3DDC97]/10 px-2 py-0.5 rounded-md border border-[#3DDC97]/20">
-                      {incomePercent}%
-                    </span>
+                    <div className="text-sm font-bold text-white truncate mt-1">
+                      {formatMoney(totalIncome, currency, true)}
+                    </div>
                   </div>
 
-                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#FF3366] shadow-[0_0_8px_#FF3366]" />
-                      <div>
-                        <div className="text-[10px] font-medium text-muted-foreground">Expenses</div>
-                        <div className="text-xs font-bold text-white">{formatMoney(totalExpenses, currency, true)}</div>
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col justify-between gap-1 overflow-hidden">
+                    <div className="flex items-center justify-between w-full min-w-0">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <div className="w-2 h-2 rounded-full bg-[#FF3366] shadow-[0_0_8px_#FF3366] shrink-0" />
+                        <span className="text-xs font-medium text-muted-foreground truncate">Expenses</span>
                       </div>
+                      <span className="text-[11px] font-bold text-[#FF3366] bg-[#FF3366]/10 px-1.5 py-0.5 rounded border border-[#FF3366]/20 shrink-0 ml-1">
+                        {expensePercent}%
+                      </span>
                     </div>
-                    <span className="text-xs font-bold text-[#FF3366] bg-[#FF3366]/10 px-2 py-0.5 rounded-md border border-[#FF3366]/20">
-                      {expensePercent}%
-                    </span>
+                    <div className="text-sm font-bold text-white truncate mt-1">
+                      {formatMoney(totalExpenses, currency, true)}
+                    </div>
                   </div>
                 </div>
               </>
@@ -548,7 +617,9 @@ function DashboardPage() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-4">
-          <div className="rounded-[24px] md:rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 md:p-5 min-h-[160px] md:min-h-0 flex flex-col md:block justify-between hover:bg-card/60 transition-colors duration-300 group shadow-lg md:shadow-none">
+          <div className="rounded-[24px] md:rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 md:p-5 min-h-[160px] md:min-h-0 flex flex-col md:block justify-between hover:bg-card/60 transition-colors duration-300 group shadow-lg md:shadow-none relative overflow-hidden">
+            {/* Top Border Fade (covers top edge, top corners & 15% down left/right sides) */}
+            <TopGlowBorder color="rgba(255,255,255,0.4)" glowColor="rgba(255,255,255,0.6)" />
             <div>
               <div className="text-[13px] md:text-[11px] font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2"><div className="p-2 md:p-1.5 rounded-xl md:rounded-lg bg-white/5 group-hover:bg-primary/20 group-hover:text-primary transition-colors"><Crown className="h-5 w-5 md:h-3.5 md:w-3.5" /></div> Biggest client</div>
             </div>
@@ -557,7 +628,9 @@ function DashboardPage() {
               <div className="mt-1 text-sm md:text-sm text-primary truncate">{biggestClient ? formatMoney(biggestClient[1], currency) : "—"}</div>
             </div>
           </div>
-          <div className="rounded-[24px] md:rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 md:p-5 min-h-[160px] md:min-h-0 flex flex-col md:block justify-between hover:bg-card/60 transition-colors duration-300 group shadow-lg md:shadow-none">
+          <div className="rounded-[24px] md:rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 md:p-5 min-h-[160px] md:min-h-0 flex flex-col md:block justify-between hover:bg-card/60 transition-colors duration-300 group shadow-lg md:shadow-none relative overflow-hidden">
+            {/* Top Border Fade (covers top edge, top corners & 15% down left/right sides) */}
+            <TopGlowBorder color="rgba(255,255,255,0.4)" glowColor="rgba(255,255,255,0.6)" />
             <div>
               <div className="text-[13px] md:text-[11px] font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2"><div className="p-2 md:p-1.5 rounded-xl md:rounded-lg bg-white/5 group-hover:bg-primary/20 group-hover:text-primary transition-colors"><Flame className="h-5 w-5 md:h-3.5 md:w-3.5" /></div> Highest expense</div>
             </div>
@@ -566,7 +639,9 @@ function DashboardPage() {
               <div className="mt-1 text-sm md:text-sm text-primary truncate">{topCat ? formatMoney(topCat[1], currency) : "—"}</div>
             </div>
           </div>
-          <div className="rounded-[24px] md:rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 md:p-5 min-h-[160px] md:min-h-0 flex flex-col md:block justify-between hover:bg-card/60 transition-colors duration-300 group shadow-lg md:shadow-none">
+          <div className="rounded-[24px] md:rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 md:p-5 min-h-[160px] md:min-h-0 flex flex-col md:block justify-between hover:bg-card/60 transition-colors duration-300 group shadow-lg md:shadow-none relative overflow-hidden">
+            {/* Top Border Fade (covers top edge, top corners & 15% down left/right sides) */}
+            <TopGlowBorder color="rgba(255,255,255,0.4)" glowColor="rgba(255,255,255,0.6)" />
             <div>
               <div className="text-[13px] md:text-[11px] font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2"><div className="p-2 md:p-1.5 rounded-xl md:rounded-lg bg-white/5 group-hover:bg-primary/20 group-hover:text-primary transition-colors"><Wallet className="h-5 w-5 md:h-3.5 md:w-3.5" /></div> Accounts</div>
             </div>

@@ -74,10 +74,16 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
   const pathPlannerId = pathMatch ? pathMatch[1] : undefined;
 
   const plannerId = currentPlannerId || routeParams?.plannerId || pathPlannerId;
-  const { state, isMobile } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const collapsed = state === "collapsed" && !isMobile;
   const navigate = useNavigate();
   const qc = useQueryClient();
+
+  useEffect(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  }, [pathname, isMobile, setOpenMobile]);
 
   const { data: planners = [] } = useQuery({
     queryKey: ["planners"],
@@ -92,11 +98,17 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
         return [];
       }
       const localConfigs = JSON.parse(localStorage.getItem("capient_planner_configs") || "{}");
-      return (data || []).map(p => ({
-        ...p,
-        workspace_type: localConfigs[p.id]?.workspace_type || p.workspace_type || "personal",
-        custom_config: localConfigs[p.id]?.custom_config || p.custom_config || {}
-      })) as Planner[];
+      return (data || []).map(p => {
+        const type = p.workspace_type || localConfigs[p.id]?.workspace_type || "personal";
+        if (!p.workspace_type && type) {
+          supabase.from("planners").update({ workspace_type: type }).eq("id", p.id).then();
+        }
+        return {
+          ...p,
+          workspace_type: type,
+          custom_config: p.custom_config || localConfigs[p.id]?.custom_config || {}
+        };
+      }) as Planner[];
     },
   });
 
@@ -111,10 +123,14 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
         .maybeSingle();
       if (!data) return null;
       const localConfigs = JSON.parse(localStorage.getItem("capient_planner_configs") || "{}");
+      const type = data.workspace_type || localConfigs[data.id]?.workspace_type || "personal";
+      if (!data.workspace_type && type) {
+        supabase.from("planners").update({ workspace_type: type }).eq("id", data.id).then();
+      }
       return {
         ...data,
-        workspace_type: localConfigs[data.id]?.workspace_type || data.workspace_type || "personal",
-        custom_config: localConfigs[data.id]?.custom_config || data.custom_config || {}
+        workspace_type: type,
+        custom_config: data.custom_config || localConfigs[data.id]?.custom_config || {}
       } as Planner;
     },
     enabled: !!plannerId,
@@ -252,6 +268,7 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
   }
 
   const handleSwitchPlanner = async (targetPlannerId: string) => {
+    if (isMobile) setOpenMobile(false);
     navigate({ to: `/app/p/${targetPlannerId}/dashboard`, params: { plannerId: targetPlannerId } });
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
@@ -699,42 +716,54 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
             </div>
             
             {(dialogOpen === "new" || dialogOpen === "settings" || dialogOpen === "rename") && (
-              <div className="flex flex-col gap-4">
-                <label className="text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-white/80 block -mb-2">Planner Icon</label>
+              <div className="flex flex-col gap-3">
+                <label className="text-xs font-['Samsung_Sharp_Sans',_sans-serif] font-bold text-white/80 block">Planner Icon</label>
                 <div className="flex items-start gap-4">
                   <div className="relative group shrink-0">
                     {(() => {
-                      const isUrl = iconUrl && (iconUrl.startsWith("http") || iconUrl.startsWith("data:"));
+                      const isUrl = iconUrl && (iconUrl.startsWith("http://") || iconUrl.startsWith("https://") || iconUrl.startsWith("data:"));
                       const IconComp = iconUrl && !isUrl && ICON_MAP[iconUrl] ? ICON_MAP[iconUrl] : Book;
                       return isUrl ? (
-                        <img src={iconUrl} className="h-16 w-16 rounded-2xl object-cover border-2 border-[#3DDC97]/50" alt="Planner Icon" />
+                        <img src={iconUrl} className="h-20 w-20 rounded-2xl object-cover border-2 border-[#3DDC97]/60 shadow-lg" alt="Planner Icon" />
                       ) : (
-                        <div className="h-16 w-16 rounded-2xl bg-white/5 border-2 border-[#3DDC97]/50 flex items-center justify-center">
-                          <IconComp className="h-8 w-8 text-white" />
+                        <div className="h-20 w-20 rounded-2xl bg-white/5 border-2 border-[#3DDC97]/60 flex items-center justify-center shadow-lg">
+                          <IconComp className="h-10 w-10 text-[#3DDC97]" />
                         </div>
                       );
                     })()}
                   </div>
 
-                  <div className="flex-1 w-full overflow-hidden">
-                    <Select value={iconUrl} onValueChange={(v) => { if(v) setIconUrl(v); }}>
-                      <SelectTrigger className="w-full bg-black/60 border-white/10 text-white rounded-xl h-[42px] text-xs">
-                        <SelectValue placeholder="Select an icon..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#0c100e] border-white/10 text-white rounded-xl max-h-[250px]">
-                        {PRESET_ICONS.map((preset, idx) => {
-                          const PresetIcon = ICON_MAP[preset.id];
-                          return (
-                            <SelectItem key={idx} value={preset.id} className="text-xs py-2">
-                              <div className="flex items-center gap-3">
-                                <PresetIcon className="h-4 w-4 text-[#3DDC97]" />
-                                <span>{preset.name}</span>
-                              </div>
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
+                  <div className="flex-1 w-full space-y-2 overflow-hidden">
+                    <div>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-1">Custom Image URL</span>
+                      <Input 
+                        value={iconUrl} 
+                        onChange={(e) => setIconUrl(e.target.value)} 
+                        placeholder="Paste image URL (https://...)" 
+                        className="bg-black/60 border-white/10 text-white rounded-xl h-[38px] text-xs focus:border-[#3DDC97]"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-1">Or Choose Preset Icon</span>
+                      <Select value={iconUrl} onValueChange={(v) => { if(v) setIconUrl(v); }}>
+                        <SelectTrigger className="w-full bg-black/60 border-white/10 text-white rounded-xl h-[38px] text-xs">
+                          <SelectValue placeholder="Select an icon..." />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#0c100e] border-white/10 text-white rounded-xl max-h-[250px]">
+                          {PRESET_ICONS.map((preset, idx) => {
+                            const PresetIcon = ICON_MAP[preset.id];
+                            return (
+                              <SelectItem key={idx} value={preset.id} className="text-xs py-2">
+                                <div className="flex items-center gap-3">
+                                  <PresetIcon className="h-4 w-4 text-[#3DDC97]" />
+                                  <span>{preset.name}</span>
+                                </div>
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               </div>
