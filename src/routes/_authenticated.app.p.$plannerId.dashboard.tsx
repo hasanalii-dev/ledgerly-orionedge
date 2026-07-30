@@ -238,6 +238,15 @@ function DashboardPage() {
     cashflow.push({ month: format(d, "MMM"), income: inc, expense: exp, net: inc - exp });
   }
 
+  const totalFinancials = totalIncome + totalExpenses;
+  const incomePercent = totalFinancials > 0 ? ((totalIncome / totalFinancials) * 100).toFixed(1) : "0.0";
+  const expensePercent = totalFinancials > 0 ? ((totalExpenses / totalFinancials) * 100).toFixed(1) : "0.0";
+
+  const overviewPie = [
+    { name: "Income", value: totalIncome, color: "#3DDC97" },
+    { name: "Expenses", value: totalExpenses, color: "#FF3366" },
+  ].filter((item) => item.value > 0);
+
   const pieColors = ["#3DDC97", "#00E5FF", "#00F0B5", "#FFD166", "#14B8A6", "#10B981", "#06B6D4", "#FBBF24"];
   const expensePie = Object.entries(catTotals).slice(0, 8).map(([name, value]) => ({ name, value }));
 
@@ -435,64 +444,105 @@ function DashboardPage() {
               </div>
           </div>
 
-          <div className="rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-5 hover:bg-card/60 transition-colors duration-300 shadow-sm">
-            <h3 className="font-display text-lg mb-1">Expense breakdown</h3>
-            <p className="text-xs text-muted-foreground mb-4">By category</p>
-            {expensePie.length === 0 ? (
-              <div className="p-6 text-sm text-muted-foreground text-center border border-dashed border-white/10 rounded-xl mt-4">No expenses to display</div>
+          <div className="rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-5 hover:bg-card/60 transition-colors duration-300 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="font-display text-lg">Income vs Expenses</h3>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 text-muted-foreground border border-white/5">
+                  Overview
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">Financial distribution & ratio</p>
+            </div>
+
+            {overviewPie.length === 0 ? (
+              <div className="p-8 text-sm text-muted-foreground text-center border border-dashed border-white/10 rounded-xl my-auto">
+                No income or expenses recorded yet
+              </div>
             ) : (
-              <div className="relative h-72 mt-2">
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-                  <div className="absolute w-[150px] h-[150px] rounded-full border-[1.5px] border-white/10" />
-                  <div className="flex flex-col items-center justify-center relative">
-                    <span className="text-[9px] text-muted-foreground uppercase tracking-[0.2em] font-bold mb-1">Expenses</span>
-                    <span className={`text-[28px] font-display font-bold tracking-tight text-white`}>
-                      {formatMoney(totalExpenses, currency, true)}
+              <>
+                <div className="relative h-60 my-auto">
+                  {/* Center info inside donut */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                    <div className="absolute w-[130px] h-[130px] rounded-full border-[1.5px] border-white/10" />
+                    <div className="flex flex-col items-center justify-center relative text-center">
+                      <span className="text-[9px] text-muted-foreground uppercase tracking-[0.2em] font-bold mb-0.5">Net Savings</span>
+                      <span className={`text-xl font-display font-bold tracking-tight ${net >= 0 ? "text-[#3DDC97]" : "text-[#FF3366]"}`}>
+                        {formatMoney(net, currency, true)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="relative z-10 w-full h-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RPieChart>
+                        <defs>
+                          <filter id="pieGlowDashboard" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="5" result="coloredBlur" />
+                            <feMerge>
+                              <feMergeNode in="coloredBlur" />
+                              <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                          </filter>
+                        </defs>
+                        <Pie 
+                          data={overviewPie} 
+                          dataKey="value" 
+                          nameKey="name" 
+                          innerRadius={70} 
+                          outerRadius={88} 
+                          paddingAngle={6} 
+                          cornerRadius={10} 
+                          stroke="none" 
+                          filter="url(#pieGlowDashboard)"
+                        >
+                          {overviewPie.map((entry, i) => (
+                            <Cell key={i} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(val: number, name: string) => {
+                            const percent = totalFinancials > 0 ? ((val / totalFinancials) * 100).toFixed(1) : "0";
+                            return [`${formatMoney(val, currency)} (${percent}%)`, name];
+                          }}
+                          wrapperStyle={{ zIndex: 50 }}
+                          contentStyle={{ backgroundColor: "#111312", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "white" }} 
+                          itemStyle={{ color: "white", fontWeight: 600, padding: "2px 0" }}
+                        />
+                      </RPieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Legend displaying both Amount and Percentage */}
+                <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/5">
+                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#3DDC97] shadow-[0_0_8px_#3DDC97]" />
+                      <div>
+                        <div className="text-[10px] font-medium text-muted-foreground">Income</div>
+                        <div className="text-xs font-bold text-white">{formatMoney(totalIncome, currency, true)}</div>
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold text-[#3DDC97] bg-[#3DDC97]/10 px-2 py-0.5 rounded-md border border-[#3DDC97]/20">
+                      {incomePercent}%
+                    </span>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#FF3366] shadow-[0_0_8px_#FF3366]" />
+                      <div>
+                        <div className="text-[10px] font-medium text-muted-foreground">Expenses</div>
+                        <div className="text-xs font-bold text-white">{formatMoney(totalExpenses, currency, true)}</div>
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold text-[#FF3366] bg-[#FF3366]/10 px-2 py-0.5 rounded-md border border-[#FF3366]/20">
+                      {expensePercent}%
                     </span>
                   </div>
                 </div>
-                
-                <div className="relative z-10 w-full h-full">
-                  <ResponsiveContainer>
-                    <RPieChart>
-                      <defs>
-                        <filter id="pieGlowDashboard" x="-50%" y="-50%" width="200%" height="200%">
-                          <feGaussianBlur stdDeviation="6" result="coloredBlur" />
-                          <feMerge>
-                            <feMergeNode in="coloredBlur" />
-                            <feMergeNode in="SourceGraphic" />
-                          </feMerge>
-                        </filter>
-                      </defs>
-                      <Pie 
-                        data={expensePie} 
-                        dataKey="value" 
-                        nameKey="name" 
-                        innerRadius={85} 
-                        outerRadius={105} 
-                        paddingAngle={10} 
-                        cornerRadius={20} 
-                        stroke="none" 
-                        filter="url(#pieGlowDashboard)"
-                        labelLine={false}
-                        label={renderCustomizedLabel}
-                      >
-                        {expensePie.map((_, i) => <Cell key={i} fill={pieColors[i % pieColors.length]} />)}
-                      </Pie>
-                      <Tooltip 
-                        formatter={(val: number, name: string) => {
-                          const total = expensePie.reduce((acc, curr) => acc + curr.value, 0);
-                          const percent = total > 0 ? `(${(val / total * 100).toFixed(1)}%)` : '';
-                          return [`${formatMoney(val, currency)} ${percent}`, name];
-                        }}
-                        wrapperStyle={{ zIndex: 50 }}
-                        contentStyle={{ backgroundColor: "#111312", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "white" }} 
-                        itemStyle={{ color: "white", fontWeight: 600, padding: "2px 0" }}
-                      />
-                    </RPieChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
+              </>
             )}
           </div>
         </div>
