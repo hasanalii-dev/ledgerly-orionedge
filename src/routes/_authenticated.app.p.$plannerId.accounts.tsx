@@ -115,17 +115,38 @@ function AccountsPage() {
           >
             {rows.map((a, i) => {
               const live = Number(a.opening_balance ?? 0) + (balMap.get(a.id) ?? 0);
+              const cardCurrency = a.currency || currency || "USD";
               
               const getCardStyles = (kind: string) => {
-                switch (kind) {
-                  case 'wallet': return { base: 'bg-[#171508]', g1: 'from-yellow-500/40', g2: 'from-amber-600/30', g3: 'from-orange-400/30' };
-                  case 'cash': return { base: 'bg-[#051616]', g1: 'from-cyan-400/40', g2: 'from-[#3DDC97]/30', g3: 'from-teal-500/40' };
+                const k = (kind || 'bank').toLowerCase().replace(/[\s_]+/g, '');
+                switch (k) {
+                  case 'wallet':
+                  case 'digitalwallet':
+                    return { base: 'bg-[#171508]', g1: 'from-amber-400/40', g2: 'from-yellow-500/30', g3: 'from-orange-500/40' };
+                  case 'cash':
+                    return { base: 'bg-[#051616]', g1: 'from-cyan-400/40', g2: 'from-[#3DDC97]/30', g3: 'from-teal-500/40' };
+                  case 'cryptowallet':
+                  case 'crypto':
+                    return { base: 'bg-[#140a24]', g1: 'from-purple-500/40', g2: 'from-violet-600/30', g3: 'from-fuchsia-500/40' };
+                  case 'forexaccount':
+                  case 'forex':
+                    return { base: 'bg-[#081426]', g1: 'from-blue-400/40', g2: 'from-indigo-500/30', g3: 'from-sky-500/40' };
+                  case 'creditcard':
+                  case 'credit':
+                    return { base: 'bg-[#220810]', g1: 'from-rose-500/40', g2: 'from-red-600/30', g3: 'from-pink-500/40' };
+                  case 'loanaccount':
+                  case 'loan':
+                  case 'debt':
+                    return { base: 'bg-[#1a1208]', g1: 'from-orange-500/40', g2: 'from-amber-600/30', g3: 'from-yellow-600/40' };
                   case 'bank':
-                  default: return { base: 'bg-[#071d15]', g1: 'from-[#3DDC97]/40', g2: 'from-cyan-500/30', g3: 'from-teal-800/50' };
+                  case 'bankaccount':
+                  default:
+                    return { base: 'bg-[#071d15]', g1: 'from-[#3DDC97]/40', g2: 'from-cyan-500/30', g3: 'from-teal-800/50' };
                 }
               };
 
               const cardStyle = getCardStyles(a.kind || 'bank');
+              const kindLabel = ACCOUNT_KINDS.find((k) => k.value === a.kind)?.label || (a.kind || 'Bank Account').replace(/_/g, ' ');
 
               return (
                 <div key={a.id} className={`snap-start shrink-0 rounded-[28px] relative overflow-hidden group w-[85vw] sm:w-[340px] max-w-[360px] aspect-[1.586] flex flex-col justify-between shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] ${cardStyle.base}`}>
@@ -159,8 +180,8 @@ function AccountsPage() {
                     </div>
                     {/* Morphing Badge / Edit Button */}
                     <div className="relative mt-1 h-7 min-w-[60px] flex items-center justify-center">
-                      <div className="absolute whitespace-nowrap bg-black/20 backdrop-blur-md border border-white/10 text-white/90 text-[11px] font-medium tracking-wide px-3 py-1.5 rounded-full shadow-inner transition-all duration-300 group-hover:opacity-0 group-hover:scale-50 group-hover:rotate-45 pointer-events-none">
-                        {(a.kind || 'bank').toUpperCase()}
+                      <div className="absolute whitespace-nowrap bg-black/20 backdrop-blur-md border border-white/10 text-white/90 text-[11px] font-medium tracking-wide px-3 py-1.5 rounded-full shadow-inner transition-all duration-300 group-hover:opacity-0 group-hover:scale-50 group-hover:rotate-45 pointer-events-none uppercase">
+                        {kindLabel}
                       </div>
                       <Button 
                         variant="ghost" 
@@ -177,7 +198,7 @@ function AccountsPage() {
                   {/* Card Content Bottom */}
                   <div className="relative z-10 flex items-center justify-between px-6 pb-6 mt-auto">
                     <div className="text-white/70 text-sm font-medium">Live Balance</div>
-                    <div className="font-display text-3xl font-bold text-white tracking-tight drop-shadow-md">{formatMoney(live, a.currency)}</div>
+                    <div className="font-display text-3xl font-bold text-white tracking-tight drop-shadow-md">{formatMoney(live, cardCurrency)}</div>
                   </div>
                 </div>
               );
