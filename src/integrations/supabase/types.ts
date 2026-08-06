@@ -161,39 +161,54 @@ export type Database = {
       }
       clients: {
         Row: {
+          amount_paid: number | null
           company: string | null
           country: string | null
           created_at: string
           email: string | null
           id: string
+          member_count: number | null
           name: string
           notes: string | null
+          payment_proof_url: string | null
+          payment_status: string | null
+          payment_type: string | null
           phone: string | null
           planner_id: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          amount_paid?: number | null
           company?: string | null
           country?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          member_count?: number | null
           name: string
           notes?: string | null
+          payment_proof_url?: string | null
+          payment_status?: string | null
+          payment_type?: string | null
           phone?: string | null
           planner_id: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          amount_paid?: number | null
           company?: string | null
           country?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          member_count?: number | null
           name?: string
           notes?: string | null
+          payment_proof_url?: string | null
+          payment_status?: string | null
+          payment_type?: string | null
           phone?: string | null
           planner_id?: string
           updated_at?: string

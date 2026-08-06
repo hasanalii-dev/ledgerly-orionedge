@@ -61,7 +61,7 @@ const renderFinancialPieLabel = (props: any) => {
 function TopGlowBorder({ color = "#ffffff", glowColor = "#ffffff" }: { color?: string; glowColor?: string }) {
   const id = useId();
   return (
-    <div className="absolute inset-0 pointer-events-none z-10 rounded-[inherit] overflow-hidden">
+    <div className="absolute inset-0 pointer-events-none z-10 rounded-[inherit] overflow-hidden hidden md:block">
       <svg className="w-full h-full block">
         <defs>
           <linearGradient id={id} x1="0%" y1="0%" x2="0%" y2="100%">
@@ -95,7 +95,7 @@ function KpiCard({ icon: Icon, label, value, compactValue, sub, variant = 'defau
     <PixelCard variant={variant} noFocus={true} className="relative overflow-hidden rounded-[24px] md:rounded-[20px] p-6 md:p-5 shadow-lg flex flex-col justify-between min-h-[160px] md:min-h-[120px] transition-all duration-300 bg-[#111312] border border-white/5 hover:bg-[#151716] hover:border-white/10 hover:-translate-y-0.5 hover:shadow-xl group">
       
       {/* Subtle Grid Background */}
-      <div className={`absolute inset-0 bg-[size:20px_20px] [mask-image:radial-gradient(ellipse_at_bottom_right,black_20%,transparent_80%)] opacity-50 z-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none ${
+      <div className={`absolute inset-0 bg-[size:20px_20px] [mask-image:radial-gradient(ellipse_at_bottom_right,black_20%,transparent_80%)] opacity-50 z-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none hidden md:block ${
         isGreen ? 'bg-[linear-gradient(rgba(61,220,151,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(61,220,151,0.05)_1px,transparent_1px)]' : 
         isRed ? 'bg-[linear-gradient(rgba(255,51,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,51,102,0.05)_1px,transparent_1px)]' : 
         'bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)]'}`} />
@@ -193,13 +193,14 @@ function DashboardPage() {
 
   const getKpiLabels = () => {
     switch(workspaceType) {
+      case "society": return { income: "Event Revenue", expenses: "Event Expenses", net: "Net Funds", wealth: "Treasury Balance", thisMonth: "This Month Funds", avgIncome: "Avg Event Revenue", reserve: "Event Reserve", topCat: "Pending Passes" };
       case "freelancer": return { income: "Client Revenue", expenses: "Project Expenses", net: "Net Profit", wealth: "Current Balance", thisMonth: "This Month Profit", avgIncome: "Avg Monthly Revenue", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
       case "agency": return { income: "Agency Revenue", expenses: "Operating Expenses", net: "Net Cash Flow", wealth: "Current Balance", thisMonth: "This Month Net", avgIncome: "Avg Monthly Revenue", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
       case "smb": return { income: "Business Revenue", expenses: "Operating Expenses", net: "Net Profit", wealth: "Current Balance", thisMonth: "This Month Profit", avgIncome: "Avg Monthly Revenue", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
       case "startup": return { income: "ARR / Revenue", expenses: "Burn Rate", net: "Net Burn", wealth: "Current Balance", thisMonth: "This Month Burn", avgIncome: "Avg Monthly Revenue", reserve: "Emergency Runway", topCat: "Pending Invoices" };
       case "creator": return { income: "Sponsorships & Ads", expenses: "Production Costs", net: "Net Earnings", wealth: "Current Balance", thisMonth: "This Month Net", avgIncome: "Avg Monthly Earnings", reserve: "Tax Reserve (Est)", topCat: "Pending Invoices" };
       case "nonprofit": return { income: "Donations & Grants", expenses: "Program Expenses", net: "Net Funds", wealth: "Current Balance", thisMonth: "This Month Net", avgIncome: "Avg Monthly Donations", reserve: "Operating Reserve", topCat: "Pending Invoices" };
-      case "student":
+      case "student": return { income: "Allowance / Income", expenses: "Campus Expenses", net: "Net Savings", wealth: "Current Balance", thisMonth: "This Month Savings", avgIncome: "Avg Monthly Income", reserve: "Emergency Reserve", topCat: "Top Category" };
       case "personal":
       default: return { income: "Total Income", expenses: "Total Expenses", net: "Net Savings", wealth: "Current Balance", thisMonth: "This Month Savings", avgIncome: "Avg Monthly Income", reserve: "Emergency Reserve", topCat: "Top Category" };
     }
@@ -409,12 +410,14 @@ function DashboardPage() {
               Welcome back, {profile?.display_name?.split(' ')[0] || "there"}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {workspaceType === "freelancer" ? `Freelance Projects & Client Financials — ${planner?.name ?? "Planner"}`
+              {workspaceType === "society" ? `Society Event Management & Treasury — ${planner?.name ?? "Planner"}`
+               : workspaceType === "freelancer" ? `Freelance Projects & Client Financials — ${planner?.name ?? "Planner"}`
                : workspaceType === "agency" ? `Agency Retainers & Client Accounts — ${planner?.name ?? "Planner"}`
                : workspaceType === "smb" ? `Small Business Financial Suite — ${planner?.name ?? "Planner"}`
                : workspaceType === "startup" ? `Startup Runway & Burn Rate — ${planner?.name ?? "Planner"}`
                : workspaceType === "creator" ? `Creator Monetization & Expenses — ${planner?.name ?? "Planner"}`
                : workspaceType === "nonprofit" ? `Non-Profit Funds & Grants — ${planner?.name ?? "Planner"}`
+               : workspaceType === "student" ? `Student Budget & Campus Expenses — ${planner?.name ?? "Planner"}`
                : `Personal Household Budget — ${planner?.name ?? "Planner"}`}
             </p>
           </div>

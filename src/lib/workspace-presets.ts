@@ -288,9 +288,9 @@ export function getWorkspaceDefaults(workspaceType: WorkspaceType): WorkspaceDef
 
     case "society":
       return {
-        hideModules: ["invoices"],
-        primaryMetrics: ["ticket_sales", "sponsorships", "event_budget", "balance"],
-        clientTerm: "Sponsors/Members",
+        hideModules: ["projects", "invoices"],
+        primaryMetrics: ["ticket_sales", "participants", "event_budget", "balance"],
+        clientTerm: "Participants",
       };
 
     default:
@@ -373,7 +373,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
     };
   }
 
-  // 3. Society / Event: NO Invoices
+  // 3. Society / Event: NO Projects, NO Invoices
   if (isSociety) {
     return {
       workspace: [
@@ -384,8 +384,7 @@ export function getWorkspaceNavigation(workspaceType: WorkspaceType = "personal"
         { id: "expenses", title: "Expenses", routeKey: "expenses", group: "workspace" },
         { id: "cashflow", title: "Cash Flow", routeKey: "cashflow", group: "workspace" },
         { id: "accounts", title: "Accounts", routeKey: "accounts", group: "workspace" },
-        { id: "clients", title: "Members", routeKey: "clients", group: "workspace" },
-        { id: "projects", title: "Events", routeKey: "projects", group: "workspace" },
+        { id: "clients", title: "Participants", routeKey: "clients", group: "workspace" },
         { id: "loans", title: "Loans & Debts", routeKey: "loans", group: "workspace" },
         { id: "investments", title: "Investments", routeKey: "investments", group: "workspace" },
       ],

@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Users, Bug, CheckCircle, Clock, LineChart as LineChartIcon, Megaphone, Sparkles, Code, Image as ImageIcon, Save, Eye, Globe } from "lucide-react";
+import { Users, Bug, CheckCircle, Clock, LineChart as LineChartIcon, Megaphone, Sparkles, Code, Image as ImageIcon, Save, Eye, Globe, Mail, Trash2, Filter, Search, Check, Reply, MessageSquare } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -173,6 +173,52 @@ function AdminPanel() {
     enabled: profile?.email === 'hasanalijaffe@gmail.com',
   });
 
+  const [contactSearch, setContactSearch] = useState("");
+  const [contactFilterStatus, setContactFilterStatus] = useState<string>("all");
+  const [selectedContactMsg, setSelectedContactMsg] = useState<any>(null);
+
+  const { data: contactMessages = [], isLoading: contactLoading } = useQuery({
+    queryKey: ["admin_contact_messages"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contact_messages" as any)
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) {
+        console.warn("Could not fetch contact messages:", error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: profile?.email === 'hasanalijaffe@gmail.com',
+  });
+
+  const updateContactStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from("contact_messages" as any).update({ status }).eq("id", id);
+    if (error) {
+      toast.error("Failed to update status: " + error.message);
+    } else {
+      toast.success(`Message marked as ${status}`);
+      qc.invalidateQueries({ queryKey: ["admin_contact_messages"] });
+      if (selectedContactMsg && selectedContactMsg.id === id) {
+        setSelectedContactMsg({ ...selectedContactMsg, status });
+      }
+    }
+  };
+
+  const deleteContactMessage = async (id: string) => {
+    const { error } = await supabase.from("contact_messages" as any).delete().eq("id", id);
+    if (error) {
+      toast.error("Failed to delete message: " + error.message);
+    } else {
+      toast.success("Message deleted successfully");
+      qc.invalidateQueries({ queryKey: ["admin_contact_messages"] });
+      if (selectedContactMsg && selectedContactMsg.id === id) {
+        setSelectedContactMsg(null);
+      }
+    }
+  };
+
   const resolveBug = async (id: string) => {
     const { error } = await supabase.from("bug_reports").update({ status: 'resolved' }).eq("id", id);
     if (error) {
@@ -235,7 +281,7 @@ function AdminPanel() {
             </div>
 
             <Tabs defaultValue="analytics" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto max-w-2xl bg-white/5 border border-hairline p-1 gap-1">
+              <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 h-auto max-w-3xl bg-white/5 border border-hairline p-1 gap-1">
                 <TabsTrigger value="analytics" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 text-xs sm:text-sm py-2">
                   <LineChartIcon className="h-4 w-4 mr-1.5 shrink-0" /> Analytics
                 </TabsTrigger>
@@ -247,6 +293,14 @@ function AdminPanel() {
                 </TabsTrigger>
                 <TabsTrigger value="ads" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 text-xs sm:text-sm py-2">
                   <Megaphone className="h-4 w-4 mr-1.5 shrink-0" /> Ads
+                </TabsTrigger>
+                <TabsTrigger value="contact" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 text-xs sm:text-sm py-2 relative">
+                  <Mail className="h-4 w-4 mr-1.5 shrink-0" /> Contact
+                  {contactMessages.filter((m: any) => m.status === 'unread').length > 0 && (
+                    <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-emerald-500 text-black font-bold rounded-full">
+                      {contactMessages.filter((m: any) => m.status === 'unread').length}
+                    </span>
+                  )}
                 </TabsTrigger>
               </TabsList>
 
@@ -626,7 +680,270 @@ function AdminPanel() {
                   </div>
                 </div>
               </TabsContent>
+
+              {/* Contact Messages Tab */}
+              <TabsContent value="contact" className="mt-6 space-y-6">
+                <div className="rounded-2xl border border-hairline bg-card p-4 sm:p-6 space-y-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                      <h3 className="font-medium text-lg text-foreground flex items-center gap-2">
+                        <Mail className="h-5 w-5 text-emerald-400" /> User Contact Inquiries
+                      </h3>
+                      <p className="text-muted-foreground text-xs mt-1">
+                        Responses submitted via the public Contact Us form.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <div className="relative flex-1 sm:w-64">
+                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search name, email, message..."
+                          value={contactSearch}
+                          onChange={(e) => setContactSearch(e.target.value)}
+                          className="pl-9 bg-black/40 border-white/10 text-xs h-9 rounded-xl"
+                        />
+                      </div>
+                      <Select value={contactFilterStatus} onValueChange={setContactFilterStatus}>
+                        <SelectTrigger className="w-32 bg-black/40 border-white/10 text-xs h-9 rounded-xl">
+                          <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#111413] border-white/10 text-white text-xs">
+                          <SelectItem value="all">All Messages</SelectItem>
+                          <SelectItem value="unread">Unread Only</SelectItem>
+                          <SelectItem value="read">Read</SelectItem>
+                          <SelectItem value="archived">Archived</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {contactLoading ? (
+                    <div className="py-12 text-center text-muted-foreground text-sm">
+                      Loading contact messages...
+                    </div>
+                  ) : (
+                    (() => {
+                      const filtered = contactMessages.filter((msg: any) => {
+                        const matchesStatus =
+                          contactFilterStatus === "all"
+                            ? true
+                            : msg.status === contactFilterStatus;
+                        const query = contactSearch.toLowerCase().trim();
+                        const matchesSearch =
+                          !query ||
+                          msg.name?.toLowerCase().includes(query) ||
+                          msg.email?.toLowerCase().includes(query) ||
+                          msg.subject?.toLowerCase().includes(query) ||
+                          msg.message?.toLowerCase().includes(query);
+                        return matchesStatus && matchesSearch;
+                      });
+
+                      if (filtered.length === 0) {
+                        return (
+                          <div className="py-12 text-center border border-dashed border-white/10 rounded-2xl">
+                            <MessageSquare className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+                            <p className="text-sm font-medium text-foreground">No contact messages found</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {contactSearch || contactFilterStatus !== "all"
+                                ? "Try adjusting your search or status filter."
+                                : "Submissions from the contact form will appear here."}
+                            </p>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="space-y-3">
+                          {filtered.map((msg: any) => (
+                            <div
+                              key={msg.id}
+                              className={`p-4 rounded-xl border transition-all ${
+                                msg.status === "unread"
+                                  ? "bg-emerald-500/[0.04] border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.08)]"
+                                  : "bg-white/[0.02] border-white/10 hover:border-white/20"
+                              }`}
+                            >
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-semibold text-white text-sm">{msg.name}</span>
+                                  <a
+                                    href={`mailto:${msg.email}`}
+                                    className="text-xs text-emerald-400 hover:underline flex items-center gap-1"
+                                  >
+                                    <Mail className="h-3 w-3" /> {msg.email}
+                                  </a>
+                                  {msg.status === "unread" && (
+                                    <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full">
+                                      NEW UNREAD
+                                    </span>
+                                  )}
+                                  {msg.status === "archived" && (
+                                    <span className="px-2 py-0.5 text-[10px] font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-full">
+                                      ARCHIVED
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-[11px] text-muted-foreground shrink-0">
+                                  {msg.created_at ? format(new Date(msg.created_at), "MMM d, yyyy h:mm a") : "Recently"}
+                                </span>
+                              </div>
+
+                              <div className="mb-3">
+                                <div className="text-xs font-medium text-white/90 mb-1">
+                                  Subject: <span className="text-emerald-400">{msg.subject || "General Inquiry"}</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                                  {msg.message}
+                                </p>
+                              </div>
+
+                              <div className="flex items-center justify-between pt-2 border-t border-white/5 gap-2 flex-wrap">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedContactMsg(msg);
+                                    if (msg.status === "unread") {
+                                      updateContactStatus(msg.id, "read");
+                                    }
+                                  }}
+                                  className="h-7 text-xs text-emerald-400 hover:bg-emerald-500/10 rounded-lg px-2.5"
+                                >
+                                  <Eye className="h-3.5 w-3.5 mr-1" /> Read Full Message
+                                </Button>
+
+                                <div className="flex items-center gap-1">
+                                  <a
+                                    href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject || "Inquiry")}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7 text-xs text-muted-foreground hover:text-white hover:bg-white/10 rounded-lg px-2.5"
+                                    >
+                                      <Reply className="h-3.5 w-3.5 mr-1" /> Reply
+                                    </Button>
+                                  </a>
+
+                                  {msg.status === "unread" ? (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => updateContactStatus(msg.id, "read")}
+                                      className="h-7 text-xs text-muted-foreground hover:text-white rounded-lg px-2"
+                                    >
+                                      Mark Read
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => updateContactStatus(msg.id, "unread")}
+                                      className="h-7 text-xs text-muted-foreground hover:text-white rounded-lg px-2"
+                                    >
+                                      Mark Unread
+                                    </Button>
+                                  )}
+
+                                  {msg.status !== "archived" && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => updateContactStatus(msg.id, "archived")}
+                                      className="h-7 text-xs text-purple-400 hover:bg-purple-500/10 rounded-lg px-2"
+                                    >
+                                      Archive
+                                    </Button>
+                                  )}
+
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => deleteContactMessage(msg.id)}
+                                    className="h-7 text-xs text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 rounded-lg px-2"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()
+                  )}
+                </div>
+              </TabsContent>
             </Tabs>
+
+            {/* Contact Message View Dialog */}
+            <Dialog open={!!selectedContactMsg} onOpenChange={(open) => !open && setSelectedContactMsg(null)}>
+              <DialogContent className="bg-[#0b0e0d] border border-white/10 text-foreground max-w-lg rounded-2xl p-6 shadow-2xl">
+                <DialogHeader>
+                  <DialogTitle className="text-white text-lg font-bold flex items-center justify-between">
+                    <span>Contact Inquiry Details</span>
+                    {selectedContactMsg?.status === "unread" ? (
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full font-bold">UNREAD</span>
+                    ) : (
+                      <span className="text-[10px] bg-white/10 text-muted-foreground px-2.5 py-0.5 rounded-full font-medium capitalize">{selectedContactMsg?.status}</span>
+                    )}
+                  </DialogTitle>
+                  <DialogDescription className="text-xs text-muted-foreground">
+                    Submitted on {selectedContactMsg?.created_at ? format(new Date(selectedContactMsg.created_at), "PPP p") : "Unknown date"}
+                  </DialogDescription>
+                </DialogHeader>
+
+                {selectedContactMsg && (
+                  <div className="space-y-4 pt-2">
+                    <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-black/40 border border-white/5 text-xs">
+                      <div>
+                        <div className="text-muted-foreground">Sender Name</div>
+                        <div className="font-semibold text-white mt-0.5">{selectedContactMsg.name}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground">Sender Email</div>
+                        <a href={`mailto:${selectedContactMsg.email}`} className="font-semibold text-emerald-400 hover:underline mt-0.5 block truncate">
+                          {selectedContactMsg.email}
+                        </a>
+                      </div>
+                      <div className="col-span-2 pt-2 border-t border-white/5">
+                        <div className="text-muted-foreground">Subject / Topic</div>
+                        <div className="font-medium text-white mt-0.5">{selectedContactMsg.subject || "General Inquiry"}</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-xs text-muted-foreground font-medium">Message:</div>
+                      <div className="p-4 rounded-xl bg-black/60 border border-white/10 text-xs text-white leading-relaxed whitespace-pre-wrap max-h-60 overflow-y-auto">
+                        {selectedContactMsg.message}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 pt-4 border-t border-white/10">
+                      <a
+                        href={`mailto:${selectedContactMsg.email}?subject=Re: ${encodeURIComponent(selectedContactMsg.subject || "Inquiry")}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <Button className="bg-emerald-500 hover:bg-emerald-600 text-black font-semibold text-xs h-9 rounded-xl px-4">
+                          <Reply className="h-3.5 w-3.5 mr-1.5" /> Reply via Email
+                        </Button>
+                      </a>
+                      <Button
+                        variant="outline"
+                        onClick={() => setSelectedContactMsg(null)}
+                        className="border-white/10 text-xs h-9 rounded-xl px-4"
+                      >
+                        Close
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
             
           </main>
           
