@@ -11,6 +11,7 @@ const navLinks = [
   { name: "Pricing", to: "/pricing" },
   { name: "Security", to: "/security" },
   { name: "Docs", to: "/docs" },
+  { name: "Contact", to: "/contact" },
 ];
 
 export function MarketingNavbar() {
