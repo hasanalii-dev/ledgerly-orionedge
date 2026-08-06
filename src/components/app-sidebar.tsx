@@ -645,7 +645,6 @@ export function AppSidebar({ currentPlannerId }: AppSidebarProps = {}) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-white/5 my-1" />
-            <DropdownMenuItem asChild className="rounded-lg cursor-pointer my-0.5 text-muted-foreground focus:text-foreground"><Link to="/app/accounts"><Wallet className="h-4 w-4 mr-2" />Accounts</Link></DropdownMenuItem>
             <DropdownMenuItem asChild className="rounded-lg cursor-pointer my-0.5 text-muted-foreground focus:text-foreground"><Link to="/app/profile"><User className="h-4 w-4 mr-2" />Profile & Account</Link></DropdownMenuItem>
             <DropdownMenuItem asChild className="rounded-lg cursor-pointer my-0.5 text-muted-foreground focus:text-foreground"><Link to="/app/preferences"><Settings className="h-4 w-4 mr-2" />Preferences</Link></DropdownMenuItem>
             <DropdownMenuSeparator className="bg-white/5 my-1" />

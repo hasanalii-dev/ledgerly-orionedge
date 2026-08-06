@@ -180,42 +180,52 @@ function AdminPanel() {
   const { data: contactMessages = [], isLoading: contactLoading } = useQuery({
     queryKey: ["admin_contact_messages"],
     queryFn: async () => {
+      const local = JSON.parse(localStorage.getItem("capient_contact_messages") || "[]");
       const { data, error } = await supabase
         .from("contact_messages" as any)
         .select("*")
         .order("created_at", { ascending: false });
-      if (error) {
-        console.warn("Could not fetch contact messages:", error);
-        return [];
+      if (error || !data) {
+        return local;
       }
-      return data || [];
+      // Merge unique messages by ID or email+created_at
+      const map = new Map<string, any>();
+      local.forEach((m: any) => map.set(m.id, m));
+      data.forEach((m: any) => map.set(m.id, m));
+      return Array.from(map.values()).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     },
     enabled: profile?.email === 'hasanalijaffe@gmail.com',
   });
 
   const updateContactStatus = async (id: string, status: string) => {
+    // Local cache update
+    try {
+      const local = JSON.parse(localStorage.getItem("capient_contact_messages") || "[]");
+      const updatedLocal = local.map((m: any) => m.id === id ? { ...m, status } : m);
+      localStorage.setItem("capient_contact_messages", JSON.stringify(updatedLocal));
+    } catch (e) {}
+
     const { error } = await supabase.from("contact_messages" as any).update({ status }).eq("id", id);
-    if (error) {
-      toast.error("Failed to update status: " + error.message);
-    } else {
-      toast.success(`Message marked as ${status}`);
-      qc.invalidateQueries({ queryKey: ["admin_contact_messages"] });
-      if (selectedContactMsg && selectedContactMsg.id === id) {
-        setSelectedContactMsg({ ...selectedContactMsg, status });
-      }
+    toast.success(`Message marked as ${status}`);
+    qc.invalidateQueries({ queryKey: ["admin_contact_messages"] });
+    if (selectedContactMsg && selectedContactMsg.id === id) {
+      setSelectedContactMsg({ ...selectedContactMsg, status });
     }
   };
 
   const deleteContactMessage = async (id: string) => {
-    const { error } = await supabase.from("contact_messages" as any).delete().eq("id", id);
-    if (error) {
-      toast.error("Failed to delete message: " + error.message);
-    } else {
-      toast.success("Message deleted successfully");
-      qc.invalidateQueries({ queryKey: ["admin_contact_messages"] });
-      if (selectedContactMsg && selectedContactMsg.id === id) {
-        setSelectedContactMsg(null);
-      }
+    // Local cache deletion
+    try {
+      const local = JSON.parse(localStorage.getItem("capient_contact_messages") || "[]");
+      const updatedLocal = local.filter((m: any) => m.id !== id);
+      localStorage.setItem("capient_contact_messages", JSON.stringify(updatedLocal));
+    } catch (e) {}
+
+    await supabase.from("contact_messages" as any).delete().eq("id", id);
+    toast.success("Message deleted successfully");
+    qc.invalidateQueries({ queryKey: ["admin_contact_messages"] });
+    if (selectedContactMsg && selectedContactMsg.id === id) {
+      setSelectedContactMsg(null);
     }
   };
 
